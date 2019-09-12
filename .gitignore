@@ -55,3 +55,7 @@ dkms.conf
 **/obj
 *.csproj
 **/corpus
+
+
+# mac specific file system
+.DS_Store
