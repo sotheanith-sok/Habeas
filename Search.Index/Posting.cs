@@ -1,4 +1,4 @@
-﻿namespace Cecs429.Search.Index {
+﻿namespace Search.Index {
 	/// <summary>
 	/// A Posting represents a document that contains a term from a query.
 	/// </summary>

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cecs429.Search.Documents {
+namespace Search.Document {
 	/// <summary>
 	/// Represents a collection of documents used to build an index.
 	/// </summary>

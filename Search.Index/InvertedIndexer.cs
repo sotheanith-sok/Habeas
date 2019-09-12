@@ -1,6 +1,6 @@
-using Cecs429.Search.Documents;
-using Cecs429.Search.Index;
-using Cecs429.Search.Text;
+using Search.Document;
+using Search.Index;
+using Search.Text;
 using System;
 using System.Collections.Generic;
 namespace Cecs429.Search.BetterBetterTermDocumentIndexer

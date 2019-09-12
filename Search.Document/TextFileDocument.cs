@@ -4,7 +4,7 @@ using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Text;
 
-namespace Cecs429.Search.Documents {
+namespace Search.Document {
 	/// <summary>
 	/// Represents a document that is saved as a simple text file in the local file system.
 	/// </summary>

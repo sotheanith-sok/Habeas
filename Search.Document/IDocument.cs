@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace Cecs429.Search.Documents {
+namespace Search.Document {
 	/// <summary>
 	/// Represents a document in an index.
 	/// </summary>

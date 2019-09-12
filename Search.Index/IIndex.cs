@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Cecs429.Search.Index {
+namespace Search.Index {
 	/// <summary>
 	/// An IIndex can retrieve postings for a term from a data structure associating terms and the documents that contain
 	/// them.

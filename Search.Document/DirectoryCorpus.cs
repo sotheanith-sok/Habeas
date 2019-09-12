@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace Cecs429.Search.Documents {
+namespace Search.Document {
 	/// <summary>
 	/// A method for constructing an IFileDocument given a path to that document.
 	/// </summary>

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cecs429.Search.Text {
+namespace Search.Text {
 	/// <summary>
 	/// A BasicTokenProcessor creates terms from tokens by removing all non-alphanumeric characters from the token, and
 	/// converting it to all lowercase.

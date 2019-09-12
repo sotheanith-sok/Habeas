@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cecs429.Search.Text {
+namespace Search.Text {
 	/// <summary>
 	/// A TokenProcessor applies some rules of normalization to a token from a document and returns a term for that 
 	/// token.

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System;
-namespace Cecs429.Search.Index
+namespace Search.Index
 {
     /// <summary>
     /// Represents a document that is saved as a simple text file in the local file system.

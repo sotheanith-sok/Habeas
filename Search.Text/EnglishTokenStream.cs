@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace Cecs429.Search.Text {
+namespace Search.Text {
 	/// <summary>
 	/// An EnglishTokenStream creates tokens by splitting on whitespace.
 	/// </summary>

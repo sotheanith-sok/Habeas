@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace Cecs429.Search.Text {
+namespace Search.Text {
 	/// <summary>
 	/// A TokenStream creates a sequence of string tokens from the contents of a stream, breaking the bytes of the stream
 	/// in some way.

@@ -1,4 +1,4 @@
-﻿namespace Cecs429.Search.Documents {
+﻿namespace Search.Document {
 	/// <summary>
 	/// Represents a document saved as a file on the local file system.
 	/// </summary>
