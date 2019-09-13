@@ -15,18 +15,26 @@ namespace Search.InvertedIndexer
 
             IIndex index = IndexCorpus(corpus);
             // We only support single-term queries for now.
+
             string query;
-            do
-            {
+            int count;
+
+            while(true){
                 Console.Write("Search: ");
                 query = Console.ReadLine();
 
-                foreach (Posting p in index.GetPostings(query))
-                {
-                    Console.WriteLine($"Document  {corpus.GetDocument(p.DocumentId).Title}");
+                if(query == ":q"){
+                    break;
                 }
 
-            } while (query != ":q");
+                count = 0;
+                foreach (Posting p in index.GetPostings(query)) {
+                    Console.WriteLine($"Document  {corpus.GetDocument(p.DocumentId).Title}");
+                    count += 1;
+                }
+                Console.WriteLine($"'{query}' found in {count} files\n");
+            }
+            
         }
 
         /// <summary>
