@@ -3,25 +3,23 @@ using Search.Index;
 using Search.Text;
 using System;
 using System.Collections.Generic;
+
 namespace Search.InvertedIndexer
 {
     public class InvertedIndexer
     {
         public static void Main(string[] args)
         {
+            // Using Moby-Dick chapters as a corpus for now.
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("./corpus", ".txt");
 
             IIndex index = IndexCorpus(corpus);
-            // We aren't ready to use a full query parser; for now, we'll only support single-term queries.
+            // We only support single-term queries for now.
             string query;
             do
             {
-                Console.Write("Enter your search:");
+                Console.Write("Search: ");
                 query = Console.ReadLine();
-                if (query == ":q")
-                {
-                    break;
-                }
 
                 foreach (Posting p in index.GetPostings(query))
                 {
@@ -31,23 +29,34 @@ namespace Search.InvertedIndexer
             } while (query != ":q");
         }
 
+        /// <summary>
+        /// Index a corpus of documents
+        /// </summary>
+        /// <param name="corpus">a corpus to be indexed</param>
         private static IIndex IndexCorpus(IDocumentCorpus corpus)
         {
-            BasicTokenProcessor processor = new BasicTokenProcessor();
+            ITokenProcessor processor = new BasicTokenProcessor();
 
-            // TODO:
-            // Constuct a TermDocumentMatrix once you know the size of the vocabulary. 
-            // THEN, do the loop again! But instead of inserting into the HashSet, add terms to the index with addPosting.
+            // Constuct a inverted-index once 
             InvertedIndex index = new InvertedIndex();
-            foreach (IDocument i in corpus.GetDocuments())
+
+            Console.WriteLine("Indexing the corpus...");
+            // Index the document
+            foreach (IDocument doc in corpus.GetDocuments())
             {
-                EnglishTokenStream tokensStream = new EnglishTokenStream(i.GetContent());
-                IEnumerable<string> tokens = tokensStream.GetTokens();
-                foreach (string s in tokens)
-                {
-                    index.AddTerm(processor.ProcessToken(s), i.DocumentId);
+                //Tokenize the documents
+                ITokenStream stream = new EnglishTokenStream(doc.GetContent());
+                IEnumerable<string> tokens = stream.GetTokens();
+
+                foreach (string token in tokens) {
+                    //Process token to term
+                    string term = processor.ProcessToken(token);
+                    //Add term to the index
+                    if(term.Length > 0) {
+                        index.AddTerm(term, doc.DocumentId);
+                    }
                 }
-                tokensStream.Dispose();
+                stream.Dispose();
             }
 
             return index;
