@@ -1,72 +1,68 @@
 using System.Collections.Generic;
-using System;
+using System.Linq;
+
 namespace Search.Index
 {
     /// <summary>
-    /// Represents a document that is saved as a simple text file in the local file system.
+    /// Implements an inverted index in a hash map (key: term, value: list of postings)
     /// </summary>
     public class InvertedIndex : IIndex
     {
-        //Hashmap used to store inverted index sorted key by alphabetical order.
-        private readonly SortedDictionary<string, List<Posting>> invertedIndex;
+        //Hashmap is used to store inverted index. O(1)
+        //Dictionary in C# is equivalent to HashMap in Java.
+        private readonly Dictionary<string, List<Posting>> hashMap;
 
         /// <summary>
-        /// The constructor used to build this object.
+        /// Constructs a hash table.
         /// </summary>
         public InvertedIndex()
         {
-            invertedIndex = new SortedDictionary<string, List<Posting>>();
+            hashMap = new Dictionary<string, List<Posting>>();
         }
 
         /// <summary>
-        /// Get Posting from index.
+        /// Gets Postings from index.
         /// </summary>
         /// <param name="term">a processed string</param>
         public IList<Posting> GetPostings(string term)
         {
-            if (invertedIndex.ContainsKey(term))
-            {
-                return invertedIndex[term];
-            }
-            else
-            {
+            if (hashMap.ContainsKey(term)) {
+                return hashMap[term];
+            } else {
                 return new List<Posting>();
             }
 
         }
 
         /// <summary>
-        /// Get all vocabularies in sorted order.
+        /// Gets a sorted list of all vocabularies from index.
         /// </summary>
         public IReadOnlyList<string> GetVocabulary()
         {
-            return new List<string>(invertedIndex.Keys);
+            List<string> vocabulary = hashMap.Keys.ToList();
+            vocabulary.Sort();
+            return vocabulary;
         }
 
         /// <summary>
-        /// Add term into inverted index.
+        /// Adds a term into the index.
         /// </summary>
         /// <param name="term">a processed string to be added</param>
         /// <param name="documentID">the document id in which the term is coming from</param>
         public void AddTerm(string term, int documentID)
         {
-
-            if (invertedIndex.ContainsKey(term))
-            {
-                List<Posting> postingList = invertedIndex[term];
-
-                if ((postingList[postingList.Count - 1]).DocumentId != documentID)
-                {
-                    postingList.Add(new Posting(documentID));
+            //Check if inverted index contains the search term (key)
+            if (hashMap.ContainsKey(term)) {
+                //Check if the docId is in the List<Posting> (value)
+                //the list is naturally in order of docId
+                if (hashMap[term].Last().DocumentId != documentID){
+                    hashMap[term].Add(new Posting(documentID));
                 }
-            }
-            else
-            {
-                invertedIndex.Add(term, new List<Posting>() { new Posting(documentID) });
+            } else {
+                hashMap.Add(term, new List<Posting>() { new Posting(documentID) });
             }
         }
 
     }
-
 
 }
