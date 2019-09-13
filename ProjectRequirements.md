@@ -1,5 +1,5 @@
 CECS 529 Search Engine Technology
-## Milestone1
+### Milestone1
 # MODULES AND THEIR REQUIREMENTS
 Due: Oct 3 (Thur)
 
