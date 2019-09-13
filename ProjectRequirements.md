@@ -6,7 +6,7 @@ Due: Oct 3 (Thur)
 - [Core Modules](##CoreModules)
 - [Extra Modules](##ExtraModules)
 
----
+
 ## Core Modules
 ### 1. Corpus
 - all -nps-sites.json corpus
@@ -72,7 +72,7 @@ Due: Oct 3 (Thur)
   - New getTitle()
 
 
----
+
 ## Extra Modules
 Listed in Priority 
 1. Unit Testing 
