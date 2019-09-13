@@ -1,16 +1,21 @@
-CECS 529
-# Milestone1
+CECS 529 Search Engine Technology
+## Milestone1
 # MODULES AND THEIR REQUIREMENTS
+Due: Oct 3 (Thur)
 
+- [Core Modules](##CoreModules)
+- [Extra Modules](##ExtraModules)
+
+---
 ## Core Modules
-### 1. Corpus:  
+### 1. Corpus
 - all -nps-sites.json corpus
 - Split into individual documents
 - Need to support multiple corpora in the search to enter p folder/directory to index
-- Index should be built in that folder=
+- Index should be built in that folder
 - **Modify the DirectoryCorpus** to know how to load JSON document
 
-### 2. Building the index:
+### 2. Building the index
 - Positional Inverted Index() 
   - Postings list needs
     - Needs documentId
@@ -67,7 +72,7 @@ CECS 529
   - New getTitle()
 
 
-
+---
 ## Extra Modules
 Listed in Priority 
 1. Unit Testing 
