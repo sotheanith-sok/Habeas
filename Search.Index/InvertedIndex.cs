@@ -5,7 +5,7 @@ namespace Search.Index
     /// <summary>
     /// Represents a document that is saved as a simple text file in the local file system.
     /// </summary>
-    public class TermDocumentInvertedIndex : IIndex
+    public class InvertedIndex : IIndex
     {
         //Hashmap used to store inverted index sorted key by alphabetical order.
         private readonly SortedDictionary<string, List<Posting>> invertedIndex;
@@ -13,7 +13,7 @@ namespace Search.Index
         /// <summary>
         /// The constructor used to build this object.
         /// </summary>
-        public TermDocumentInvertedIndex()
+        public InvertedIndex()
         {
             invertedIndex = new SortedDictionary<string, List<Posting>>();
         }

@@ -3,9 +3,9 @@ using Search.Index;
 using Search.Text;
 using System;
 using System.Collections.Generic;
-namespace Cecs429.Search.BetterBetterTermDocumentIndexer
+namespace Search.InvertedIndexer
 {
-    public class BetterBetterTermDocumentIndexer
+    public class InvertedIndexer
     {
         public static void Main(string[] args)
         {
@@ -18,7 +18,7 @@ namespace Cecs429.Search.BetterBetterTermDocumentIndexer
             {
                 Console.Write("Enter your search:");
                 query = Console.ReadLine();
-                if (query == "quit")
+                if (query == ":q")
                 {
                     break;
                 }
@@ -28,31 +28,30 @@ namespace Cecs429.Search.BetterBetterTermDocumentIndexer
                     Console.WriteLine($"Document  {corpus.GetDocument(p.DocumentId).Title}");
                 }
 
-            } while (query != "quit");
+            } while (query != ":q");
         }
 
         private static IIndex IndexCorpus(IDocumentCorpus corpus)
         {
-            HashSet<string> vocabulary = new HashSet<string>();
             BasicTokenProcessor processor = new BasicTokenProcessor();
 
 
             // TODO:
             // Constuct a TermDocumentMatrix once you know the size of the vocabulary. 
             // THEN, do the loop again! But instead of inserting into the HashSet, add terms to the index with addPosting.
-            TermDocumentInvertedIndex tdii = new TermDocumentInvertedIndex();
+            InvertedIndex index = new InvertedIndex();
             foreach (IDocument i in corpus.GetDocuments())
             {
                 EnglishTokenStream tokensStream = new EnglishTokenStream(i.GetContent());
                 IEnumerable<string> tokens = tokensStream.GetTokens();
                 foreach (string s in tokens)
                 {
-                    tdii.AddTerm(processor.ProcessToken(s), i.DocumentId);
+                    index.AddTerm(processor.ProcessToken(s), i.DocumentId);
                 }
                 tokensStream.Dispose();
             }
 
-            return tdii;
+            return index;
         }
 
 
