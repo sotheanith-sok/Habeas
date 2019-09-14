@@ -11,7 +11,7 @@ namespace Search.InvertedIndexer
         public static void Main(string[] args)
         {
             // Using Moby-Dick chapters as a corpus for now.
-            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("./corpus", ".txt");
+            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("./corpus");
 
             IIndex index = IndexCorpus(corpus);
             // We only support single-term queries for now.
