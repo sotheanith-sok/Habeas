@@ -35,7 +35,7 @@ namespace Search.Index
                 return new List<PositionalPosting>();
             }
         }
-        
+
         //TODO: either replace GetPositionalPostings or delete this
         public IList<Posting> GetPostings(string term)
         { 
@@ -56,24 +56,42 @@ namespace Search.Index
         /// Adds a term into the index with its docId and position.
         /// </summary>
         /// <param name="term">a processed string to be added</param>
-        /// <param name="documentID">the document id in which the term is coming from</param>
+        /// <param name="docID">the document id in which the term is coming from</param>
         /// <param name="position">the position of the term within the document</param>
-        public void AddTerm(string term, int documentID, int position)
+        public void AddTerm(string term, int docID, int position)
         {
+            //Check if inverted index contains the term (key)
+            if (hashMap.ContainsKey(term)) {
+                //Check if the document of the term is in the posting list
+                PositionalPosting lastPosting = hashMap[term].Last();
+                if(lastPosting.DocumentId != docID){
+                    //Add a position to the posting
+                    lastPosting.Positions.Add(position);
+                } else {
+                    //Create a posting with (docID & position) to the posting list
+                    hashMap[term].Add(new PositionalPosting(docID, new List<int>{position}));
+                }
+            } else {
+                //Add term and a posting (docID & position) to the hashmap
+                List<PositionalPosting> postingList = new List<PositionalPosting>();
+                postingList.Add(new PositionalPosting(docID, new List<int>{position}));
+                hashMap.Add(term, postingList);
+            }
             
-            // //TODO: handle position
-            // //Check if inverted index contains the search term (key)
+            //TODO: Old code to remove
+            //Check if inverted index contains the search term (key)
             // if (hashMap.ContainsKey(term)) {
             //     //Check if the docId is in the List<Posting> (value)
             //     //the list is naturally in order of docId
-            //     if (hashMap[term].Last().DocumentId != documentID){
-            //         hashMap[term].Add(new PositionalPosting(documentID, position));
+            //     if (hashMap[term].Last().DocumentId != docID){
+            //         hashMap[term].Add(new PositionalPosting(docID, position));
             //     }
             // } else {
 
             //     List<PositionalPosting> postingList = new List<PositionalPosting>();
             //     hashMap.Add(term, new List<PositionalPosting>() { new PositionalPosting(documentID) });
-            //}
+            // }
+
         }
 
     }
