@@ -3,8 +3,8 @@ CECS 529 Search Engine Technology
 # MODULES AND THEIR REQUIREMENTS
 Due: Oct 3 (Thur)
 
-- [Core Modules](#core-modules)
-- [Extra Modules](#extra-modules)
+- [Core Modules](##core-modules)
+- [Extra Modules](##extra-modules)
 
 
 ## Core Modules :thumbsup:
