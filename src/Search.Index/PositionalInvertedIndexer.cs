@@ -9,35 +9,34 @@ namespace Search.PositionalInvertedIndexer
 {
     public class PositionalInvertedIndexer
     {
-        public static void Main(string[] args)
-        {
-            // Using Moby-Dick chapters as a corpus for now.
-            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("./corpus", ".txt");
+        // public static void Main(string[] args)
+        // {
+        //     // Using Moby-Dick chapters as a corpus for now.
+        //     IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("./corpus", ".txt");
 
-            IIndex index = IndexCorpus(corpus);
-            // We only support single-term queries for now.
+        //     IIndex index = IndexCorpus(corpus);
+        //     // We only support single-term queries for now.
 
-            string query;
-            int count;
+        //     string query;
+        //     int count;
 
-            while(true){
-                Console.Write("Search: ");
-                query = Console.ReadLine();
+        //     while(true){
+        //         Console.Write("Search: ");
+        //         query = Console.ReadLine();
 
-                if(query == ":q"){
-                    break;
-                }
+        //         if(query == ":q"){
+        //             break;
+        //         }
 
-                count = 0;
-                //TODO: change GetPostings() to getPositionalPostings()
-                foreach (Posting p in index.GetPostings(query)) {
-                    Console.WriteLine($"Document  {corpus.GetDocument(p.DocumentId).Title}");
-                    count += 1;
-                }
-                Console.WriteLine($"'{query}' found in {count} files\n");
-            }
-            
-        }
+        //         count = 0;
+        //         //TODO: change GetPostings() to getPositionalPostings()
+        //         foreach (Posting p in index.GetPostings(query)) {
+        //             Console.WriteLine($"Document  {corpus.GetDocument(p.DocumentId).Title}");
+        //             count += 1;
+        //         }
+        //         Console.WriteLine($"'{query}' found in {count} files\n");
+        //     }
+        // }
 
         /// <summary>
         /// Index a corpus of documents
