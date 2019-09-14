@@ -2,7 +2,8 @@ using System.Collections.Generic;
 
 namespace Search.Index {
 	/// <summary>
-	/// A PositionalPosting represents a document and positions of a term from a query.
+	/// A PositionalPosting represents a documentID and positions of a term from a query.
+    /// e.g. (docID, [pos1, pos2, pos3])
 	/// </summary>
 	public class PositionalPosting {
 		/// <summary>
