@@ -3,11 +3,11 @@ CECS 529 Search Engine Technology
 # MODULES AND THEIR REQUIREMENTS
 Due: Oct 3 (Thur)
 
-- [Core Modules](##CoreModules)
-- [Extra Modules](##ExtraModules)
+- [Core Modules](#core-modules)
+- [Extra Modules](#extra-modules)
 
 
-## Core Modules
+## Core Modules :thumbsup:
 ### 1. Corpus
 - all -nps-sites.json corpus
 - Split into individual documents
@@ -73,7 +73,7 @@ Due: Oct 3 (Thur)
 
 
 
-## Extra Modules
+## Extra Modules :thumbsup:
 Listed in Priority 
 1. Unit Testing 
 2. GUI 
