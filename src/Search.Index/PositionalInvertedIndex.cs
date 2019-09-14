@@ -4,9 +4,9 @@ using System.Linq;
 namespace Search.Index
 {
     /// <summary>
-    /// Implements a Positional Inverted Index in a hash map
-    /// key: a term
-    /// value: a list of PositionalPosting
+    /// Implements a Positional Inverted Index in a hash map.
+    /// key: term, value: list of PositionalPosting.
+    /// e.g. term -> { (doc1, [pos1, pos2]), (doc2, [pos1, pos3, pos4]), ... }
     /// </summary>
     public class PositionalInvertedIndex : IIndex
     {
@@ -77,20 +77,6 @@ namespace Search.Index
                 postingList.Add(new PositionalPosting(docID, new List<int>{position}));
                 hashMap.Add(term, postingList);
             }
-            
-            //TODO: Old code to remove
-            //Check if inverted index contains the search term (key)
-            // if (hashMap.ContainsKey(term)) {
-            //     //Check if the docId is in the List<Posting> (value)
-            //     //the list is naturally in order of docId
-            //     if (hashMap[term].Last().DocumentId != docID){
-            //         hashMap[term].Add(new PositionalPosting(docID, position));
-            //     }
-            // } else {
-
-            //     List<PositionalPosting> postingList = new List<PositionalPosting>();
-            //     hashMap.Add(term, new List<PositionalPosting>() { new PositionalPosting(documentID) });
-            // }
 
         }
 
