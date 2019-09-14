@@ -3,6 +3,7 @@
 
 
 ## Milestone1
-- [Milestone 1 Requirements](ProjectRequirements.md)
+- [Milestone 1 Requirements summary](project-requirements/ProjectRequirements.md)
 - Core and extra modules
+- [milestone1.pdf](project-requirements/milestone1.pdf)
 - Due: Oct 3
