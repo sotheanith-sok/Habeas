@@ -17,7 +17,6 @@ namespace Search.InvertedIndexer
             // We only support single-term queries for now.
 
             string query;
-            int count;
 
             while(true){
                 Console.Write("Search: ");
@@ -27,12 +26,11 @@ namespace Search.InvertedIndexer
                     break;
                 }
 
-                count = 0;
-                foreach (Posting p in index.GetPostings(query)) {
+                IList<Posting> postings = index.GetPostings(query);
+                foreach (Posting p in postings) {
                     Console.WriteLine($"Document  {corpus.GetDocument(p.DocumentId).Title}");
-                    count += 1;
                 }
-                Console.WriteLine($"'{query}' found in {count} files\n");
+                Console.WriteLine($"'{query}' found in {postings.Count} files\n");
             }
             
         }
