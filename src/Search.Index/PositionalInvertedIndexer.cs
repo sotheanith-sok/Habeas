@@ -49,7 +49,7 @@ namespace Search.PositionalInvertedIndexer
             // Constuct a inverted-index once 
             PositionalInvertedIndex index = new PositionalInvertedIndex();
 
-            Console.WriteLine("Indexing the corpus...");
+            Console.WriteLine("Indexing the corpus... with Positional Inverted Index");
             // Index the document
             foreach (IDocument doc in corpus.GetDocuments())
             {
