@@ -1,15 +1,43 @@
-using System;
 using System.Collections.Generic;
 using Search.Document;
 using Search.Index;
+using Search.InvertedIndexer;
 using Xunit;
 
-namespace Search.InvertedIndexer
+
+namespace UnitTests
 {
-    public class SearchFromIndexTest
+    public class IndexTests
     {
-        IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("./UnitTests/testCorpus", ".txt");
-        //Hand-written inverted index
+        // test method name convention
+        // public void MethodName_Senario_ExpectedBehavior(){
+        //     //Arrange
+        //     //Act
+        //     //Assert
+        // }
+        
+
+        [Fact]
+        public void IndexCorpusTest()
+        {
+            //Arrange
+            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("./UnitTests/testCorpus", ".txt");
+            Dictionary<string, List<Posting>> validIndex = CreateValidIndex();
+
+            //Act
+            //TODO: Need to find a way to use private method in InvertedIndexer
+            // PrivateType pt = new PrivateType(typeof(InvertedIndexer));
+            // ...
+            // IIndex index = InvertedIndexer.IndexCorpus(corpus);
+
+            //Assert
+            // Assert.Equal(validIndex, index);
+
+        }
+
+
+        //Creates a Hand-written inverted index
+        //TODO: Just know the hand-written result of expected index from the testCorpus
         public Dictionary<string, List<Posting>> CreateValidIndex(){
             Dictionary<string, List<Posting>> validIndex = new Dictionary<string, List<Posting>>();
             validIndex.Add("hello", PostingFactory(new List<int> {0,2}));
@@ -36,14 +64,5 @@ namespace Search.InvertedIndexer
             return list;
         }
 
-        // IIndex index = InvertedIndex
-        InvertedIndexer indexer = new InvertedIndexer();
-        
-
-        [Fact]
-        public void PassingIndexCorpusTest()
-        {
-            // Assert.Equal(CreateValidIndex(), InvertedIndex.Ind)
-        }
     }
 }
