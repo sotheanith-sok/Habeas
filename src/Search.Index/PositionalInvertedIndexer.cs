@@ -9,16 +9,15 @@ namespace Search.PositionalInvertedIndexer
 {
     public class PositionalInvertedIndexer
     {
+
         public static void Main(string[] args)
         {
-            // Using Moby-Dick chapters as a corpus for now.
-            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("./corpus", ".txt");
-
+            string _directory = "./corpus";
+            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(_directory, ".txt");
             PositionalInvertedIndex index = IndexCorpus(corpus);
-            // We only support single-term queries for now.
 
             string query;
-            IList<PositionalPosting> postings;
+            IList<Posting> postings;
 
             while(true) {
                 Console.Write("Search: ");
@@ -26,15 +25,22 @@ namespace Search.PositionalInvertedIndexer
 
                 if(query == ":q") {
                     break;
+                } else if (query == ":vocab") {
+                    PrintVocab();
                 }
 
-                postings = index.GetPositionalPostings(query);
-                //TODO: Change GetPositionalPostings() to updated GetPostings()
-                foreach (PositionalPosting p in postings)
+
+                //TODO: Change GetPostings() to updated GetPostings()
+                postings = index.GetPostings(query);
+                foreach (Posting p in postings)
                 {
-                    Console.WriteLine($"Document  {corpus.GetDocument(p.DocumentId).Title}");
+                    Console.Write($"Document {corpus.GetDocument(p.DocumentId).Title}");
+                    Console.Write($"\t{p.ToString()}");
+                    Console.WriteLine();
                 }
+                
                 Console.WriteLine($"'{query}' found in {postings.Count} files\n");
+                
             }
         }
 
@@ -42,7 +48,7 @@ namespace Search.PositionalInvertedIndexer
         /// Index a corpus of documents
         /// </summary>
         /// <param name="corpus">a corpus to be indexed</param>
-        private static PositionalInvertedIndex IndexCorpus(IDocumentCorpus corpus)
+        public static PositionalInvertedIndex IndexCorpus(IDocumentCorpus corpus)
         {
             ITokenProcessor processor = new BasicTokenProcessor();
 
@@ -75,7 +81,9 @@ namespace Search.PositionalInvertedIndexer
             return index;
         }
 
+        public static void PrintVocab(){
 
+        }
 
     }
 }

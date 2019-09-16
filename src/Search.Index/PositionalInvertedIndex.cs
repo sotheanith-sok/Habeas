@@ -5,41 +5,35 @@ namespace Search.Index
 {
     /// <summary>
     /// Implements a Positional Inverted Index in a hash map.
-    /// key: term, value: list of PositionalPosting.
+    /// key: term, value: list of Posting.
     /// e.g. term -> { (doc1, [pos1, pos2]), (doc2, [pos1, pos3, pos4]), ... }
     /// </summary>
     public class PositionalInvertedIndex : IIndex
     {
         //Hashmap is used to store the index. O(1)
         //Dictionary in C# is equivalent to HashMap in Java.
-        private readonly Dictionary<string, List<PositionalPosting>> hashMap;
+        private readonly Dictionary<string, List<Posting>> hashMap;
 
         /// <summary>
         /// Constructs a hash table.
         /// </summary>
         public PositionalInvertedIndex()
         {
-            hashMap = new Dictionary<string, List<PositionalPosting>>();
+            hashMap = new Dictionary<string, List<Posting>>();
         }
 
         /// <summary>
-        /// Gets PositionalPostings from index.
+        /// Gets Postings from index.
         /// </summary>
         /// <param name="term">a processed string</param>
-        /// <return>a PositionalPosting</return>
-        public IList<PositionalPosting> GetPositionalPostings(string term)
+        /// <return>a Posting</return>
+        public IList<Posting> GetPostings(string term)
         {
             if (hashMap.ContainsKey(term)) {
                 return hashMap[term];
             } else {
-                return new List<PositionalPosting>();
+                return new List<Posting>();
             }
-        }
-
-        //TODO: either replace GetPositionalPostings or delete this
-        public IList<Posting> GetPostings(string term)
-        { 
-            return null; 
         }
 
         /// <summary>
@@ -63,18 +57,18 @@ namespace Search.Index
             //Check if inverted index contains the term (key)
             if (hashMap.ContainsKey(term)) {
                 //Check if the document of the term is in the posting list
-                PositionalPosting lastPosting = hashMap[term].Last();
+                Posting lastPosting = hashMap[term].Last();
                 if(lastPosting.DocumentId == docID){
                     //Add a position to the posting
                     lastPosting.Positions.Add(position);
                 } else {
                     //Create a posting with (docID & position) to the posting list
-                    hashMap[term].Add(new PositionalPosting(docID, new List<int>{position}));
+                    hashMap[term].Add(new Posting(docID, new List<int>{position}));
                 }
             } else {
                 //Add term and a posting (docID & position) to the hashmap
-                List<PositionalPosting> postingList = new List<PositionalPosting>();
-                postingList.Add(new PositionalPosting(docID, new List<int>{position}));
+                List<Posting> postingList = new List<Posting>();
+                postingList.Add(new Posting(docID, new List<int>{position}));
                 hashMap.Add(term, postingList);
             }
 

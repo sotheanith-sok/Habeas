@@ -9,7 +9,6 @@ using System;
 
 //Aren't they too big to call unit tests?
 
-
 namespace UnitTests
 {
     public class PositionalIndexTests {
@@ -20,9 +19,9 @@ namespace UnitTests
 
         [Theory]
         [MemberData(nameof(Data))]
-        public void PositoinalPostingTest(string term, List<PositionalPosting> expected)
+        public void PositoinalPostingTest(string term, List<Posting> expected)
         {
-            var result = index.GetPositionalPostings(term);
+            var result = index.GetPostings(term);
 
             //Assert
             Assert.Equal(expected.Count, result.Count);
@@ -33,33 +32,33 @@ namespace UnitTests
             Console.Write("Expected: ");
             expected.ForEach(x => Console.Write($"{x.ToString()}, "));
             Console.Write("\nResult:   ");
-            ((List<PositionalPosting>)result).ForEach(x => Console.Write($"{x.ToString()}, "));
+            ((List<Posting>)result).ForEach(x => Console.Write($"{x.ToString()}, "));
             Console.WriteLine();
         }
 
         //Test data for positional inverted index
         //Assumed the terms were processed with BasicTokenProcessor
         //The docID in the data is generated depend on different OS
-        public static TheoryData<string, List<PositionalPosting>> Data(){
-            var winData = new TheoryData<string, List<PositionalPosting>> {
-                {"hello", new List<PositionalPosting>{
-                    new PositionalPosting(0, new List<int>{0,1}),
-                    new PositionalPosting(2, new List<int>{0,2,3})
+        public static TheoryData<string, List<Posting>> Data(){
+            var winData = new TheoryData<string, List<Posting>> {
+                {"hello", new List<Posting>{
+                    new Posting(0, new List<int>{0,1}),
+                    new Posting(2, new List<int>{0,2,3})
                 }},
-                {"snows", new List<PositionalPosting>{
-                    new PositionalPosting(1, new List<int>{7,8,9}),
-                    new PositionalPosting(4, new List<int>{1,2,3})
+                {"snows", new List<Posting>{
+                    new Posting(1, new List<int>{7,8,9}),
+                    new Posting(4, new List<int>{1,2,3})
                 }},
             };
 
-            var macData = new TheoryData<string, List<PositionalPosting>> {
-                {"hello", new List<PositionalPosting>{
-                    new PositionalPosting(2, new List<int>{0,2,3}),
-                    new PositionalPosting(4, new List<int>{0,1}),
+            var macData = new TheoryData<string, List<Posting>> {
+                {"hello", new List<Posting>{
+                    new Posting(2, new List<int>{0,2,3}),
+                    new Posting(4, new List<int>{0,1}),
                 }},
-                {"snows", new List<PositionalPosting>{
-                    new PositionalPosting(0, new List<int>{1,2,3}),
-                    new PositionalPosting(3, new List<int>{7,8,9}),
+                {"snows", new List<Posting>{
+                    new Posting(0, new List<int>{1,2,3}),
+                    new Posting(3, new List<int>{7,8,9}),
                 }},
             };
             
