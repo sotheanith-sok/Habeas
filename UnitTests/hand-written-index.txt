@@ -1,21 +1,13 @@
 Use this hand-written-index.txt as a reference for test inputs.
+term    -> (docId1, [pos1, pos2, ...]), (docId2, [...]), ...
 
-<Inverted Index>
-hello   -> 0, 2
-world   -> 0, 1, 4
-it      -> 0, 1, 2, 3, 4
-is      -> 0, 1, 2, 3, 4
-snowing -> 0, 2
-the     -> 1, 3, 4
-full    -> 1, 4
-of      -> 1, 4
-mystery -> 1, 3, 4
-snows   -> 1, 4
-mr.snowman  -> 2, 3
-loves   -> 3
-sun     -> 3
-a       -> 3
-
+For macOS, the document id is different
+fileName        docID    docID(macOS)
+testdoc1.txt    0        4
+testdoc2.txt    1        3
+testdoc3.txt    2        2
+testdoc4.txt    3        1
+testdoc5.txt    4        0
 
 <Positional Inverted Index> w/o stemmer
 hello   -> (0,[0,1]), (2,[0,2,3])
