@@ -43,7 +43,7 @@ namespace Search.PositionalInvertedIndexer
         }
 
         /// <summary>
-        /// Index a corpus of documents
+        /// Constructs an index from a corpus of documents
         /// </summary>
         /// <param name="corpus">a corpus to be indexed</param>
         public static PositionalInvertedIndex IndexCorpus(IDocumentCorpus corpus)

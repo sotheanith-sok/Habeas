@@ -17,8 +17,10 @@ namespace Search.Index {
         public List<int> Positions { get; }
 
         /// <summary>
-        /// Constructs a Positional Posting with a docID and positions of a term
+        /// Constructs a Positional Posting with a docID and positions of a term.
         /// </summary>
+        /// <param name="docID">ID of a document where a term is in</param>
+        /// <param name="positions">positions of a term in a document</param>
         public Posting(int docID, List<int> positions){
             DocumentId = docID;
             Positions = positions;
