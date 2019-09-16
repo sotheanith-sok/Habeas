@@ -25,15 +25,14 @@ namespace UnitTests
 
             //Assert
             Assert.Equal(expected.Count, result.Count);
-            //Assert.Equal(expected, result);       //TODO: Don't know why this does't work..
+            //Assert.Equal(expected, result);       // NOTE: Why not equal??
+            //Assert.Equal(expected[0], result[0]); // This also doesn't work.
+            
+            for(int i=0; i < Math.Max(expected.Count, result.Count); i++) {
+                Assert.Equal(expected[i].ToString(), result[i].ToString());
+                Console.WriteLine($"Term: {term}\t Expected: {expected[i].ToString()} \t Actual: {result[i].ToString()}");
+            }
 
-            //Print the expected and actual
-            Console.WriteLine($"Term:     {term}");
-            Console.Write("Expected: ");
-            expected.ForEach(x => Console.Write($"{x.ToString()}, "));
-            Console.Write("\nResult:   ");
-            ((List<Posting>)result).ForEach(x => Console.Write($"{x.ToString()}, "));
-            Console.WriteLine();
         }
 
         //Test data for positional inverted index

@@ -29,7 +29,7 @@ namespace UnitTests
         //     //     ["hello"] = new List<PositionalPosting>(){new PositionalPosting(1,new List<int>(){1})}
         //     // };
 
-        //     //TODO: how to build an PositionalInvertedIndex from outside? w/o using AddTerm()
+        //     //NOTE: How to build an PositionalInvertedIndex from outside? w/o using AddTerm()
 
         //     // //Act
         //     // PositionalInvertedIndex.AddTerm("world",1,2);
