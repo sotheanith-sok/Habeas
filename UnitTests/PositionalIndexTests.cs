@@ -67,7 +67,7 @@ namespace UnitTests
                 System.Console.WriteLine("TestData for macOSX");
                 return macData;
             } else {
-                System.Console.WriteLine("TestData for all others");
+                System.Console.WriteLine("TestData for other OSs");
                 return winData;
             }
         }
