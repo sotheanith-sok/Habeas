@@ -23,5 +23,15 @@ namespace Search.Index {
             DocumentId = docID;
             Positions = positions;
         }
+
+        /// <summary>
+        /// Returns a string of this posting in (docId, [pos1, pos2, ... ]) form
+        /// </summary>
+        override public string ToString(){
+            string str = "(" + DocumentId + ", [";
+            Positions.ForEach(pos => str = str + pos + ",");
+            str += "])";
+            return str;
+        }
 	}
 }
