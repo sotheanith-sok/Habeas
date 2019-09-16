@@ -2,10 +2,10 @@ using System.Collections.Generic;
 
 namespace Search.Index {
 	/// <summary>
-	/// A PositionalPosting represents a documentID and positions of a term from a query.
+	/// A Posting represents a documentID and positions of a term from a query.
     /// e.g. (docID, [pos1, pos2, pos3])
 	/// </summary>
-	public class PositionalPosting {
+	public class Posting {
 		/// <summary>
 		/// The 0-based unique ID of the document.
 		/// </summary>
@@ -19,7 +19,7 @@ namespace Search.Index {
         /// <summary>
         /// Constructs a Positional Posting with a docID and positions of a term
         /// </summary>
-        public PositionalPosting(int docID, List<int> positions){
+        public Posting(int docID, List<int> positions){
             DocumentId = docID;
             Positions = positions;
         }
