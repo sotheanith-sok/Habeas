@@ -42,7 +42,7 @@ namespace Search.PositionalInvertedIndexer
         /// Index a corpus of documents
         /// </summary>
         /// <param name="corpus">a corpus to be indexed</param>
-        public static PositionalInvertedIndex IndexCorpus(IDocumentCorpus corpus)
+        private static PositionalInvertedIndex IndexCorpus(IDocumentCorpus corpus)
         {
             ITokenProcessor processor = new BasicTokenProcessor();
 
