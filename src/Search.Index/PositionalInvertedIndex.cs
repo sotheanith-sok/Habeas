@@ -64,7 +64,7 @@ namespace Search.Index
             if (hashMap.ContainsKey(term)) {
                 //Check if the document of the term is in the posting list
                 PositionalPosting lastPosting = hashMap[term].Last();
-                if(lastPosting.DocumentId != docID){
+                if(lastPosting.DocumentId == docID){
                     //Add a position to the posting
                     lastPosting.Positions.Add(position);
                 } else {
