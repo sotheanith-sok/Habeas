@@ -43,7 +43,7 @@ namespace UnitTests
             };
 
 
-        public static IIndex IndexCorpus(IDocumentCorpus corpus)
+        private static IIndex IndexCorpus(IDocumentCorpus corpus)
         {
             ITokenProcessor processor = new BasicTokenProcessor();
             InvertedIndex index = new InvertedIndex();
