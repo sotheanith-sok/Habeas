@@ -89,6 +89,13 @@ namespace CECS_529_Search_Engine_Project
             Assert.Equal(expected, this.betterTokenProcessor.StemWords(token));
         }
 
+        [Fact]
+        public void TestProcessToken()
+        {
+            Assert.Equal(new List<string> { "hello", "192.168.1.1", "hewlett", "packard", "comput", "john legend", "m", "eat", "hello..192.168.1.1.hewlettpackardcomputingjohn legendm" },
+            betterTokenProcessor.ProcessToken("Hello.-.192.168.1.1.-Hewlett-Packard-Computing-\"John Legend\"-'M'-Eating"));
+        }
+
     }
 
 }
