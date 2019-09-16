@@ -1,3 +1,5 @@
+Use this hand-written-index.txt as a reference for test inputs.
+
 <Inverted Index>
 hello   -> 0, 2
 world   -> 0, 1, 4

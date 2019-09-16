@@ -1,68 +1,70 @@
+using System;
 using System.Collections.Generic;
 using Search.Document;
 using Search.Index;
-using Search.InvertedIndexer;
+using Search.Text;
 using Xunit;
-
 
 namespace UnitTests
 {
     public class IndexTests
     {
-        // test method name convention
-        // public void MethodName_Senario_ExpectedBehavior(){
-        //     //Arrange
-        //     //Act
-        //     //Assert
+        //TODO: why the path was not working with "./UnitTest/testCorpus"?
+        static IDocumentCorpus corpus = 
+        DirectoryCorpus.LoadTextDirectory("../../../UnitTests/testCorpus", ".txt");
+        IIndex index = IndexCorpus(corpus);
+
+        // [Theory]
+        // [InlineData("hello", 2)]
+        // [InlineData("mystery", 3)]
+        // public void PostingCountTest(string term, int expected)
+        // {
+        //     //Arrange & Act
+        //     int result = index.GetPostings(term).Count;
+        //     Assert.Equal(expected, result);
         // }
-        
 
-        [Fact]
-        public void IndexCorpusTest()
+        [Theory]
+        [MemberData(nameof(Data))]
+        public void InvertedIndexTest(string term, List<Posting> expected)
         {
-            //Arrange
-            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("./UnitTests/testCorpus", ".txt");
-            Dictionary<string, List<Posting>> validIndex = CreateValidIndex();
-
-            //Act
-            //TODO: Need to find a way to use private method in InvertedIndexer
-            // PrivateType pt = new PrivateType(typeof(InvertedIndexer));
-            // ...
-            // IIndex index = InvertedIndexer.IndexCorpus(corpus);
+            IList<Posting> result = index.GetPostings(term);
 
             //Assert
-            // Assert.Equal(validIndex, index);
-
+            // TODO: Due to OS difference, can't compare exact List<Posting>
+            // the order of docIds assigned to documents is different...
+            Assert.Equal(expected.Count, result.Count);
         }
+        
+        public static TheoryData<string, List<Posting>> Data =>
+            new TheoryData<string, List<Posting>> {
+                {"hello", new List<Posting>{new Posting(0), new Posting(2)}},
+                {"sun", new List<Posting>{new Posting(3)}}
+            };
 
 
-        //Creates a Hand-written inverted index
-        //TODO: Just know the hand-written result of expected index from the testCorpus
-        public Dictionary<string, List<Posting>> CreateValidIndex(){
-            Dictionary<string, List<Posting>> validIndex = new Dictionary<string, List<Posting>>();
-            validIndex.Add("hello", PostingFactory(new List<int> {0,2}));
-            validIndex.Add("world", PostingFactory(new List<int> {0,1,4}));
-            validIndex.Add("it",    PostingFactory(new List<int> {0,1,2,3,4}));
-            validIndex.Add("is",    PostingFactory(new List<int> {0,1,2,3,4}));
-            validIndex.Add("snowing", PostingFactory(new List<int> {0,2}));
-            validIndex.Add("the",   PostingFactory(new List<int> {1,3,4}));
-            validIndex.Add("full",  PostingFactory(new List<int> {1,4}));
-            validIndex.Add("of",    PostingFactory(new List<int> {1,4}));
-            validIndex.Add("mystery", PostingFactory(new List<int> {1,3,4}));
-            validIndex.Add("snows", PostingFactory(new List<int> {1,4}));
-            validIndex.Add("mr.snowman", PostingFactory(new List<int> {2,3}));
-            validIndex.Add("loves", PostingFactory(new List<int> {3}));
-            validIndex.Add("sun",   PostingFactory(new List<int> {3}));
-            validIndex.Add("a",     PostingFactory(new List<int> {3}));
-            return validIndex;
-        }
-        public List<Posting> PostingFactory (List<int> docIdList){
-            List<Posting> list = new List<Posting>();
-            foreach(int docId in docIdList){
-                list.Add(new Posting(docId));
+        public static IIndex IndexCorpus(IDocumentCorpus corpus)
+        {
+            ITokenProcessor processor = new BasicTokenProcessor();
+            InvertedIndex index = new InvertedIndex();
+
+            Console.WriteLine("UnitTest: Indexing the corpus... with Inverted Index");
+            foreach (IDocument doc in corpus.GetDocuments())
+            {
+                ITokenStream stream = new EnglishTokenStream(doc.GetContent());
+                IEnumerable<string> tokens = stream.GetTokens();
+
+                foreach (string token in tokens) {
+                    string term = processor.ProcessToken(token);
+                    if(term.Length > 0) {
+                        index.AddTerm(term, doc.DocumentId);
+                    }
+                }
+                stream.Dispose();
             }
-            return list;
-        }
 
+            return index;
+        }
+    
     }
 }
