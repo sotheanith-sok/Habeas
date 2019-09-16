@@ -9,34 +9,34 @@ namespace Search.PositionalInvertedIndexer
 {
     public class PositionalInvertedIndexer
     {
-        // public static void Main(string[] args)
-        // {
-        //     // Using Moby-Dick chapters as a corpus for now.
-        //     IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("./corpus", ".txt");
+        public static void Main(string[] args)
+        {
+            // Using Moby-Dick chapters as a corpus for now.
+            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("./corpus", ".txt");
 
-        //     IIndex index = IndexCorpus(corpus);
-        //     // We only support single-term queries for now.
+            PositionalInvertedIndex index = IndexCorpus(corpus);
+            // We only support single-term queries for now.
 
-        //     string query;
-        //     int count;
+            string query;
+            IList<PositionalPosting> postings;
 
-        //     while(true){
-        //         Console.Write("Search: ");
-        //         query = Console.ReadLine();
+            while(true) {
+                Console.Write("Search: ");
+                query = Console.ReadLine();
 
-        //         if(query == ":q"){
-        //             break;
-        //         }
+                if(query == ":q") {
+                    break;
+                }
 
-        //         count = 0;
-        //         //TODO: change GetPostings() to getPositionalPostings()
-        //         foreach (Posting p in index.GetPostings(query)) {
-        //             Console.WriteLine($"Document  {corpus.GetDocument(p.DocumentId).Title}");
-        //             count += 1;
-        //         }
-        //         Console.WriteLine($"'{query}' found in {count} files\n");
-        //     }
-        // }
+                postings = index.GetPositionalPostings(query);
+                //TODO: Change GetPositionalPostings() to updated GetPostings()
+                foreach (PositionalPosting p in postings)
+                {
+                    Console.WriteLine($"Document  {corpus.GetDocument(p.DocumentId).Title}");
+                }
+                Console.WriteLine($"'{query}' found in {postings.Count} files\n");
+            }
+        }
 
         /// <summary>
         /// Index a corpus of documents
@@ -46,7 +46,7 @@ namespace Search.PositionalInvertedIndexer
         {
             ITokenProcessor processor = new BasicTokenProcessor();
 
-            // Constuct a inverted-index once 
+            // Constuct a positional-inverted-index once 
             PositionalInvertedIndex index = new PositionalInvertedIndex();
 
             Console.WriteLine("Indexing the corpus... with Positional Inverted Index");
@@ -57,15 +57,18 @@ namespace Search.PositionalInvertedIndexer
                 ITokenStream stream = new EnglishTokenStream(doc.GetContent());
                 IEnumerable<string> tokens = stream.GetTokens();
 
+                int position = 0;
                 foreach (string token in tokens) {
                     //Process token to term
                     string term = processor.ProcessToken(token);
                     //Add term to the index
                     if(term.Length > 0) {
-                        //TODO: pass a proper position parameter
-                        index.AddTerm(term, doc.DocumentId, 0);
+                        index.AddTerm(term, doc.DocumentId, position);
                     }
+                    //Increase the position num
+                    position += 1;
                 }
+
                 stream.Dispose();
             }
 

@@ -8,32 +8,32 @@ namespace Search.InvertedIndexer
 {
     public class InvertedIndexer
     {
-        public static void Main(string[] args)
-        {
-            // Using Moby-Dick chapters as a corpus for now.
-            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("./corpus", ".txt");
+        // public static void Main(string[] args)
+        // {
+        //     // Using Moby-Dick chapters as a corpus for now.
+        //     IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("./corpus", ".txt");
 
-            IIndex index = IndexCorpus(corpus);
-            // We only support single-term queries for now.
+        //     IIndex index = IndexCorpus(corpus);
+        //     // We only support single-term queries for now.
 
-            string query;
+        //     string query;
 
-            while(true){
-                Console.Write("Search: ");
-                query = Console.ReadLine();
+        //     while(true){
+        //         Console.Write("Search: ");
+        //         query = Console.ReadLine();
 
-                if(query == ":q"){
-                    break;
-                }
+        //         if(query == ":q"){
+        //             break;
+        //         }
 
-                IList<Posting> postings = index.GetPostings(query);
-                foreach (Posting p in postings) {
-                    Console.WriteLine($"Document  {corpus.GetDocument(p.DocumentId).Title}");
-                }
-                Console.WriteLine($"'{query}' found in {postings.Count} files\n");
-            }
+        //         IList<Posting> postings = index.GetPostings(query);
+        //         foreach (Posting p in postings) {
+        //             Console.WriteLine($"Document  {corpus.GetDocument(p.DocumentId).Title}");
+        //         }
+        //         Console.WriteLine($"'{query}' found in {postings.Count} files\n");
+        //     }
             
-        }
+        // }
 
         /// <summary>
         /// Index a corpus of documents
