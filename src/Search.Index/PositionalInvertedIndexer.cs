@@ -20,27 +20,25 @@ namespace Search.PositionalInvertedIndexer
             IList<Posting> postings;
 
             while(true) {
-                Console.Write("Search: ");
+                Console.Write("\nSearch: ");
                 query = Console.ReadLine();
 
-                if(query == ":q") {
+                if (query == ":q") {
                     break;
-                } else if (query == ":vocab") {
-                    PrintVocab();
                 }
-
-
-                //TODO: Change GetPostings() to updated GetPostings()
-                postings = index.GetPostings(query);
-                foreach (Posting p in postings)
-                {
-                    Console.Write($"Document {corpus.GetDocument(p.DocumentId).Title}");
-                    Console.Write($"\t{p.ToString()}");
-                    Console.WriteLine();
+                else if (query == ":vocab") {
+                    PrintVocab(index.GetVocabulary(), 100);
                 }
-                
-                Console.WriteLine($"'{query}' found in {postings.Count} files\n");
-                
+                else {
+                    postings = index.GetPostings(query);
+                    foreach (Posting p in postings)
+                    {
+                        Console.Write($"Document {corpus.GetDocument(p.DocumentId).Title}");
+                        Console.Write($"\t{p.ToString()}");
+                        Console.WriteLine();
+                    }
+                    Console.WriteLine($"'{query}' found in {postings.Count} files");
+                }
             }
         }
 
@@ -81,8 +79,16 @@ namespace Search.PositionalInvertedIndexer
             return index;
         }
 
-        public static void PrintVocab(){
-
+        /// <summary>
+        /// Prints the first 1000 terms in the sorted vocabulary and the count
+        /// </summary>
+        /// <param name="vocabulary">a sorted vocabulary to print</param>
+        /// <param name="count">the number of terms to print</param>
+        public static void PrintVocab(IReadOnlyList<string> vocabulary, int count){
+            for(int i=0; i < Math.Min(count, vocabulary.Count); i++) {
+                Console.WriteLine(vocabulary[i]);
+            }
+            Console.WriteLine($"Total: {vocabulary.Count} terms");
         }
 
     }
