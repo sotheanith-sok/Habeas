@@ -1,8 +1,12 @@
 CECS 529 Search Engine Technology
 ### Milestone1 :thumbsup:
-# MODULES AND THEIR REQUIREMENTS
-Due: Oct 3 (Thur)
+Due: Oct 3 (Thur)  
+For more detailed requirements, check [milestone1.pdf](milestone1.pdf)
 
+
+# MODULES AND THEIR REQUIREMENTS
+  
+  
 - [Core Modules](#core-modules)
 - [Extra Modules](#extra-modules)
 
@@ -18,7 +22,7 @@ Due: Oct 3 (Thur)
 ### 2. Building the index
 - Positional Inverted Index() 
   - Postings list needs
-    - Needs documentId
+    - Needs documentId 
     - List of of positions
   - (documentID, [position1, position2])
 - Implemented from **IIndex**

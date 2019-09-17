@@ -1,0 +1,26 @@
+Use this hand-written-index.txt as a reference for test inputs.
+term    -> (docId1, [pos1, pos2, ...]), (docId2, [...]), ...
+
+For macOS, the document id is different
+fileName        docID    docID(macOS)
+testdoc1.txt    0        4
+testdoc2.txt    1        3
+testdoc3.txt    2        2
+testdoc4.txt    3        1
+testdoc5.txt    4        0
+
+<Positional Inverted Index> w/o stemmer
+hello   -> (0,[0,1]), (2,[0,2,3])
+world   -> (0,[2]), (1,[1]), (4,[5])
+it      -> (0,[3]), (1,[6]), (2,[4]), (3,[4]), (4,[0])
+is      -> (0,[4]), (1,[2]), (2,[5]), (3,[5]), (4,[6])
+snowing -> (0,[5]), (2,[6])
+the     -> (1,[0]), (3,[2]), (4,[4])
+full    -> (1,[3]), (4,[7])
+of      -> (1,[4]), (4,[8])
+mystery -> (1,[5]), (3,[6]), (4,[9])
+snows   -> (1,[7,8,9]), (4,[1,2,3])
+mr.snowman  -> (2,[1]), (3,[0])
+loves   -> (3,[1])
+sun     -> (3,[3])
+a       -> (3,[5])
