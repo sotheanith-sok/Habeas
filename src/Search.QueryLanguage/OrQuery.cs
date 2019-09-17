@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Cecs429.Search.Index;
+using Search.Index;
 
 namespace Cecs429.Search.Query {
 	public class OrQuery : IQueryComponent {
@@ -15,9 +15,16 @@ namespace Cecs429.Search.Query {
 		}
 
 		public IList<Posting> GetPostings(IIndex index) {
-			throw new NotImplementedException();
-			// TODO: program this method. Retrieve the postings for the individual query components in
-			// mComponents, and OR merge them together.
+			IList<Posting> finalPostingList = new List<Posting>();
+			List<IList<Posting>> candidates = new List<IList<Posting>>();
+			foreach(IQueryComponent qc in mComponents){
+				candidates.Add(qc.GetPostings(index));
+			}
+			candidates.OrderByDescending(x => x.Count);
+			
+
+			//OR merge them together.
+			return finalPostingList;
 		}
 
 
