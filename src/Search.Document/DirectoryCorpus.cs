@@ -121,14 +121,17 @@ namespace Search.Document {
 		}
 
 		/// <summary>
-		/// Constructs a corpus over a directory of simple text documents.
+		/// Constructs a corpus over a directory of different types of documents
 		/// </summary>
-		/// <param name="fileExtension">The extension of the text documents to load, e.g., ".txt".</param>
-		public static DirectoryCorpus LoadTextDirectory(string absolutePath, string fileExtension) {
-			DirectoryCorpus corpus = new DirectoryCorpus(absolutePath);
-			corpus.RegisterFileDocumentFactory(fileExtension, TextFileDocument.CreateTextFileDocument);
-			return corpus;
-		}
+	
+		  public static DirectoryCorpus LoadTextDirectory(string absolutePath)
+        {
+            DirectoryCorpus corpus = new DirectoryCorpus(absolutePath);
+            corpus.RegisterFileDocumentFactory(".txt", TextFileDocument.CreateTextFileDocument);
+            corpus.RegisterFileDocumentFactory(".json", JsonFileDocument.CreateJsonFileDocument);
+            return corpus;
+
+        }
 
 	}
 }

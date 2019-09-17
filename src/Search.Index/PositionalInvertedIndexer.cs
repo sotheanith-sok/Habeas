@@ -13,7 +13,7 @@ namespace Search.PositionalInvertedIndexer
         public static void Main(string[] args)
         {
             string _directory = "./corpus";
-            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(_directory, ".txt");
+            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(_directory);
             PositionalInvertedIndex index = IndexCorpus(corpus);
 
             string query;
