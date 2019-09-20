@@ -3,13 +3,24 @@ CECS 529 Search Engine Technology
 Due: Oct 3 (Thur)  
 For more detailed requirements, check [milestone1.pdf](milestone1.pdf)
 
-
 # MODULES AND THEIR REQUIREMENTS
   
-  
-- [Core Modules](#core-modules)
-- [Extra Modules](#extra-modules)
+[Core Modules](#core-modules)  
+- [ ] 1. Corpus to handle Json
+- [ ] 2. Building positional index
+- [ ] 3. Indexing and Tokenization
+- [ ] 4. Query Language
+- [ ] 5. Main Application
+- [ ] 6. JsonFileDocument
 
+[Extra Modules](#extra-modules)  
+- [ ] 1. Unit Testing 
+- [ ] 2. GUI 
+- [ ] 3. Wildcard Queries 
+- [ ] 4. SoundEx 
+- [ ] 5. Near Operator
+
+---
 
 ## Core Modules
 ### 1. Corpus
@@ -19,7 +30,7 @@ For more detailed requirements, check [milestone1.pdf](milestone1.pdf)
 - Index should be built in that folder
 - **Modify the DirectoryCorpus** to know how to load JSON document
 
-### 2. Building the index
+### 2. Building Positional Index
 - Positional Inverted Index() 
   - Postings list needs
     - Needs documentId 
@@ -79,8 +90,15 @@ For more detailed requirements, check [milestone1.pdf](milestone1.pdf)
 
 ## Extra Modules
 Listed in Priority 
-1. Unit Testing 
-2. GUI 
-3. Wildcard Queries 
-4. SoundEx 
-5. Near Operator
+### 1. Unit Testing 
+- for Positional Index
+- for Query language
+
+### 2. GUI 
+..
+### 3. Wildcard Queries 
+..
+### 4. SoundEx 
+..
+### 5. Near Operator
+..

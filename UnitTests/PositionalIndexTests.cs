@@ -14,9 +14,8 @@ namespace UnitTests
     public class PositionalIndexTests {
 
         //Arrange
-        static IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../UnitTests/testCorpus", ".txt");
+        static IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../UnitTests/testCorpus");
         PositionalInvertedIndex index = IndexCorpus(corpus);
-
         [Theory]
         [MemberData(nameof(Data))]
         public void PositoinalPostingTest(string term, List<Posting> expected)
