@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Porter2Stemmer;
 namespace Search.Text
 {
@@ -147,7 +148,7 @@ namespace Search.Text
             {
                 result.AddRange(this.KGramSplitter(token, kGramSize));
             }
-            return result;
+            return result.Distinct().ToList();
         }
 
     }

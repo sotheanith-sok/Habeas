@@ -115,7 +115,7 @@ namespace UnitTests
         public void TestProcessTokenWithKGram()
         {
             string input = "Hello.-.192.168.1.1.-Hewlett-Packard-Computing-\"John Legend\"-'M'-Eating";
-            List<string> expected = new List<string> { "$he", "hel", "ell", "llo", "lo$", "$19", "192", "92.", "2.1", ".16", "168", "68.", "8.1", ".1.", "1.1", ".1$", "$he", "hew", "ewl", "wle", "let", "ett", "tt$", "$pa", "pac", "ack", "cka", "kar", "ard", "rd$", "$co", "com", "omp", "mpu", "put", "ut$", "$jo", "joh", "ohn", "hn ", "n l", " le", "leg", "ege", "gen", "end", "nd$", "$m$", "$ea", "eat", "at$", "$he", "hel", "ell", "llo", "lo.", "o..", "..1", ".19", "192", "92.", "2.1", ".16", "168", "68.", "8.1", ".1.", "1.1", ".1.", "1.h", ".he", "hew", "ewl", "wle", "let", "ett", "ttp", "tpa", "pac", "ack", "cka", "kar", "ard", "rdc", "dco", "com", "omp", "mpu", "put", "uti", "tin", "ing", "ngj", "gjo", "joh", "ohn", "hn ", "n l", " le", "leg", "ege", "gen", "end", "ndm", "dm$" };
+            List<string> expected = new List<string> { "$he", "hel", "ell", "llo", "lo$", "$19", "192", "92.", "2.1", ".16", "168", "68.", "8.1", ".1.", "1.1", ".1$", "hew", "ewl", "wle", "let", "ett", "tt$", "$pa", "pac", "ack", "cka", "kar", "ard", "rd$", "$co", "com", "omp", "mpu", "put", "ut$", "$jo", "joh", "ohn", "hn ", "n l", " le", "leg", "ege", "gen", "end", "nd$", "$m$", "$ea", "eat", "at$", "lo.", "o..", "..1", ".19", "1.h", ".he", "ttp", "tpa", "rdc", "dco", "uti", "tin", "ing", "ngj", "gjo", "ndm", "dm$" };
             Assert.Equal(expected, betterTokenProcessor.ProcessToken(input, true));
         }
 
