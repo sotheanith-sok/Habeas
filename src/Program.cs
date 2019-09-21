@@ -6,11 +6,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 
-
 namespace Program
 {
-
-
     class Program
     {
         private static PositionalInvertedIndex index;
@@ -52,13 +49,14 @@ namespace Program
                         //Print the documents (posting list)
                         PrintPostings(postings);
 
-                        //Ask if the user wants to see a document
-                        
-                        //Ask the document name
-                        //Print the entire content
+                        //Ask a document to view and print the content
+                        AskDocument(postings);
                     }
+
                 }
+
             }
+            
         }
 
 
@@ -134,16 +132,64 @@ namespace Program
         /// <param name="postings">postings to be printed</param>
         public static void PrintPostings(IList<Posting> postings)
         {
+            int i = 1;
             foreach (Posting p in postings)
             {
                 IDocument doc = corpus.GetDocument(p.DocumentId);
-                Console.Write($"Document {doc.Title} \t{p.Positions.Count} terms");
+                Console.Write($"[{i}] {doc.Title} \t{p.Positions.Count} terms");
                 Console.Write($"\t\t{p.ToString()}");
                 Console.WriteLine();
+                i += 1;
             }
-            Console.WriteLine($"Found in {postings.Count} files");
+            Console.WriteLine($"Found in {postings.Count} files.\n");
         }
         
+        /// <summary>
+        /// Ask the user the document name and print the content of it
+        /// </summary>
+        /// <param name="postings">posting list to search the selected document from</param>
+        public static void AskDocument(IList<Posting> postings)
+        {
+            int selected;
+            IDocument selectedDocument;
+            
+            //Ask if the user want to see a doc
+            Console.Write("Do you like to view a document? [Y/N]: ");
+            Boolean doesWantToView = Console.ReadLine().ToLower().Equals("y");
+            if (doesWantToView) {
+                //Ask the doc name
+                while(true) {
+                    Console.Write("Select the document to view (Enter number): ");
+
+                    string input = Console.ReadLine();
+                    try {
+                        selected = Int32.Parse(input);
+                    } catch {
+                        continue;
+                    }
+                    //Console.WriteLine($"selected: {selected}");
+
+                    Boolean isSelectedInRange = (selected > 0) && (selected <= postings.Count);
+                    if(!isSelectedInRange) {
+                        continue;
+                    }
+
+                    selectedDocument = corpus.GetDocument(postings[selected-1].DocumentId);
+
+                    //TODO: Print the content of the doc
+                    Console.WriteLine($"\n{selectedDocument.Title.ToUpper()}");
+                    Console.WriteLine($"content...\n");
+                    //TextReader content = selectedDocument.GetContent();
+
+                    return; //NOTE: It can ask another document to view. But then, when to stop asking??
+                }
+            } else {
+                return;
+            }
+            //NOTE: handling exception first better? or main action first better?
+
+            
+        }
     }
 
 
