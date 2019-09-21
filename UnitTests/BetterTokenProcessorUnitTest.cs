@@ -3,7 +3,7 @@ using Xunit;
 using Search.Text;
 using System.Collections.Generic;
 
-namespace CECS_529_Search_Engine_Project
+namespace UnitTests
 {
     public class BetterTokenProcessorUnitTest
     {

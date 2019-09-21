@@ -15,8 +15,7 @@ namespace UnitTests
 
         //Arrange
         static IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../UnitTests/testCorpus");
-        PositionalInvertedIndex index = PositionalInvertedIndexer.IndexCorpus(corpus);
-
+        PositionalInvertedIndex index = IndexCorpus(corpus);
         [Theory]
         [MemberData(nameof(Data))]
         public void PositoinalPostingTest(string term, List<Posting> expected)
@@ -24,13 +23,15 @@ namespace UnitTests
             var result = index.GetPostings(term);
 
             //Assert
+            // TODO: Use FluentAssertion. It can check if A contains all in B.
+            // Use some assertions other than equal().
             Assert.Equal(expected.Count, result.Count);
-            //Assert.Equal(expected, result);       // NOTE: Why not equal??
-            //Assert.Equal(expected[0], result[0]); // This also doesn't work.
+            //Assert.Equal(expected, result);
             
+            Console.WriteLine($"term: {term}");
             for(int i=0; i < Math.Max(expected.Count, result.Count); i++) {
                 Assert.Equal(expected[i].ToString(), result[i].ToString());
-                Console.WriteLine($"Term: {term}\t Expected: {expected[i].ToString()} \t Actual: {result[i].ToString()}");
+                Console.WriteLine($"expected: {expected[i].ToString()} \t actual: {result[i].ToString()}");
             }
 
         }
@@ -68,6 +69,37 @@ namespace UnitTests
                 System.Console.WriteLine("TestData for other OSs");
                 return winData;
             }
+        }
+
+        //For independent unit testing, Copied from PositionalInvertedIndexer.IndexCorpus()
+        public static PositionalInvertedIndex IndexCorpus(IDocumentCorpus corpus)
+        {
+            ITokenProcessor processor = new BasicTokenProcessor();
+            PositionalInvertedIndex index = new PositionalInvertedIndex();
+            Console.WriteLine("UnitTests: Indexing the corpus... with Positional Inverted Index");
+            // Index the document
+            foreach (IDocument doc in corpus.GetDocuments())
+            {
+                //Tokenize the documents
+                ITokenStream stream = new EnglishTokenStream(doc.GetContent());
+                IEnumerable<string> tokens = stream.GetTokens();
+
+                int position = 0;
+                foreach (string token in tokens) {
+                    //Process token to term
+                    string term = processor.ProcessToken(token);
+                    //Add term to the index
+                    if(term.Length > 0) {
+                        index.AddTerm(term, doc.DocumentId, position);
+                    }
+                    //Increase the position num
+                    position += 1;
+                }
+
+                stream.Dispose();
+            }
+
+            return index;
         }
 
     }
