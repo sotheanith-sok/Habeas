@@ -34,6 +34,7 @@ namespace Program
 
 
                 string query;
+                IList<Posting> postings;
 
                 while (true)
                 {
@@ -47,10 +48,12 @@ namespace Program
                     //search queries
                     else
                     {
+                        postings = index.GetPostings(query);
                         //Print the documents (posting list)
-                        PerformSearch(query);
+                        PrintPostings(postings);
 
                         //Ask if the user wants to see a document
+                        
                         //Ask the document name
                         //Print the entire content
                     }
@@ -121,6 +124,16 @@ namespace Program
             }
 
             IList<Posting> postings = index.GetPostings(query);
+            PrintPostings(postings);
+
+        }
+
+        /// <summary>
+        /// Print the name and count of the documents from a posting list
+        /// </summary>
+        /// <param name="postings">postings to be printed</param>
+        public static void PrintPostings(IList<Posting> postings)
+        {
             foreach (Posting p in postings)
             {
                 IDocument doc = corpus.GetDocument(p.DocumentId);
@@ -128,8 +141,7 @@ namespace Program
                 Console.Write($"\t\t{p.ToString()}");
                 Console.WriteLine();
             }
-            Console.WriteLine($"'{query}' found in {postings.Count} files");
-
+            Console.WriteLine($"Found in {postings.Count} files");
         }
         
     }
