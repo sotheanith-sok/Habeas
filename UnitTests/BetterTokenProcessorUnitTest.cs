@@ -89,11 +89,34 @@ namespace UnitTests
             Assert.Equal(expected, this.betterTokenProcessor.StemWords(token));
         }
 
+        /// <summary>
+        /// Test entire token processor with k-gram disable
+        /// </summary>
         [Fact]
-        public void TestProcessToken()
+        public void TestProcessTokenWithoutKGram()
         {
             Assert.Equal(new List<string> { "hello", "192.168.1.1", "hewlett", "packard", "comput", "john legend", "m", "eat", "hello..192.168.1.1.hewlettpackardcomputingjohn legendm" },
-            betterTokenProcessor.ProcessToken("Hello.-.192.168.1.1.-Hewlett-Packard-Computing-\"John Legend\"-'M'-Eating"));
+            betterTokenProcessor.ProcessToken("Hello.-.192.168.1.1.-Hewlett-Packard-Computing-\"John Legend\"-'M'-Eating", false));
+        }
+
+        /// <summary>
+        /// Test K-Gram splitter on a list of tokens
+        /// </summary>
+        [Fact]
+        public void TestKGramSplitter()
+        {
+            Assert.Equal(new List<string> { "$Mi", "Mik", "ike", "ke$", "$Ap", "App", "ppl", "ple", "le$" }, betterTokenProcessor.KGramSplitter(new List<string> { "Mike", "Apple" }));
+        }
+
+        /// <summary>
+        /// Test entire token processor with k-gram enable
+        /// </summary>
+        [Fact]
+        public void TestProcessTokenWithKGram()
+        {
+            string input = "Hello.-.192.168.1.1.-Hewlett-Packard-Computing-\"John Legend\"-'M'-Eating";
+            List<string> expected = new List<string> { "$he", "hel", "ell", "llo", "lo$", "$19", "192", "92.", "2.1", ".16", "168", "68.", "8.1", ".1.", "1.1", ".1$", "$he", "hew", "ewl", "wle", "let", "ett", "tt$", "$pa", "pac", "ack", "cka", "kar", "ard", "rd$", "$co", "com", "omp", "mpu", "put", "ut$", "$jo", "joh", "ohn", "hn ", "n l", " le", "leg", "ege", "gen", "end", "nd$", "$m$", "$ea", "eat", "at$", "$he", "hel", "ell", "llo", "lo.", "o..", "..1", ".19", "192", "92.", "2.1", ".16", "168", "68.", "8.1", ".1.", "1.1", ".1.", "1.h", ".he", "hew", "ewl", "wle", "let", "ett", "ttp", "tpa", "pac", "ack", "cka", "kar", "ard", "rdc", "dco", "com", "omp", "mpu", "put", "uti", "tin", "ing", "ngj", "gjo", "joh", "ohn", "hn ", "n l", " le", "leg", "ege", "gen", "end", "ndm", "dm$" };
+            Assert.Equal(expected, betterTokenProcessor.ProcessToken(input, true));
         }
 
     }
