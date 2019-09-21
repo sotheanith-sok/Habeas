@@ -1,6 +1,7 @@
 using Search.Document;
 using Search.Index;
 using Search.PositionalInvertedIndexer;
+using Search.Text;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -102,10 +103,18 @@ namespace Program
         /// </summary>
         /// <param name="specialQuery">a special query to be performed</param>
         public static void PerformSpecialQueries(string specialQuery){
+            if(!specialQuery.StartsWith(":")) {
+                return;
+            }
             specialQuery = specialQuery.ToLower();
 
             if (specialQuery == ":q") {
                 System.Environment.Exit(1); // Exit the console app
+            }
+            else if (specialQuery.StartsWith(":stem ")) {
+                string term = specialQuery.Substring(":stem ".Length);
+                Console.WriteLine(new BetterTokenProcessor().StemWords(term));
+                Console.WriteLine();
             }
             else if (specialQuery == ":vocab") {
                 PositionalInvertedIndexer.PrintVocab(index.GetVocabulary(), 100);
@@ -119,21 +128,6 @@ namespace Program
                 Console.WriteLine(":index [dir]   index a folder");
                 Console.WriteLine(":vocab         print vocabulary of the current corpus");
             }
-        }
-
-        /// <summary>
-        /// Search query from index and
-        /// Print the name and the number of documents that contain the term(query)
-        /// </summary>
-        /// <param name="query">search query</param>
-        public static void PerformSearch(string query) {
-            if(query.StartsWith(':')) {
-                return;
-            }
-
-            IList<Posting> postings = index.GetPostings(query);
-            PrintPostings(postings);
-
         }
 
         /// <summary>
