@@ -31,22 +31,29 @@ namespace Program
 
                 while (true)
                 {
-                    Console.Write("\nSearch: ");
+                    Console.Write("Search: ");
                     query = Console.ReadLine();
+                    if (query.Equals("")) {
+                        continue;
+                    }
 
                     //special queries
                     if (query.StartsWith(":")) {
                         PerformSpecialQueries(query);
+                        continue;
                     }
                     //search queries
                     else
                     {
                         postings = index.GetPostings(query);
-                        //Print the documents (posting list)
-                        PrintPostings(postings);
-
-                        //Ask a document to view and print the content
-                        AskDocument(postings);
+                        if (postings.Count > 0) {
+                            //Print the documents (posting list)
+                            PrintPostings(postings);
+                            //Ask a document to view and print the content
+                            AskDocument(postings);
+                        } else {
+                            Console.WriteLine("Not Found.");
+                        }
                     }
 
                 }
@@ -139,16 +146,16 @@ namespace Program
             foreach (Posting p in postings)
             {
                 IDocument doc = corpus.GetDocument(p.DocumentId);
-                Console.Write($"[{i}] {doc.Title} \t{p.Positions.Count} terms");
+                Console.Write($"    [{i}] {doc.Title} \t{p.Positions.Count} terms");
                 Console.Write($"\t\t{p.ToString()}");
                 Console.WriteLine();
                 i += 1;
             }
-            Console.WriteLine($"Found in {postings.Count} files.\n");
+            Console.WriteLine($"Found in {postings.Count} files.");
         }
         
         /// <summary>
-        /// Ask the user the document name and print the content of it
+        /// Ask the user the document to view and print the content of it
         /// </summary>
         /// <param name="postings">posting list to search the selected document from</param>
         public static void AskDocument(IList<Posting> postings)
@@ -156,42 +163,46 @@ namespace Program
             int selected;
             IDocument selectedDocument;
             
-            //Ask if the user want to see a doc
-            Console.Write("Do you like to view a document? [Y/N]: ");
-            Boolean doesWantToView = Console.ReadLine().ToLower().Equals("y");
-            if (doesWantToView) {
-                //Ask the doc name
-                while(true) {
-                    Console.Write("Select the document to view (Enter number): ");
-
-                    string input = Console.ReadLine();
-                    try {
-                        selected = Int32.Parse(input);
-                    } catch {
-                        continue;
-                    }
-                    //Console.WriteLine($"selected: {selected}");
-
-                    Boolean isSelectedInRange = (selected > 0) && (selected <= postings.Count);
-                    if(!isSelectedInRange) {
-                        continue;
-                    }
-
-                    selectedDocument = corpus.GetDocument(postings[selected-1].DocumentId);
-
-                    //TODO: Print the content of the doc
-                    Console.WriteLine($"\n{selectedDocument.Title.ToUpper()}");
-                    Console.WriteLine($"content...\n");
-                    //TextReader content = selectedDocument.GetContent();
-
-                    return; //NOTE: It can ask another document to view. But then, when to stop asking??
+            //Ask user a document to view
+            while(true) {
+                Console.Write("Select the number to view the document ([Enter] to exit): ");
+                string input = Console.ReadLine();
+                //Enter to exit
+                if (input.Equals("")) {
+                    break;
                 }
-            } else {
+                //Take number or ask again if input is not numeric
+                try {
+                    selected = Int32.Parse(input);
+                } catch {
+                    continue;
+                }
+                //Console.WriteLine($"selected: {selected}");
+                
+                //Ask again if input number is not in range
+                Boolean isSelectedInRange = (selected > 0) && (selected <= postings.Count);
+                if(!isSelectedInRange) {
+                    continue;
+                }
+
+                selectedDocument = corpus.GetDocument(postings[selected-1].DocumentId);
+
+                PrintContent(selectedDocument);
                 return;
             }
-            //NOTE: handling exception first better? or main action first better?
 
-            
+        }
+
+        /// <summary>
+        /// Print the content of a document.
+        /// </summary>
+        /// <param name="doc">document to be printed</param>
+        public static void PrintContent(IDocument doc) {
+            //TODO: Print the content of the doc
+            Console.WriteLine($"\n{doc.Title.ToUpper()}");
+            Console.WriteLine($"content...\n");
+            //TextReader content = selectedDocument.GetContent();
+
         }
     }
 
