@@ -5,48 +5,17 @@ using Search.Text;
 using System;
 using System.Collections.Generic;
 
+
 namespace Search.PositionalInvertedIndexer
 {
     public class PositionalInvertedIndexer
     {
-
-        public static void Main(string[] args)
-        {
-            string _directory = "./corpus";
-            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(_directory);
-            PositionalInvertedIndex index = IndexCorpus(corpus);
-
-            string query;
-            IList<Posting> postings;
-
-            while(true) {
-                Console.Write("\nSearch: ");
-                query = Console.ReadLine();
-
-                if (query == ":q") {
-                    break;
-                }
-                else if (query == ":vocab") {
-                    PrintVocab(index.GetVocabulary(), 100);
-                }
-                else {
-                    postings = index.GetPostings(query);
-                    foreach (Posting p in postings)
-                    {
-                        Console.Write($"Document {corpus.GetDocument(p.DocumentId).Title}");
-                        Console.Write($"\t{p.ToString()}");
-                        Console.WriteLine();
-                    }
-                    Console.WriteLine($"'{query}' found in {postings.Count} files");
-                }
-            }
-        }
-
+        
         /// <summary>
         /// Constructs an index from a corpus of documents
         /// </summary>
         /// <param name="corpus">a corpus to be indexed</param>
-        public static PositionalInvertedIndex IndexCorpus(IDocumentCorpus corpus)
+        public static  PositionalInvertedIndex IndexCorpus(IDocumentCorpus corpus)
         {
             ITokenProcessor processor = new BasicTokenProcessor();
 
