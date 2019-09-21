@@ -13,6 +13,7 @@ namespace Program
 
     class Program
     {
+        static PositionalInvertedIndex index;
 
         public static void Main(string[] args)
         {
@@ -28,7 +29,7 @@ namespace Program
 
 
                 // implements stopwatch to measure how long it takes to index corpus
-                PositionalInvertedIndex index = positIndex(corpus);
+                index = positIndex(corpus);
 
 
                 string query;
@@ -39,13 +40,8 @@ namespace Program
                     Console.Write("\nSearch: ");
                     query = Console.ReadLine();
 
-                    if (query == ":q")
-                    {
-                        break;
-                    }
-                    else if (query == ":vocab")
-                    {
-                        PositionalInvertedIndexer.PrintVocab(index.GetVocabulary(), 100);
+                    if (query.StartsWith(":")) {
+                        PerformSpecialQueries(query);
                     }
                     else
                     {
@@ -89,7 +85,29 @@ namespace Program
 
         }
 
+        /// <summary>
+        /// Perform special queries that start with ':'
+        /// such as ':q', ':vocab', ':stem', ':index'
+        /// </summary>
+        /// <param name="specialQuery">a special query to be performed</param>
+        public static void PerformSpecialQueries(string specialQuery){
+            if (specialQuery == ":q") {
+                System.Environment.Exit(1); // Exit the console app
+            }
+            else if (specialQuery == ":vocab") {
+                PositionalInvertedIndexer.PrintVocab(index.GetVocabulary(), 100);
+            }
+            // TODO: add speical query actions from Jesse's code
+            else {
+                Console.WriteLine("No such query exist");
+                Console.WriteLine(":q             exit the program");
+                Console.WriteLine(":stem [token]  print the stemmed token");
+                Console.WriteLine(":index [dir]   index a folder");
+                Console.WriteLine(":vocab         print vocabulary of the current corpus");
+            }
+        }
 
+        
     }
 
 
