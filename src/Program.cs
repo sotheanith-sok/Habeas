@@ -16,7 +16,7 @@ namespace Program
 
         public static void Main(string[] args)
         {
-            //requesting for Directory path from user 
+            
             //IDocumentCorpus corpus = askDirectory();
 
             string _directory = "./corpus";
@@ -25,9 +25,7 @@ namespace Program
             if (corpus != null && corpus.CorpusSize != 0)
             {
 
-
-
-                // implements stopwatch to measure how long it takes to index corpus
+ 
                 PositionalInvertedIndex index = positIndex(corpus);
 
 
@@ -62,7 +60,9 @@ namespace Program
             }
         }
 
-
+        ///<summary>
+        ///requests Directory/Folder path from user and creates corpus based off that directory
+        ///</summary>
         public static IDocumentCorpus askDirectory()
         {
             string _directory;
@@ -77,6 +77,10 @@ namespace Program
 
         }
 
+
+        ///<summary>
+        ///implements stopwatch to measure how long it takes to index corpus
+         ///</summary>
         public static PositionalInvertedIndex positIndex(IDocumentCorpus corpus)
         {
             Stopwatch elapsedTime = new Stopwatch();
