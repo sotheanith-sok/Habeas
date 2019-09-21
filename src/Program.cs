@@ -13,7 +13,8 @@ namespace Program
 
     class Program
     {
-        static PositionalInvertedIndex index;
+        private static PositionalInvertedIndex index;
+        private static IDocumentCorpus corpus;
 
         public static void Main(string[] args)
         {
@@ -21,7 +22,7 @@ namespace Program
             //IDocumentCorpus corpus = askDirectory();
 
             string _directory = "./corpus";
-            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(_directory);
+            corpus = DirectoryCorpus.LoadTextDirectory(_directory);
    
             if (corpus != null && corpus.CorpusSize != 0)
             {
@@ -33,26 +34,25 @@ namespace Program
 
 
                 string query;
-                IList<Posting> postings;
 
                 while (true)
                 {
                     Console.Write("\nSearch: ");
                     query = Console.ReadLine();
 
+                    //special queries
                     if (query.StartsWith(":")) {
                         PerformSpecialQueries(query);
                     }
+                    //search queries
                     else
                     {
-                        postings = index.GetPostings(query);
-                        foreach (Posting p in postings)
-                        {
-                            Console.Write($"Document {corpus.GetDocument(p.DocumentId).Title}");
-                            Console.Write($"\t{p.ToString()}");
-                            Console.WriteLine();
-                        }
-                        Console.WriteLine($"'{query}' found in {postings.Count} files");
+                        //Print the documents (posting list)
+                        PerformSearch(query);
+
+                        //Ask if the user wants to see a document
+                        //Ask the document name
+                        //Print the entire content
                     }
                 }
             }
@@ -91,6 +91,8 @@ namespace Program
         /// </summary>
         /// <param name="specialQuery">a special query to be performed</param>
         public static void PerformSpecialQueries(string specialQuery){
+            specialQuery = specialQuery.ToLower();
+
             if (specialQuery == ":q") {
                 System.Environment.Exit(1); // Exit the console app
             }
@@ -98,8 +100,9 @@ namespace Program
                 PositionalInvertedIndexer.PrintVocab(index.GetVocabulary(), 100);
             }
             // TODO: add speical query actions from Jesse's code
+
             else {
-                Console.WriteLine("No such query exist");
+                Console.WriteLine("No such special query exist.");
                 Console.WriteLine(":q             exit the program");
                 Console.WriteLine(":stem [token]  print the stemmed token");
                 Console.WriteLine(":index [dir]   index a folder");
@@ -107,6 +110,27 @@ namespace Program
             }
         }
 
+        /// <summary>
+        /// Search query from index and
+        /// Print the name and the number of documents that contain the term(query)
+        /// </summary>
+        /// <param name="query">search query</param>
+        public static void PerformSearch(string query) {
+            if(query.StartsWith(':')) {
+                return;
+            }
+
+            IList<Posting> postings = index.GetPostings(query);
+            foreach (Posting p in postings)
+            {
+                IDocument doc = corpus.GetDocument(p.DocumentId);
+                Console.Write($"Document {doc.Title} \t{p.Positions.Count} terms");
+                Console.Write($"\t\t{p.ToString()}");
+                Console.WriteLine();
+            }
+            Console.WriteLine($"'{query}' found in {postings.Count} files");
+
+        }
         
     }
 
