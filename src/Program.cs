@@ -119,7 +119,10 @@ namespace Program
             else if (specialQuery == ":vocab") {
                 PositionalInvertedIndexer.PrintVocab(index.GetVocabulary(), 100);
             }
-            // TODO: add speical query actions from Jesse's code
+            else if(specialQuery.StartsWith(":index ")){
+                corpus = DirectoryCorpus.LoadTextDirectory(specialQuery.Substring(":index ".Length));
+                index = PositIndex(corpus);
+            }
 
             else {
                 Console.WriteLine("No such special query exist.");
