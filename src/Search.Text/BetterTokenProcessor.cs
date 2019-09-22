@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Porter2Stemmer;
 namespace Search.Text
 {
@@ -12,8 +13,9 @@ namespace Search.Text
         /// Process a token by applying multiple rules
         /// </summary>
         /// <param name="token">Preprocess token</param>
+        /// <param name="enableKGram">is K Gram processing enable. True by default</param>
         /// <returns>List of postprocess tokens</returns>
-        public List<string> ProcessToken(string token)
+        public List<string> ProcessToken(string token, bool enableKGram = true)
         {
             List<string> tokens = this.HyphenateWords(token);
             for (int i = 0; i < tokens.Count; i++)
@@ -24,7 +26,7 @@ namespace Search.Text
                 tokens[i] = this.LowercaseWords(tokens[i]);
                 tokens[i] = this.StemWords(tokens[i]);
             }
-            return tokens;
+            return (enableKGram == false) ? tokens : this.KGramSplitter(tokens);
         }
 
         /// <summary>
@@ -112,6 +114,41 @@ namespace Search.Text
         public string StemWords(string token)
         {
             return new EnglishPorter2Stemmer().Stem(token).Value;
+        }
+
+        /// <summary>
+        /// Splits a token into subtoken of a certain k-gram size
+        /// </summary>
+        /// <param name="token">Preprocssing token</param>
+        /// <param name="size">size of k-gram</param>
+        /// <returns>A list of k-grams</returns>
+        public List<string> KGramSplitter(string token, int size)
+        {
+            token = "$" + token + "$";
+            int i = 0;
+            List<string> result = new List<string>();
+            while (i + size <= token.Length)
+            {
+                result.Add(token.Substring(i, size));
+                i++;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Splits tokens in a list into subtokens of a certain k-gram size
+        /// </summary>
+        /// <param name="tokens">Preprocssing list of tokens</param>
+        /// <param name="kGramSize">K-gram size</param>
+        /// <returns>A list of k-grams</returns>
+        public List<string> KGramSplitter(List<string> tokens, int kGramSize = 3)
+        {
+            List<string> result = new List<string>();
+            foreach (string token in tokens)
+            {
+                result.AddRange(this.KGramSplitter(token, kGramSize));
+            }
+            return result.Distinct().ToList();
         }
 
     }
