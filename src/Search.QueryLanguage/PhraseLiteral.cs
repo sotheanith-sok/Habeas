@@ -29,38 +29,48 @@ namespace Cecs429.Search.Query {
 		public IList<Posting> GetPostings(IIndex index) {
 			//A list of posting lists (postings for each term in the phrase)
 			List<IList<Posting>> postingsList = new List<IList<Posting>>();
-
 			//Retrieves the postings for the individual terms in the phrase
 			foreach(string term in mTerms) {
 				postingsList.Add(index.GetPostings(term));
 			}
 
-			// positional merge them together.
-			//PhraseMerge( 1st, 2nd, 1)
-			//PhraseMerge( (1st+2nd), 3rd, 2)
-
-			// for(int i=1; i<mTerms.Count-1; i++) {
-			// 	IList<Posting> first = index.GetPostings(mTerms[i-1]);
-			// 	IList<Posting> second = index.GetPostings(mTerms[i]);
-			// 	PhraseMerge(first, second, i);
-			// }
-
-			throw new NotImplementedException(); //TODO: return proper value!!
+			//positional merge all posting lists
+			// return PositionalMerge(postingsList);
+			throw new NotImplementedException();
 		}
 
 		public override string ToString() {
 			return "\"" + string.Join(" ", mTerms) + "\"";
 		}
 
+		/// <summary>
+		/// Merge posting lists of terms in a phrase into one list of postings
+		/// based on their consecutive positions in a document.
+		/// </summary>
+		/// <param name="postingsList">a list of posting lists from multiple terms</param>
+		/// <returns></returns>
+		public IList<Posting> PositionalMerge(List<IList<Posting>> postingsList) {
+			IList<Posting> first = postingsList[0];
+			postingsList.RemoveAt(0);
+			//positional merge them together.
+
+			//PositionalMerge( 1st, 2nd, 1)
+			//PositionalMerge( (1st+2nd), 3rd, 2)
+			if (postingsList.Count <= 2) {}
+			//TODO: implement the rest using recursive call
+
+			return null;
+		}
 
 		/// <summary>
-		/// Merge posting lists of two terms into one posting list for a phrase literals
+		/// Merge posting lists of two terms into one list of postings
+		/// based on their positions in a document with an offset value.
 		/// </summary>
 		/// <param name="first">the first list of postings</param>
 		/// <param name="second">the second list of postings</param>
 		/// <param name="gap">the gap between the terms in the phrase. default: 1</param>
 		/// <returns></returns>
-		public IList<Posting> PhraseMerge(IList<Posting> first, IList<Posting> second, int gap = 1) {
+		public IList<Posting> PositionalMerge(IList<Posting> first, IList<Posting> second, int gap = 1) {
 			IList<Posting> newPostingList = new List<Posting>();
 			
 			int i=0;	//track docID in first postings
