@@ -205,10 +205,6 @@ namespace Cecs429.Search.Query
                 {
                     // We'll just assume that they meant the rest of the subquery
                     lengthOut = subquery.Length - startIndex;
-					// Then berate them
-                    Console.WriteLine("Listen up you insufferable wazzok! I'm going to assume that the phrase in your query was: ");
-                    Console.WriteLine('"' + subquery.Substring(startIndex, lengthOut) + '"');
-                    Console.WriteLine("Didn't yer ma ever teach you to close your quotation marks? Cor Blimey!");
                 }
                 else
                 {
