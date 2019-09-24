@@ -27,15 +27,15 @@ namespace Cecs429.Search.Query {
 		}
 
 		public IList<Posting> GetPostings(IIndex index) {
-			// List<IList<Posting>> TermPostingsList = new List<IList<Posting>>();
-			// //Retrieves the postings for the individual terms in the phrase
-			// foreach(string s in mTerms){
-			// 	TermLiteral TL = new TermLiteral(s);
-			// 	IList<Posting> termPostings = TL.GetPostings(index);
-			// 	TermPostingsList.Add(termPostings);
-			// }
-			// // and positional merge them together.
-			throw new NotImplementedException();
+			List<IList<Posting>> TermPostingsList = new List<IList<Posting>>();
+			//Retrieves the postings for the individual terms in the phrase
+			foreach(string s in mTerms){
+				TermLiteral TL = new TermLiteral(s);
+				IList<Posting> termPostings = TL.GetPostings(index);
+				TermPostingsList.Add(termPostings);
+			}
+			// and positional merge them together.
+			// throw new NotImplementedException();
 		}
 
 		public override string ToString() {

@@ -32,7 +32,7 @@ namespace Cecs429.Search.Query
             if (candidates.Count == 1)
             {
                 //return the only list of postings there is
-                return candidates[candidates.Count - 1];
+                return candidates[0];
             }
             //pop one list off of the back of candidates
             IList<Posting> firstList = candidates[candidates.Count - 1];
@@ -86,7 +86,9 @@ namespace Cecs429.Search.Query
                 //if the position has past the end of either list, the AND merge is complete  
                 if (firstListPosition > firstList.Count - 1 || secondListPosition > secondList.Count - 1) { return finalList; }
                 //if the documentID of both postings are the same
-                if (firstList[firstListPosition].DocumentId == secondList[secondListPosition].DocumentId)
+
+                var firstItem = firstList[firstListPosition];
+                if (firstItem.DocumentId == secondList[secondListPosition].DocumentId)
                 {
                     //add that posting to the final list
                     finalList.Add(firstList[firstListPosition]);
