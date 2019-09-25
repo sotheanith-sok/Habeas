@@ -15,7 +15,7 @@ namespace Search.Text
         /// <param name="token">Preprocess token</param>
         /// <param name="enableKGram">is K Gram processing enable. True by default</param>
         /// <returns>List of postprocess tokens</returns>
-        public List<string> ProcessToken(string token, bool enableKGram = true)
+        public List<string> ProcessToken(string token, bool enableKGram = false, bool enableSteam = false)
         {
             List<string> tokens = this.HyphenateWords(token);
             for (int i = 0; i < tokens.Count; i++)
@@ -24,7 +24,7 @@ namespace Search.Text
                 tokens[i] = this.RemoveApostrophes(tokens[i]);
                 tokens[i] = this.RemoveQuotationMarks(tokens[i]);
                 tokens[i] = this.LowercaseWords(tokens[i]);
-                tokens[i] = this.StemWords(tokens[i]);
+                tokens[i] = (enableSteam==true)? this.StemWords(tokens[i]):tokens[i];
             }
             return (enableKGram == false) ? tokens : this.KGramSplitter(tokens);
         }
