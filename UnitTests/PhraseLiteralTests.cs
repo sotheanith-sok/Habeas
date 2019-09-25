@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Cecs429.Search.Query;
 using Search.Index;
 using Xunit;
+using FluentAssertions;
 
 namespace UnitTests
 {
@@ -29,11 +30,8 @@ namespace UnitTests
             //Act
             IList<Posting> result = (new PhraseLiteral("ttt")).PositionalMerge(first, second, 1);
 
-            //Assert
-            //TODO: Use Fluent Assertion to solve this issue.
-            //Assert.Equal(expected, result);
-            Assert.Equal(expected[0].ToString(), result[0].ToString());
-            
+            //Assert 
+            result.Should().BeEquivalentTo(expected); //NOTE: used FluentAssertion
         }
 
         [Fact]
@@ -50,7 +48,7 @@ namespace UnitTests
             IList<Posting> result = (new PhraseLiteral("ttt")).PositionalMerge(first, second, 1);
 
             //Assert
-            Assert.Equal(expected, result);
+            result.Should().BeEmpty("because there is no result set from the given postings");
         }
 
         [Fact]
@@ -71,10 +69,7 @@ namespace UnitTests
             IList<Posting> result = (new PhraseLiteral("ttt")).PositionalMerge(first, second, 1);
 
             //Assert
-            //TODO: Use Fluent Assertion and edit below!
-            Assert.Equal(expected[0].ToString(), result[0].ToString());
-            Assert.Equal(expected[1].ToString(), result[1].ToString());
-            Assert.Equal(expected[2].ToString(), result[2].ToString());
+            result.Should().BeEquivalentTo(expected, "because if all document and positions are relevant, it's same as first postings.");
         }
 
         // /// <summary>
