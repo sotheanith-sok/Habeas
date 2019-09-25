@@ -98,7 +98,10 @@ namespace UnitTests
                     //Add term to the index
                     foreach (string term in terms)
                     {
-                        index.AddTerm(term, doc.DocumentId, position);
+                        if (term.Length > 0)
+                        {
+                            index.AddTerm(term, doc.DocumentId, position);
+                        }
                     }
                     //Increase the position num
                     position += 1;
