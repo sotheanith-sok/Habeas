@@ -76,7 +76,7 @@ namespace Cecs429.Search.Query {
 			int i=0;	//track docID in first postings
 			int j=0;	//track docID in second postings
 			//Iterate through all postings in the first and second.
-			while ( (i<=first.Count) && (j<=second.Count) )
+			while ( (i<first.Count) && (j<second.Count) )
 			{
 				//Compare the document IDs
 				if (first[i].DocumentId == second[j].DocumentId)
@@ -88,10 +88,10 @@ namespace Cecs429.Search.Query {
 					List<int> pp2 = second[j].Positions;
 					List<int> newPositions = new List<int>();
 					//Iterate through all positions in the posting first[i] and second[j]
-					while ( (x<=pp1.Count) && (y<=pp2.Count) )
+					while ( (x<pp1.Count) && (y<pp2.Count) )
 					{
 						//Compare the positions
-						int difference = pp1[y] - pp2[x];
+						int difference = pp2[y] - pp1[x];
 						if ( difference == gap ) {			//y is off by gap from x
 							//Add to new positions
 							newPositions.Add(pp1[x]);
