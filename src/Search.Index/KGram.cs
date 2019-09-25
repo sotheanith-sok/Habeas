@@ -8,7 +8,6 @@ namespace Search.Index
     /// </summary>
     public class KGram
     {
-
         private Dictionary<string, List<string>> map;
         private int size;
         private BetterTokenProcessor btp;

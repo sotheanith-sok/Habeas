@@ -7,7 +7,7 @@ namespace Search.Text
     /// <summary>
     /// An Improved Token Proccessor
     /// </summary>
-    public class BetterTokenProcessor
+    public class BetterTokenProcessor:ITokenProcessor
     {
         /// <summary>
         /// Process a token by applying multiple rules
