@@ -10,14 +10,14 @@ namespace Search.PositionalInvertedIndexer
 {
     public class PositionalInvertedIndexer
     {
-        
+
         /// <summary>
         /// Constructs an index from a corpus of documents
         /// </summary>
         /// <param name="corpus">a corpus to be indexed</param>
-        public static  PositionalInvertedIndex IndexCorpus(IDocumentCorpus corpus)
+        public static PositionalInvertedIndex IndexCorpus(IDocumentCorpus corpus)
         {
-            ITokenProcessor processor = new BasicTokenProcessor();
+            ITokenProcessor processor = new BetterTokenProcessor();
 
             // Constuct a positional-inverted-index once 
             PositionalInvertedIndex index = new PositionalInvertedIndex();
@@ -31,12 +31,17 @@ namespace Search.PositionalInvertedIndexer
                 IEnumerable<string> tokens = stream.GetTokens();
 
                 int position = 0;
-                foreach (string token in tokens) {
+                foreach (string token in tokens)
+                {
                     //Process token to term
-                    string term = processor.ProcessToken(token);
+                    List<string> terms = processor.ProcessToken(token, false, false);
                     //Add term to the index
-                    if(term.Length > 0) {
-                        index.AddTerm(term, doc.DocumentId, position);
+                    foreach (string term in terms)
+                    {
+                        if (term.Length > 0)
+                        {
+                            index.AddTerm(term, doc.DocumentId, position);
+                        }
                     }
                     //Increase the position num
                     position += 1;
@@ -53,8 +58,10 @@ namespace Search.PositionalInvertedIndexer
         /// </summary>
         /// <param name="vocabulary">a sorted vocabulary to print</param>
         /// <param name="count">the number of terms to print</param>
-        public static void PrintVocab(IReadOnlyList<string> vocabulary, int count){
-            for(int i=0; i < Math.Min(count, vocabulary.Count); i++) {
+        public static void PrintVocab(IReadOnlyList<string> vocabulary, int count)
+        {
+            for (int i = 0; i < Math.Min(count, vocabulary.Count); i++)
+            {
                 Console.WriteLine(vocabulary[i]);
             }
             Console.WriteLine($"Total: {vocabulary.Count} terms");
