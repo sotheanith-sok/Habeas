@@ -45,6 +45,13 @@ namespace Cecs429.Search.Query {
 		/// <param name="list">a list of posting lists from multiple terms</param>
 		/// <returns>a merged postings list</returns>
 		public IList<Posting> PositionalMerge(List<IList<Posting>> list) {
+			//handle exception
+			if (list.Count == 0) {
+				return new List<Posting>();
+			} if (list.Count == 1) {
+				return list[0];
+			}
+
 			int gap = list.Count-1;
 			//extract last postings from the list
 			IList<Posting> last = list[list.Count-1];
@@ -62,70 +69,15 @@ namespace Cecs429.Search.Query {
 		/// <param name="gap">the gap between the terms in the phrase. default: 1</param>
 		/// <returns>a merged postings list</returns>
 		public IList<Posting> PositionalMerge(List<IList<Posting>> list, IList<Posting> last, int gap = 1) {
-			//Base case: first and second posting groups from the whole list
-			if( (list.Count == 1) || (gap == 1) ) {
-				IList<Posting> first = list[0];
-				IList<Posting> second = last;
-				IList<Posting> mergedList = new List<Posting>();
-			
-				int i=0;	//track docID in first postings
-				int j=0;	//track docID in second postings
-				//Iterate through all postings in the first and second.
-				while ( (i<first.Count) && (j<second.Count) )
-				{
-					//Compare the document IDs
-					if (first[i].DocumentId == second[j].DocumentId)
-					{
-						//then first[i] and second[j] are the candidates.
-						int x=0;	//track the position in i doc
-						int y=0;	//track the position in j doc (check if y is off by 'gap' from x)
-						List<int> pp1 = first[i].Positions;
-						List<int> pp2 = second[j].Positions;
-						List<int> newPositions = new List<int>();
-						//Iterate through all positions in the posting first[i] and second[j]
-						while ( (x<pp1.Count) && (y<pp2.Count) )
-						{
-							//Compare the positions
-							int difference = pp2[y] - pp1[x];
-							if ( difference == gap ) {			//y is off by gap from x
-								//Add to new positions
-								newPositions.Add(pp1[x]);
-								x++;
-								y++;
-							} else {
-								if(newPositions.Contains(pp1[x])) {
-									//take the position back if the gap doesn't match anymore
-									newPositions.Remove(pp1[x]);
-								}
-								if ( difference > gap ) {		//y is too far from x
-									x++;
-								} else {						//y comes before x
-									y++;
-								}
-							}
-						}
-						//Add to the posting list
-						if(newPositions.Count > 0){
-							mergedList.Add(new Posting(first[i].DocumentId, newPositions));
-						}
-						i++;
-						j++;
-					}
-					else if ( first[i].DocumentId < second[j].DocumentId ) {
-						i++;
-					}
-					else {
-						j++;
-					}
-				}
-
-				return mergedList;
+			if( list.Count == 1 ) {
+				// base case
+				return PositionalMerge(list[0], last, gap);
 			}
 			else {
 				// recursive case
 				IList<Posting> newLast = list[list.Count-1];
 				list.RemoveAt(list.Count-1);
-				return PositionalMerge(list, newLast, gap-1);	//recursion
+				return PositionalMerge( PositionalMerge(list, newLast, gap-1), last, gap);	//recursion
 			}
 		}
 
@@ -133,8 +85,8 @@ namespace Cecs429.Search.Query {
 		/// Merge posting lists of two terms into one list of postings
 		/// based on their positions in a document with an offset value.
 		/// </summary>
-		/// <param name="first">the first list of postings</param>
-		/// <param name="second">the second list of postings</param>
+		/// <param name="first">the first posting list</param>
+		/// <param name="second">the second posting list</param>
 		/// <param name="gap">the gap between the terms in the phrase. default: 1</param>
 		/// <returns>a merged postings list</returns>
 		public IList<Posting> PositionalMerge(IList<Posting> first, IList<Posting> second, int gap = 1) {
@@ -148,9 +100,9 @@ namespace Cecs429.Search.Query {
 				//Compare the document IDs
 				if (first[i].DocumentId == second[j].DocumentId)
 				{
-					//then first[i] and second[j] are the candidates.
+					//then first[i] and second[j] be the candidates.
 					int x=0;	//track the position in i doc
-					int y=0;	//track the position in j doc (check if y is off by 'gap' from x)
+					int y=0;	//track the position in j doc (to check if y is off by 'gap' from x)
 					List<int> pp1 = first[i].Positions;
 					List<int> pp2 = second[j].Positions;
 					List<int> newPositions = new List<int>();
@@ -171,7 +123,7 @@ namespace Cecs429.Search.Query {
 						}
 					}
 					//Add to the posting list
-					if(newPositions.Count != 0){
+					if(newPositions.Count > 0){
 						mergedList.Add(new Posting(first[i].DocumentId, newPositions));
 					}
 					i++;
@@ -184,7 +136,6 @@ namespace Cecs429.Search.Query {
 					j++;
 				}
 			}
-
 			return mergedList;
 		}
 
