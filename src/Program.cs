@@ -17,14 +17,10 @@ namespace Program
         public static void Main(string[] args)
         {
             
-            //IDocumentCorpus corpus = askDirectory();
-
-            string _directory = "./corpus";
-            corpus = DirectoryCorpus.LoadTextDirectory(_directory);
+            IDocumentCorpus corpus = AskDirectory();
    
             if (corpus != null && corpus.CorpusSize != 0)
             {
-                //TODO: Implements stopwatch to measure how long it takes to index corpus
                 index = PositIndex(corpus);
 
                 string query;
@@ -69,16 +65,25 @@ namespace Program
         ///</summary>
         public static IDocumentCorpus AskDirectory()
         {
+            while(true){
             string _directory;
-            Console.WriteLine("Enter the path of Folder or Directory: ");
+            //Habeas Corpus!!!
+            Console.WriteLine("Enter the path of the Folder or Directory you wish to search: ");
             _directory = Console.ReadLine();
             if (Directory.Exists(_directory))
             {
-                return DirectoryCorpus.LoadTextDirectory(_directory);
+               corpus = DirectoryCorpus.LoadTextDirectory(_directory);
+               if(corpus != null && corpus.CorpusSize != 0){
+                   return corpus;
+               }
+               else{
+                   Console.WriteLine("Error: the selected path is empty...");
+               }
             }
-
-            return null;
-
+               else{
+                   Console.WriteLine("Error: the selected path is invalid...");
+               }
+            }
         }
 
 
@@ -195,11 +200,10 @@ namespace Program
         /// </summary>
         /// <param name="doc">document to be printed</param>
         public static void PrintContent(IDocument doc) {
-            //TODO: Print the content of the doc
             Console.WriteLine($"\n{doc.Title.ToUpper()}");
-            Console.WriteLine($"content...\n");
-            //TextReader content = selectedDocument.GetContent();
-
+            TextReader content = doc.GetContent();
+            Console.WriteLine(content.ReadToEnd());
+            
         }
     }
 
