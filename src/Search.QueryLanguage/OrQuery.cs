@@ -35,7 +35,7 @@ namespace Cecs429.Search.Query
         /// </summary>
         /// <param name="list">a list of posting lists to be OR merged</param>
         /// <returns></returns>
-        public IList<Posting> OrMerge(List<IList<Posting>> list) {
+        public static IList<Posting> OrMerge(List<IList<Posting>> list) {
             //exceptions
             if (list.Count == 0) { return new List<Posting>(); }
             if (list.Count == 1) { return list[0]; }
@@ -49,25 +49,18 @@ namespace Cecs429.Search.Query
         }
 
         //MergeLists is a recursive function
-        public IList<Posting> MergeLists(IList<Posting> mergeList, List<IList<Posting>> list)
+        private static IList<Posting> MergeLists(IList<Posting> pList, List<IList<Posting>> listOfPList)
         {
-            //if the list of list is empty, all the lists have been merged together
-            //return the mergedList
-            if (list.Count == 0) { return mergeList; }
-            //if list is not empty...
-            else
-            {
-                //pop a list off of the end of list
-                IList<Posting> NextList = list[list.Count - 1];
-                list.RemoveAt(list.Count - 1);
-                //or merge the mergeList with the list which was just popped off of list
-                mergeList = OrMerge(mergeList, NextList);
-                //recursively call MergeLists
-                //send in the most recently merged list with the rest of the remaining list
-                IList<Posting> FinalListing = MergeLists(mergeList, list);
-                //return the resulting listings
-                return FinalListing;
-            }
+            //if listOfPList is empty, all in the list have been merged
+            if (listOfPList.Count == 0) { return pList; }
+            
+            //TODO: Merge larger posting lists first
+            //pop a list off of the end of listOfPList
+            IList<Posting> next = listOfPList[listOfPList.Count - 1];
+            listOfPList.RemoveAt(listOfPList.Count - 1);
+            
+            //recursively call MergeLists and return the result
+            return MergeLists( OrMerge(pList, next), listOfPList );
 
         }
 
@@ -77,7 +70,7 @@ namespace Cecs429.Search.Query
         /// <param name="first">first posting list to be merged</param>
         /// <param name="second">second posting list to be merged</param>
         /// <returns></returns>
-        public IList<Posting> OrMerge(IList<Posting> first, IList<Posting> second)
+        public static IList<Posting> OrMerge(IList<Posting> first, IList<Posting> second)
         {
             //creates a list to hold all the valid postings
             IList<Posting> finalList = new List<Posting>();
