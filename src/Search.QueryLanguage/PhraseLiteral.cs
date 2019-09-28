@@ -23,8 +23,10 @@ namespace Search.Query
 		/// Constructs a PhraseLiteral given a string with one or more individual terms separated
 		/// by spaces.
 		/// </summary>
-		public PhraseLiteral(string terms) {
-			mTerms.AddRange(terms.Split(' '));
+		public PhraseLiteral(string phrase) {
+			//NOTE: Words in the phrase are not processed.
+			//TODO: Needs to process it before dealing them like processed terms
+			mTerms.AddRange(phrase.Split(' '));
 		}
 
 		public IList<Posting> GetPostings(IIndex index) {
