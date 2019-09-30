@@ -17,16 +17,16 @@ namespace Search.Text
         /// <returns>List of postprocess tokens</returns>
         public List<string> ProcessToken(string token, bool enableKGram = false, bool enableSteam = false)
         {
-            List<string> tokens = this.HyphenateWords(token);
-            for (int i = 0; i < tokens.Count; i++)
+            List<string> terms = this.HyphenateWords(token);
+            for (int i = 0; i < terms.Count; i++)
             {
-                tokens[i] = this.RemoveNonAlphanumeric(tokens[i]);
-                tokens[i] = this.RemoveApostrophes(tokens[i]);
-                tokens[i] = this.RemoveQuotationMarks(tokens[i]);
-                tokens[i] = this.LowercaseWords(tokens[i]);
-                tokens[i] = (enableSteam==true)? this.StemWords(tokens[i]):tokens[i];
+                terms[i] = this.RemoveNonAlphanumeric(terms[i]);
+                terms[i] = this.RemoveApostrophes(terms[i]);
+                terms[i] = this.RemoveQuotationMarks(terms[i]);
+                terms[i] = this.LowercaseWords(terms[i]);
+                terms[i] = this.StemWords(terms[i]);
             }
-            return (enableKGram == false) ? tokens : this.KGramSplitter(tokens);
+            return terms;
         }
 
         /// <summary>
