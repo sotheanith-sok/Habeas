@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Cecs429.Search.Query;
 using Search.Index;
+using Search.Text;
 
 namespace Search.Query
 {
@@ -21,7 +22,9 @@ namespace Search.Query
         /// <param name="k">a value of how far the second is away from the first at most</param>
         /// <param name="second">the second token</param>
         public NearLiteral(string first, int k, string second) {
-            //NOTE: should this be token?term? already processed? or not?
+            //NOTE: Should this be token?term? already processed? or not?
+            // ITokenProcessor processor = new BetterTokenProcessor();
+            // processor.ProcessToken(first, false, true);
             this.firstTerm = first;
             this.k = k;
             this.secondTerm = second;
@@ -33,15 +36,14 @@ namespace Search.Query
             IList<Posting> firstPostings = index.GetPostings(firstTerm);
             IList<Posting> secondPostings = index.GetPostings(secondTerm);
             
-            //PositionalMerge with gap(distance) 1 to k
+            //PositionalMerge to any postings found with gap(distance) 1 to k (up to k)
             List<IList<Posting>> list = new List<IList<Posting>>();
             for(int i=1; i<=k; i++) {
-                list.Add(Merge.PositionalMerge(firstPostings, secondPostings, i));
+                list.Add( Merge.PositionalMerge(firstPostings, secondPostings, i) );
             }
-            //TODO: OrMerge all of them
-            // return Merge.OrMerge(list);
 
-            throw new System.NotImplementedException();
+            //OrMerge all of them
+            return Merge.OrMerge(list);
         }
 
         public override string ToString() {

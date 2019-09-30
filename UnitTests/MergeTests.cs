@@ -245,19 +245,19 @@ namespace UnitTests
         /// </summary>
         /// <param name="str">a string to generate postings</param>
         /// <returns></returns>
-        public IList<Posting> GeneratePostings(string str) {
+        public static IList<Posting> GeneratePostings(string str) {
             if( !str.StartsWith('(') || !str.EndsWith(')') ) {
-                Console.WriteLine("not a correct string to generate postings");
+                Console.WriteLine("GeneratePostings(): Not a correct string to generate postings");
                 return null;
             }
-            Console.WriteLine($"Generating postings from string \'{str}\'");
+            // Console.WriteLine($"Generating postings from string \'{str}\'");
+            
             IList<Posting> postingList = new List<Posting>();
             //untanggle the string of postings
             str = str.TrimStart('(').TrimEnd(')');
             List<string> str_postings = str.Split("), (").ToList();
             foreach (string str_p in str_postings)
             {
-                //Console.Write($"str_p: {str_p}\t->\t");
                 int docId = Int32.Parse( str_p.Substring(0,str_p.IndexOf(',')) );
                 //untanggle the string of positions
                 string trimedPositions = str_p.Substring(str_p.IndexOf('[')).TrimStart('[').TrimEnd(']');
@@ -269,10 +269,9 @@ namespace UnitTests
                 //make a posting with docId and positions
                 Posting posting = new Posting(docId, positions);
                 postingList.Add(posting);
-                //Console.WriteLine($"object: {posting.ToString()}");
             }
             
-            Console.WriteLine($"Generated: {postingList.Count} postings.");
+            // Console.WriteLine($"Generated: {postingList.Count} postings.");
             return postingList;
         }
     }
