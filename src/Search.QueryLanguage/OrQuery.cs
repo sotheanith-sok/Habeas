@@ -31,10 +31,10 @@ namespace Cecs429.Search.Query
         }
 
         /// <summary>
-        /// OR Merge all posting lists from multiple components into one posting list
+        /// OR-Merge all posting lists from multiple components into one posting list
         /// </summary>
         /// <param name="list">a list of posting lists to be OR merged</param>
-        /// <returns></returns>
+        /// <returns>an OR-merged posting list</returns>
         public static IList<Posting> OrMerge(List<IList<Posting>> list) {
             //exceptions
             if (list.Count == 0) { return new List<Posting>(); }
@@ -45,44 +45,54 @@ namespace Cecs429.Search.Query
             IList<Posting> first = list[list.Count - 1];
             list.RemoveAt(list.Count - 1);
             //Return the result of recursive merge
-            return MergeLists(first, list);
+            return OrMerge(first, list);
         }
 
-        //MergeLists is a recursive function
-        private static IList<Posting> MergeLists(IList<Posting> pList, List<IList<Posting>> listOfPList)
+        /// <summary>
+        /// OR-Merge a posting list with a list of posting lists with recursion
+        /// </summary>
+        /// <param name="pList">a posting list to be merged</param>
+        /// <param name="listOfPList">a list of posting lists to be merged</param>
+        /// <returns>an OR-merged posting list</returns>
+        private static IList<Posting> OrMerge(IList<Posting> pList, List<IList<Posting>> listOfPList)
         {
+            //base case
             //if listOfPList is empty, all in the list have been merged
             if (listOfPList.Count == 0) { return pList; }
             
-            //TODO: Merge larger posting lists first
+            //recursive case
+            //TODO: Merge larger posting lists first?
             //pop a list off of the end of listOfPList
             IList<Posting> next = listOfPList[listOfPList.Count - 1];
             listOfPList.RemoveAt(listOfPList.Count - 1);
             
-            //recursively call MergeLists and return the result
-            return MergeLists( OrMerge(pList, next), listOfPList );
-
+            //return the result of recursion
+            return OrMerge( OrMerge(pList, next), listOfPList );
         }
 
         /// <summary>
-        /// OR Merge two posting lists into one posting list
+        /// OR-Merge two posting lists into one
         /// </summary>
         /// <param name="first">first posting list to be merged</param>
         /// <param name="second">second posting list to be merged</param>
-        /// <returns></returns>
+        /// <returns>an OR-merged posting list</returns>
         public static IList<Posting> OrMerge(IList<Posting> first, IList<Posting> second)
         {
-            //creates a list to hold all the valid postings
+            //a list to hold all the valid postings
             IList<Posting> finalList = new List<Posting>();
-            //creates positions for comparing the values of the first and second list of postings
+            //positions for comparing the values of the first and second list of postings
             int firstPosition = 0;
             int secondPosition = 0;
-            //if for some reason, both lists are empty, return an empty list
-            if (first.Count <= firstPosition && second.Count <= secondPosition) { return finalList; }
-            //if the first list is empty, return the second one
-            if (first.Count <= firstPosition) { return second; }
-            //if the second list is empty, return the first list
-            if (second.Count <= secondPosition) { return first; }
+            
+            //if both empty, return an empty list
+            if (first.Count <= 0 && second.Count <= 0)
+            {
+                return new List<Posting>();
+            }
+            //if one of them is empty, return the other
+            if (first.Count <= 0) { return second; }
+            if (second.Count <= 0) { return first; }
+
             //if both lists have postings in them...
             while (true)
             {

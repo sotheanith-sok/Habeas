@@ -11,6 +11,8 @@ namespace UnitTests
 {
     public class MergeTests
     {
+
+    // Tests for AndlMerge --------------------------------------------------------------
         [Fact]
         public void AndMergeTest_AllOverlap_ReturnsOneOfThePostingLists(){
             //Test with two
@@ -20,9 +22,17 @@ namespace UnitTests
             IList<Posting> result = AndQuery.AndMerge(first, second);
             result.Should().HaveCount(first.Count, "because all overlaps");
             
-            //TODO: test with list
-
+            //Test with list
+            List<IList<Posting>> list = new List<IList<Posting>>{
+                GeneratePostings("(1,[0,5]), (2,[1])"),
+                GeneratePostings("(1,[3,6]), (2,[7])"),
+                GeneratePostings("(1,[4]), (2,[3,6])"),
+                GeneratePostings("(1,[2,8]), (2,[9])")
+            };
+            result = AndQuery.AndMerge(list);
+            result.Should().HaveCount(2, "because all in the list overlaps");
         }
+
         [Fact]
         public void AndMergeTest_NoOverlap_ReturnsEmpty(){
             //Test with two
@@ -32,10 +42,18 @@ namespace UnitTests
             IList<Posting> result = AndQuery.AndMerge(first, second);
             result.Should().BeEmpty("because nothing overlaps between the two");
             result.Should().HaveCount(0, "because nothing overlaps between the two");
-                        
-            //TODO: test with list
 
+            //Test with list
+            List<IList<Posting>> list = new List<IList<Posting>>{
+                GeneratePostings("(1,[0,5]), (2,[4])"),
+                GeneratePostings("(2,[6]), (3,[7])"),
+                GeneratePostings("(1,[2]), (3,[1,9])"),
+                GeneratePostings("(3,[8]), (4,[6])")
+            };
+            result = AndQuery.AndMerge(list);
+            result.Should().BeEmpty("because nothing in the list overlaps");
         }
+
         [Fact]
         public void AndMergeTest_SomeOverlap_ReturnsMatchingPostings(){
             //Test with two
@@ -45,10 +63,18 @@ namespace UnitTests
             IList<Posting> result = AndQuery.AndMerge(first, second);
             result.Should().HaveCount(1, "because only 1 posting overlap");
 
-            //TODO: test with list
-
+            //Test with list
+            List<IList<Posting>> list = new List<IList<Posting>>{
+                GeneratePostings("(1,[0,5]), (2,[8])"),
+                GeneratePostings("(2,[1,9])"),
+                GeneratePostings("(1,[3]), (2,[4]), (3,[9])"),
+                GeneratePostings("(2,[7]), (3,[7])")
+            };
+            result = AndQuery.AndMerge(list);
+            result.Should().HaveCount(1, "because only 1 posting overlap");
         }
 
+    // Tests for OrMerge --------------------------------------------------------------
         [Fact]
         public void OrMergeTest_AllOverlap_ReturnsOneOfThePostingLists(){
             //Test with two
@@ -86,7 +112,6 @@ namespace UnitTests
             };
             result = OrQuery.OrMerge(list);
             result.Should().HaveCount(6, "because nothing in the list overlaps");
-
         }
 
         [Fact]
@@ -121,7 +146,7 @@ namespace UnitTests
             // result.Should().BeEquivalentTo(expected);
         }
 
-
+    // Tests for PostionalMerge --------------------------------------------------------------
         [Fact]
         public void PositionalMergeTest_WithTwoPostingLists_PhraseExist_ReturnsFirstPos()
         {
