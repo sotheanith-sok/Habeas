@@ -6,11 +6,13 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 
 namespace Program
 {
     class Program
     {
+        private static SoundExIndex soundIndex;
         private static PositionalInvertedIndex index;
         private static IDocumentCorpus corpus;
 
@@ -22,6 +24,7 @@ namespace Program
             if (corpus != null && corpus.CorpusSize != 0)
             {
                 index = PositIndex(corpus);
+                soundIndex = new SoundExIndex(index);
 
                 string query;
                 IList<Posting> postings;
@@ -59,7 +62,10 @@ namespace Program
             
         }
 
+        public void InitSoundEx()
+        {
 
+        }
         ///<summary>
         ///requests Directory/Folder path from user and creates corpus based off that directory
         ///</summary>
@@ -95,6 +101,8 @@ namespace Program
             Stopwatch elapsedTime = new Stopwatch();
             elapsedTime.Start();
             PositionalInvertedIndex index = PositionalInvertedIndexer.IndexCorpus(corpus);
+
+
             elapsedTime.Stop();
             Console.WriteLine("Elapsed = {0}", elapsedTime.Elapsed);
 
