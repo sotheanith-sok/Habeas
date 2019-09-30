@@ -1,6 +1,7 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Search.Text;
 
 namespace Cecs429.Search.Query
 {
@@ -208,10 +209,10 @@ namespace Cecs429.Search.Query
                 }
                 else
                 {
-					//Otherwise, the position of the next '"' character is the end of the phrase
+                    //Otherwise, the position of the next '"' character is the end of the phrase
                     lengthOut = nextSpace - startIndex - 1;
                 }
-				//create the PhraseLiteral
+                //create the PhraseLiteral
                 return new Literal(
               // startIndex and lengthOut identify the bounds of the literal
               new StringBounds(startIndex, lengthOut),
@@ -219,7 +220,7 @@ namespace Cecs429.Search.Query
               new PhraseLiteral(subquery.Substring(startIndex, lengthOut)));
             }
             // JESSE'S EASTER EGG:
-			// POETRY INTERLUDE!
+            // POETRY INTERLUDE!
             // Do not stand at my grave and weep,
             // I am no there, I do not sleep.
             // I am a thousand winds that blow.
@@ -245,7 +246,18 @@ namespace Cecs429.Search.Query
                 {
                     lengthOut = nextSpace - startIndex;
                 }
+                //if it is not a wildcard: stem
+                if (!subquery.Substring(startIndex, lengthOut).Contains("*"))
+                {
+				 BetterTokenProcessor BTP = new BetterTokenProcessor();
 
+                 return new Literal(
+                 // startIndex and lengthOut identify the bounds of the literal
+                 new StringBounds(startIndex, lengthOut),
+                 // we assume this is a single term literal... for now
+                 new TermLiteral(BTP.StemWords(subquery.Substring(startIndex, lengthOut))));
+                }
+                //otherwise, stem
                 // This is a term literal containing a single term.
                 return new Literal(
                  // startIndex and lengthOut identify the bounds of the literal

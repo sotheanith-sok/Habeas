@@ -35,6 +35,7 @@ namespace Cecs429.Search.Query {
 				TermPostingsList.Add(termPostings);
 			}
 			// and positional merge them together.
+			return null;
 		}
 
 		public override string ToString() {
