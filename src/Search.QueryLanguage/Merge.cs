@@ -8,8 +8,9 @@ namespace Search.Query
     /// </summary>
     public class Merge
     {
-        //TODO: Move And Merge here
-        //TODO: Move Or Merge here
+        //TODO: Move all 3 AndMerge() methods here
+
+        //TODO: Move all 3 OrMerge() methods here
 
 
 		/// <summary>

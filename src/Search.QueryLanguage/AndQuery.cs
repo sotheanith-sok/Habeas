@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Search.Index;
 
 namespace Cecs429.Search.Query
@@ -43,13 +41,11 @@ namespace Cecs429.Search.Query
             return finalPostingList;
         }
 
-        public override string ToString()
-        {
-            return string.Join(" ", mComponents.Select(c => c.ToString()));
-        }
+        //TODO: Have an overloading AndMerge() method for list of posting lists
+        // public static IList<Posting> AndMerge(List<IList<Posting>> list) {}
 
         //MergeLists is a recursive function
-        public IList<Posting> MergeLists(IList<Posting> mergeList, List<IList<Posting>> candidates)
+        private static IList<Posting> MergeLists(IList<Posting> mergeList, List<IList<Posting>> candidates)
         {
             //if the list of candidates is empty, all the lists have been merged together
             //return the mergedList
@@ -71,7 +67,7 @@ namespace Cecs429.Search.Query
 
         }
 
-        public IList<Posting> AndMerge(IList<Posting> firstList, IList<Posting> secondList)
+        public static IList<Posting> AndMerge(IList<Posting> firstList, IList<Posting> secondList)
         {
             //creates a list to hold all the valid postings
             IList<Posting> finalList = new List<Posting>();
@@ -109,6 +105,12 @@ namespace Cecs429.Search.Query
                     secondListPosition++;
                 }
             }
+        }
+
+
+        public override string ToString()
+        {
+            return string.Join(" ", mComponents.Select(c => c.ToString()));
         }
     }
 }
