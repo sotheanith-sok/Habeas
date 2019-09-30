@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Cecs429.Search.Query;
 using FluentAssertions;
 using Search.Index;
 using Search.Query;
@@ -19,7 +18,7 @@ namespace UnitTests
             IList<Posting> first = GeneratePostings("(1,[0,5]), (2,[10,99])");
             IList<Posting> second = GeneratePostings("(1,[2,9]), (2,[77])");
 
-            IList<Posting> result = AndQuery.AndMerge(first, second);
+            IList<Posting> result = Merge.AndMerge(first, second);
             result.Should().HaveCount(first.Count, "because all overlaps");
             
             //Test with list
@@ -29,7 +28,7 @@ namespace UnitTests
                 GeneratePostings("(1,[4]), (2,[3,6])"),
                 GeneratePostings("(1,[2,8]), (2,[9])")
             };
-            result = AndQuery.AndMerge(list);
+            result = Merge.AndMerge(list);
             result.Should().HaveCount(2, "because all in the list overlaps");
         }
 
@@ -39,7 +38,7 @@ namespace UnitTests
             IList<Posting> first = GeneratePostings("(1,[0,5]), (5,[10])");
             IList<Posting> second = GeneratePostings("(2,[2,9]), (7,[77])");
 
-            IList<Posting> result = AndQuery.AndMerge(first, second);
+            IList<Posting> result = Merge.AndMerge(first, second);
             result.Should().BeEmpty("because nothing overlaps between the two");
             result.Should().HaveCount(0, "because nothing overlaps between the two");
 
@@ -50,7 +49,7 @@ namespace UnitTests
                 GeneratePostings("(1,[2]), (3,[1,9])"),
                 GeneratePostings("(3,[8]), (4,[6])")
             };
-            result = AndQuery.AndMerge(list);
+            result = Merge.AndMerge(list);
             result.Should().BeEmpty("because nothing in the list overlaps");
         }
 
@@ -60,7 +59,7 @@ namespace UnitTests
             IList<Posting> first = GeneratePostings("(1,[0,5]), (2,[10,99])");
             IList<Posting> second = GeneratePostings("(1,[2,9]), (3,[77])");
 
-            IList<Posting> result = AndQuery.AndMerge(first, second);
+            IList<Posting> result = Merge.AndMerge(first, second);
             result.Should().HaveCount(1, "because only 1 posting overlap");
 
             //Test with list
@@ -70,7 +69,7 @@ namespace UnitTests
                 GeneratePostings("(1,[3]), (2,[4]), (3,[9])"),
                 GeneratePostings("(2,[7]), (3,[7])")
             };
-            result = AndQuery.AndMerge(list);
+            result = Merge.AndMerge(list);
             result.Should().HaveCount(1, "because only 1 posting overlap");
         }
 
