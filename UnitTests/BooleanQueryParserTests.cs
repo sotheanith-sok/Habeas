@@ -1,7 +1,5 @@
 using System;
 using Xunit;
-using Cecs429.Search.Query;
-using System.Collections.Generic;
 using Search.Query;
 
 namespace UnitTests

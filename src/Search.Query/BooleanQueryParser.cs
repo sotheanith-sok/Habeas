@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using Search.Query;
 using Search.Text;
 
-namespace Cecs429.Search.Query
+namespace Search.Query
 {
     /// <summary>
     /// Parses Boolean queries to produce an object representation that can be executed to find documents

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Cecs429.Search.Query;
 using Search.Index;
 
 namespace Search.Query
