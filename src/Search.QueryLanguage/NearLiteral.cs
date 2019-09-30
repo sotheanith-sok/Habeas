@@ -34,12 +34,12 @@ namespace Search.Query
             IList<Posting> secondPostings = index.GetPostings(secondTerm);
             
             //PositionalMerge with gap(distance) 1 to k
-            List<IList<Posting>> candidates = new List<IList<Posting>>();
+            List<IList<Posting>> list = new List<IList<Posting>>();
             for(int i=1; i<=k; i++) {
-                candidates.Add(Merge.PositionalMerge(firstPostings, secondPostings, i));
+                list.Add(Merge.PositionalMerge(firstPostings, secondPostings, i));
             }
             //TODO: OrMerge all of them
-            // return Merge.OrMerge(candidates);
+            // return Merge.OrMerge(list);
 
             throw new System.NotImplementedException();
         }
