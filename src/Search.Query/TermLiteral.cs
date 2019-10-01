@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using Search.Index;
 
-namespace Cecs429.Search.Query {
+namespace Search.Query {
 	public class TermLiteral : IQueryComponent {
 		public string Term { get; }
 
