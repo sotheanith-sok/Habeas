@@ -34,7 +34,7 @@ namespace Search.PositionalInvertedIndexer
                 foreach (string token in tokens)
                 {
                     //Process token to term
-                    List<string> terms = processor.ProcessToken(token, false, false);
+                    List<string> terms = processor.ProcessToken(token);
                     //Add term to the index
                     foreach (string term in terms)
                     {
@@ -51,20 +51,6 @@ namespace Search.PositionalInvertedIndexer
             }
 
             return index;
-        }
-
-        /// <summary>
-        /// Prints the first 1000 terms in the sorted vocabulary and the count
-        /// </summary>
-        /// <param name="vocabulary">a sorted vocabulary to print</param>
-        /// <param name="count">the number of terms to print</param>
-        public static void PrintVocab(IReadOnlyList<string> vocabulary, int count)
-        {
-            for (int i = 0; i < Math.Min(count, vocabulary.Count); i++)
-            {
-                Console.WriteLine(vocabulary[i]);
-            }
-            Console.WriteLine($"Total: {vocabulary.Count} terms");
         }
 
     }
