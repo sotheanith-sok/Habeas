@@ -14,19 +14,20 @@ namespace Search.Text
         /// </summary>
         /// <param name="token">Preprocess token</param>
         /// <param name="enableKGram">is K Gram processing enable. True by default</param>
-        /// <returns>List of postprocess tokens</returns>
+        /// <returns>a list of postprocessed tokens</returns>
         public List<string> ProcessToken(string token, bool enableKGram = false, bool enableSteam = false)
         {
-            List<string> terms = this.HyphenateWords(token);
-            for (int i = 0; i < terms.Count; i++)
+            List<string> tokens = this.HyphenateWords(token);
+            for (int i = 0; i < tokens.Count; i++)
             {
-                terms[i] = this.RemoveNonAlphanumeric(terms[i]);
-                terms[i] = this.RemoveApostrophes(terms[i]);
-                terms[i] = this.RemoveQuotationMarks(terms[i]);
-                terms[i] = this.LowercaseWords(terms[i]);
-                terms[i] = this.StemWords(terms[i]);
+                tokens[i] = this.RemoveNonAlphanumeric(tokens[i]);
+                tokens[i] = this.RemoveApostrophes(tokens[i]);
+                tokens[i] = this.RemoveQuotationMarks(tokens[i]);
+                tokens[i] = this.LowercaseWords(tokens[i]);
+                tokens[i] = (enableSteam==true)? this.StemWords(tokens[i]):tokens[i];
             }
-            return terms;
+            return (enableKGram == false) ? tokens : this.KGramSplitter(tokens);
+            //NOTE: the changes on ProcesToken are reverted back to check enableKGram and enableSteam
         }
 
         /// <summary>
