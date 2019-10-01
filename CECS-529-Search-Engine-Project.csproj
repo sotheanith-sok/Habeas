@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <RootNamespace>CECS_529_Search_Engine_Project</RootNamespace>
     <GenerateProgramFile>false</GenerateProgramFile>
     <IsPackable>false</IsPackable>
