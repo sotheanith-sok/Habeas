@@ -62,10 +62,7 @@ namespace Program
             
         }
 
-        public void InitSoundEx()
-        {
-
-        }
+       
         ///<summary>
         ///requests Directory/Folder path from user and creates corpus based off that directory
         ///</summary>

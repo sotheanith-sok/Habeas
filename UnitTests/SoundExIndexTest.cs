@@ -18,8 +18,9 @@ namespace UnitTests
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../UnitTests/testCorpus");
             PositionalInvertedIndex index = PositionalInvertedIndexer.IndexCorpus(corpus);
             SoundExIndex soundIndex = new SoundExIndex(index);
-
-            soundIndex.getSoundMap().ContainsKey("s530");
+            
+            Dictionary<String , IList<Posting>> test =  soundIndex.getSoundMap();
+            Assert.Equal(test["y200"],index.GetPostings("yashua"));
 
         }
     }

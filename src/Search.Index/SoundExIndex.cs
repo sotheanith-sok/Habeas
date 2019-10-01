@@ -11,12 +11,14 @@ namespace Search.Index
         public SoundExIndex(PositionalInvertedIndex index)
         {
             soundMap = new Dictionary<string, IList<Posting>>();
+            SoundExHash(index);
+
         }
 
         public static void SoundExHash(PositionalInvertedIndex index)
         {
 
-          
+
 
             string SoundExCode;
             foreach (string term in index.GetVocabulary())
@@ -28,13 +30,20 @@ namespace Search.Index
 
                 if (SoundExCode.Length < 4)
                     SoundExCode = SoundExCode.PadRight(4, '0');
-
-                soundMap.Add(SoundExCode, index.GetPostings(term));
+                if(soundMap.ContainsKey(SoundExCode))
+                {
+                    foreach (Posting p in index.GetPostings(term))
+                    soundMap[SoundExCode].Add(p);
+                }
+                else
+                    soundMap.Add(SoundExCode, index.GetPostings(term));
+                
+                    
             }
 
-            
+
         }
-    
+
 
         public static string RemoveZeros(string SoundExCode)
         {
@@ -122,11 +131,11 @@ namespace Search.Index
             }
 
         }
-    
+
         public Dictionary<string, IList<Posting>> getSoundMap()
         {
             return soundMap;
         }
-    
+
     }
 }
