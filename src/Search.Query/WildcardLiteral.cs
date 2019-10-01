@@ -16,7 +16,7 @@ namespace Search.Query
 
         public IList<Posting> GetPostings(IIndex index, ITokenProcessor processor)
         {
-            string term = ((NormalTokenProcessor)(processor)).ProcessToken(this.token)[0];
+            string term = processor.ProcessToken(this.token)[0];
             term = "$" + term + "$";
             string[] literals = term.Split("*");
 
@@ -80,15 +80,14 @@ namespace Search.Query
                 }
             }
 
-
             //Get posting
-            foreach (string candidate in finalCandidates){
-
-                //TODO: Merge posting
-                index.GetPostings(candidate);
+            List<IList<Posting>> finalPostingList = new List<IList<Posting>>();
+            foreach (string candidate in finalCandidates)
+            {
+                finalPostingList.Add(index.GetPostings(candidate));
             }
-            
-            return new List<Posting>();
+
+            return Merge.AndMerge(finalPostingList);
         }
 
         private List<string> KGramSplitter(string term)
