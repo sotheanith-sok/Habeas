@@ -40,10 +40,19 @@ namespace Search.Document
         
         public TextReader GetContent()
         {
-            StreamReader file = new StreamReader(MemoryMappedFile.CreateFromFile(FilePath).CreateViewStream());
+            // Open a StreamReader from a high-performance memory-mapped file.
+            MemoryMappedViewStream mmvs;
+            try
+            {
+                 mmvs = MemoryMappedFile.OpenExisting(Path.GetFileName(FilePath)).CreateViewStream();
+            }
+            catch (FileNotFoundException)
+            {
+                mmvs = MemoryMappedFile.CreateFromFile(FilePath, System.IO.FileMode.Open, Path.GetFileName(FilePath)).CreateViewStream();
+            }
+            StreamReader file = new StreamReader(mmvs);
             Document jobject = JsonConvert.DeserializeObject<Document>(file.ReadToEnd());
             articleTitle = jobject.title;
-            
             var content = jobject.title + jobject.body + jobject.url;
             file.Dispose();
             return new StringReader(content);

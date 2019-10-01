@@ -73,7 +73,7 @@ namespace UnitTests
         //For independent unit testing, Copied from PositionalInvertedIndexer.IndexCorpus()
         public static PositionalInvertedIndex IndexCorpus(IDocumentCorpus corpus)
         {
-            ITokenProcessor processor = new BetterTokenProcessor();
+            ITokenProcessor processor = new NormalTokenProcessor();
             PositionalInvertedIndex index = new PositionalInvertedIndex();
             Console.WriteLine($"UnitTest: Indexing {corpus.CorpusSize} documents in the corpus...");
             // Index the document
@@ -87,7 +87,7 @@ namespace UnitTests
                 foreach (string token in tokens)
                 {
                     //Process token to term
-                    List<string> terms = processor.ProcessToken(token, false, false);
+                    List<string> terms = processor.ProcessToken(token);
                     //Add term to the index
                     foreach (string term in terms)
                     {

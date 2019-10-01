@@ -17,7 +17,7 @@ namespace Search.PositionalInvertedIndexer
         /// <param name="corpus">a corpus to be indexed</param>
         public static PositionalInvertedIndex IndexCorpus(IDocumentCorpus corpus)
         {
-            ITokenProcessor processor = new BetterTokenProcessor();
+            ITokenProcessor processor = new NormalTokenProcessor();
 
             // Constuct a positional-inverted-index once 
             PositionalInvertedIndex index = new PositionalInvertedIndex();
@@ -34,7 +34,7 @@ namespace Search.PositionalInvertedIndexer
                 foreach (string token in tokens)
                 {
                     //Process token to term
-                    List<string> terms = processor.ProcessToken(token, false, false);
+                    List<string> terms = processor.ProcessToken(token);
                     //Add term to the index
                     foreach (string term in terms)
                     {

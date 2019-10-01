@@ -118,7 +118,7 @@ namespace Program
             }
             else if (specialQuery.StartsWith(":stem ")) {
                 string term = specialQuery.Substring(":stem ".Length);
-                Console.WriteLine(new BetterTokenProcessor().StemWords(term));
+                Console.WriteLine(new StemmingTokenProcesor().StemWords(term));
                 Console.WriteLine();
             }
             else if (specialQuery == ":vocab") {

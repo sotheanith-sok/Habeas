@@ -12,9 +12,7 @@ namespace Search.Text {
 		/// Normalize a token into a term.
 		/// </summary>
 		/// <param name="token">Preprocess token</param>
-		/// <param name="enableKGram">Should token be k-gram</param>
-		/// <param name="enableSteam">Should token be steam</param>
-		/// <returns></returns>
-		List<string> ProcessToken(string token, bool enableKGram = false, bool enableSteam = false);
+		/// <returns>A list of terms</returns>
+		List<string> ProcessToken(string token);
 	}
 }

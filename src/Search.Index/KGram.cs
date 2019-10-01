@@ -9,8 +9,8 @@ namespace Search.Index
     public class KGram
     {
         private Dictionary<string, List<string>> map;
-        private int size;
-        private BetterTokenProcessor btp;
+        public int size { get; }
+        private ITokenProcessor processor;
 
         /// <summary>
         /// Constructor
@@ -21,7 +21,7 @@ namespace Search.Index
         {
             this.map = new Dictionary<string, List<string>>();
             this.size = size;
-            this.btp = new BetterTokenProcessor();
+            this.processor = new NormalTokenProcessor();
             buildKGram(vocabularies);
         }
 
@@ -33,10 +33,10 @@ namespace Search.Index
         {
             foreach (string vocab in vocabularies)
             {
-                List<string> tokens = this.btp.ProcessToken(vocab, false, false);
+                List<string> tokens = this.processor.ProcessToken(vocab);
                 foreach (string token in tokens)
                 {
-                    List<string> kGrams = this.btp.KGramSplitter(token, this.size);
+                    List<string> kGrams = this.KGramSplitter("$"+token+"$");
                     foreach (string kGram in kGrams)
                     {
                         if (this.map.ContainsKey(kGram))
@@ -66,6 +66,25 @@ namespace Search.Index
                 Console.WriteLine("Key = {0}, Value = {1}", kvp.Key, kvp.Value);
             }
             return (this.map.ContainsKey(kGram)) ? this.map[kGram] : new List<string>();
+        }
+
+
+        /// <summary>
+        /// Split k-gram
+        /// </summary>
+        /// <param name="term">term to be split</param>
+        /// <returns> list of kgram</returns>
+        private List<string> KGramSplitter(string term)
+        {
+            int i = 0;
+            List<string> result = new List<string>();
+            while (i + this.size <= term.Length)
+            {
+                result.Add(term.Substring(i, this.size));
+                i++;
+            }
+            return result;
+
         }
 
     }
