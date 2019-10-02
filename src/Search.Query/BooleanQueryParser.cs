@@ -178,12 +178,26 @@ namespace Search.Query
             return new StringBounds(startIndex, lengthOut);
         }
 
+        // JESSE'S EASTER EGG:
+        // POETRY INTERLUDE!
+        // Do not stand at my grave and weep,
+        // I am no there, I do not sleep.
+        // I am a thousand winds that blow.
+        // I am the diamond glint on snow.
+        // I am the the sunlight on ripened grain.
+        // I am the gentle autumn rain.
+        // When you awake amid the morning hush,
+        // I am the swift uplifting rush,
+        // Of quiet birds in circling flight.
+        // I am the soft star that shine at night.
+        // Do not stand at my grave and cry,
+        //I am not there, I did not die.
+
         /// <summary>
         /// Locates and returns the next literal from the given subquery string.
         /// </summary>
         private Literal FindNextLiteral(String subquery, int startIndex)
         {
-
             int subLength = subquery.Length;
             int lengthOut;
 
@@ -193,7 +207,7 @@ namespace Search.Query
                 ++startIndex;
             }
 
-            //If a non-white space character starts with '"'
+            // Capture PhraseLiteral
             if (subquery[startIndex] == '"')
             {
                 //move the startIndex up by one, we don't care about the '"' character
@@ -201,69 +215,53 @@ namespace Search.Query
                 // Locate the next space to find the closing '"' character.
                 int nextSpace = subquery.IndexOf('"', startIndex);
                 // Assuming some loathsome Boetian forgets to end the quote
-                if (nextSpace < 0)
-                {
+                if (nextSpace < 0) {
                     // We'll just assume that they meant the rest of the subquery
                     lengthOut = subquery.Length - startIndex;
                 }
-                else
-                {
+                else {
                     //Otherwise, the position of the next '"' character is the end of the phrase
-                    lengthOut = nextSpace - startIndex - 1;
+                    lengthOut = nextSpace - startIndex;
                 }
                 //create the PhraseLiteral
                 return new Literal(
-                    // startIndex and lengthOut identify the bounds of the literal
                     new StringBounds(startIndex, lengthOut),
-                    // we assume this is a single term literal... for now
                     new PhraseLiteral(subquery.Substring(startIndex, lengthOut))
                 );
             }
-            // JESSE'S EASTER EGG:
-            // POETRY INTERLUDE!
-            // Do not stand at my grave and weep,
-            // I am no there, I do not sleep.
-            // I am a thousand winds that blow.
-            // I am the diamond glint on snow.
-            // I am the the sunlight on ripened grain.
-            // I am the gentle autumn rain.
-            // When you awake amid the morning hush,
-            // I am the swift uplifting rush,
-            // Of quiet birds in circling flight.
-            // I am the soft star that shine at night.
-            // Do not stand at my grave and cry,
-            //I am not there, I did not die.
+            //TODO: Capture NearLiteral
+            // else if (subquery[startIndex] == '['])
+            // { ...
+            // }
+            // Capture WildcardLiteral or TermLiteral otherwise
             else
             {
                 // Locate the next space to find the end of this literal.
                 int nextSpace = subquery.IndexOf(' ', startIndex);
-                if (nextSpace < 0)
-                {
-                    // No more literals in this subquery.
+                if (nextSpace < 0) { // No more literals in this subquery.
                     lengthOut = subLength - startIndex;
                 }
-                else
-                {
+                else {
                     lengthOut = nextSpace - startIndex;
                 }
-                //if it is not a wildcard: stem
-                if (!subquery.Substring(startIndex, lengthOut).Contains("*"))
-                {
 
-                 return new Literal(
-                 // startIndex and lengthOut identify the bounds of the literal
-                 new StringBounds(startIndex, lengthOut),
-                 // we assume this is a single term literal... for now
-                 new TermLiteral(subquery.Substring(startIndex, lengthOut)));
+                //Capture WildcardLiteral
+                if (subquery.Substring(startIndex, lengthOut).Contains("*"))
+                {
+                    //create WildcardLiteral
+                    return new Literal(
+                        new StringBounds(startIndex, lengthOut),
+                        //TODO: change to WildcardLiteral
+                        new TermLiteral(subquery.Substring(startIndex, lengthOut))
+                    );
                 }
-                //otherwise, stem
-                // This is a term literal containing a single term.
+                //create TermLiteral
                 return new Literal(
-                 // startIndex and lengthOut identify the bounds of the literal
-                 new StringBounds(startIndex, lengthOut),
-                 // we assume this is a single term literal... for now
-                 new TermLiteral(subquery.Substring(startIndex, lengthOut)));
+                    new StringBounds(startIndex, lengthOut),
+                    new TermLiteral(subquery.Substring(startIndex, lengthOut))
+                );
             }
+            
         }
     }
 }
