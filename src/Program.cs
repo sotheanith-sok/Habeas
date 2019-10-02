@@ -13,11 +13,14 @@ namespace Program
     {
         private static PositionalInvertedIndex index;
         private static IDocumentCorpus corpus;
-        private static BooleanQueryParser parser;
 
         public static void Main(string[] args)
         {
-            parser = new BooleanQueryParser();
+            string query;
+            IList<Posting> postings;
+            IQueryComponent component;
+            BooleanQueryParser parser = new BooleanQueryParser();
+            ITokenProcessor processor = new BetterTokenProcessor();
 
             Console.WriteLine("[Search Engine 0.7]");
             corpus = GetCorpusByAskingDirectory();
@@ -26,11 +29,9 @@ namespace Program
             {
                 index = PositionalInvertedIndexer.IndexCorpus(corpus);
 
-                string query;
-                IList<Posting> postings;
-
                 while (true)
                 {
+                    //get query input from user
                     Console.Write("\nSearch: ");
                     query = Console.ReadLine();
                     if (query.Equals("")) {
@@ -43,10 +44,9 @@ namespace Program
                         continue;
                     }
                     //search queries
-                    else
-                    {
-                        //TODO: Use BooleanQueryParser
-                        postings = index.GetPostings(query);
+                    else {
+                        component = parser.ParseQuery(query);
+                        postings = component.GetPostings(index, processor);
                         if (postings.Count > 0) {
                             //Print the documents (posting list)
                             PrintPostings(postings, corpus);
