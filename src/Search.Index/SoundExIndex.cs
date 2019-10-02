@@ -30,19 +30,37 @@ namespace Search.Index
 
                 if (SoundExCode.Length < 4)
                     SoundExCode = SoundExCode.PadRight(4, '0');
-                if(soundMap.ContainsKey(SoundExCode))
+                else
+                {
+                    SoundExCode = SoundExCode.Substring(0,4);
+                }
+
+
+
+                if (soundMap.ContainsKey(SoundExCode))
                 {
                     foreach (Posting p in index.GetPostings(term))
-                    soundMap[SoundExCode].Add(p);
+                    {
+                        soundMap[SoundExCode].Add(p);
+                    }
                 }
                 else
+                {
                     soundMap.Add(SoundExCode, index.GetPostings(term));
+                }
+
                 
-                    
+            }
+
+
+            foreach(string soundex in soundMap.Keys)
+            {
+                Console.WriteLine(soundex);
             }
 
 
         }
+
 
 
         public static string RemoveZeros(string SoundExCode)
@@ -109,7 +127,7 @@ namespace Search.Index
         public static string RemoveDuplicateChar(string code)
         {
             string newCode = "";
-            Console.WriteLine(code);
+        
             if (code.Length < 2)
             {
                 return code;

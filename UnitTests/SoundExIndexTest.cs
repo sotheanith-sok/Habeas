@@ -7,6 +7,7 @@ using Search.Text;
 using System.Runtime.InteropServices;
 using System;
 using FluentAssertions;
+using Search;
 
 namespace UnitTests
 {
@@ -15,13 +16,14 @@ namespace UnitTests
         [Fact]
         public void testSoundExIndex()
         {
+
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../UnitTests/testCorpus");
             PositionalInvertedIndex index = PositionalInvertedIndexer.IndexCorpus(corpus);
-            SoundExIndex soundIndex = new SoundExIndex(index);
-            
-            Dictionary<String , IList<Posting>> test =  soundIndex.getSoundMap();
-            Assert.Equal(test["y200"],index.GetPostings("yashua"));
 
+            SoundExIndex soundIndex = new SoundExIndex(index);
+            Dictionary<string, IList<Posting>> map = soundIndex.getSoundMap();
+            int length = map.Count;
+            Assert.Equal(0 , index.GetVocabulary().Count );
         }
     }
 }
