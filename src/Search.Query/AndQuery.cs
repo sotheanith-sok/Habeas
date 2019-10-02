@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Search.Index;
+using Search.Text;
 
 namespace Search.Query
 {
@@ -15,17 +16,18 @@ namespace Search.Query
             mComponents.AddRange(components);
         }
 
-        public IList<Posting> GetPostings(IIndex index)
+        public IList<Posting> GetPostings(IIndex index, ITokenProcessor processor)
         {
             //list of posting lists from all query components to be AND-merged
-            List<IList<Posting>> listOfPostingsLists = new List<IList<Posting>>();
+            List<IList<Posting>> postingLists = new List<IList<Posting>>();
             //for each components
             foreach (IQueryComponent qc in mComponents)
             {
                 //get a posting list and add it to the collection
-                listOfPostingsLists.Add(qc.GetPostings(index));
+                postingLists.Add( qc.GetPostings(index, processor) );
             }
-            return Merge.AndMerge(listOfPostingsLists);
+            
+            return Merge.AndMerge(postingLists);
         }
 
         public override string ToString()
