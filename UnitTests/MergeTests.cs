@@ -251,7 +251,6 @@ namespace UnitTests
                 return null;
             }
             // Console.WriteLine($"Generating postings from string \'{str}\'");
-            
             IList<Posting> postingList = new List<Posting>();
             //untanggle the string of postings
             str = str.TrimStart('(').TrimEnd(')');

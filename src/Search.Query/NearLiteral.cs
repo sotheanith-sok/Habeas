@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Search.Index;
+using Search.Text;
 
 namespace Search.Query
 {
@@ -9,9 +10,9 @@ namespace Search.Query
     /// </summary>
     public class NearLiteral : IQueryComponent
     {
-        private string firstTerm;
+        private string firstTerm;   //not processed word
         private int k;
-        private string secondTerm;
+        private string secondTerm;  //not processed word
 
         /// <summary>
         /// Constructs NearLiteral with two terms and the k value between the two
@@ -20,15 +21,12 @@ namespace Search.Query
         /// <param name="k">a value of how far the second is away from the first at most</param>
         /// <param name="second">the second token</param>
         public NearLiteral(string first, int k, string second) {
-            //NOTE: Should this be token?term? already processed? or not?
-            // ITokenProcessor processor = new BetterTokenProcessor();
-            // processor.ProcessToken(first, false, true);
             this.firstTerm = first;
             this.k = k;
             this.secondTerm = second;
         }
 
-        public IList<Posting> GetPostings(IIndex index)
+        public IList<Posting> GetPostings(IIndex index, ITokenProcessor processor)
         {
             //Get postings for the two term
             IList<Posting> firstPostings = index.GetPostings(firstTerm);

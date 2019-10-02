@@ -213,10 +213,11 @@ namespace Search.Query
                 }
                 //create the PhraseLiteral
                 return new Literal(
-              // startIndex and lengthOut identify the bounds of the literal
-              new StringBounds(startIndex, lengthOut),
-              // we assume this is a single term literal... for now
-              new PhraseLiteral(subquery.Substring(startIndex, lengthOut)));
+                    // startIndex and lengthOut identify the bounds of the literal
+                    new StringBounds(startIndex, lengthOut),
+                    // we assume this is a single term literal... for now
+                    new PhraseLiteral(subquery.Substring(startIndex, lengthOut))
+                );
             }
             // JESSE'S EASTER EGG:
             // POETRY INTERLUDE!
@@ -248,13 +249,12 @@ namespace Search.Query
                 //if it is not a wildcard: stem
                 if (!subquery.Substring(startIndex, lengthOut).Contains("*"))
                 {
-				 BetterTokenProcessor BTP = new BetterTokenProcessor();
 
                  return new Literal(
                  // startIndex and lengthOut identify the bounds of the literal
                  new StringBounds(startIndex, lengthOut),
                  // we assume this is a single term literal... for now
-                 new TermLiteral(BTP.StemWords(subquery.Substring(startIndex, lengthOut))));
+                 new TermLiteral(subquery.Substring(startIndex, lengthOut)));
                 }
                 //otherwise, stem
                 // This is a term literal containing a single term.

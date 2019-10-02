@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Search.Index;
 
@@ -18,36 +19,37 @@ namespace Search.Query
             //exceptions
             if (list.Count == 0) { return new List<Posting>(); }
             if (list.Count == 1) { return list[0]; }
+            if (list.Count == 2) { return AndMerge(list[0], list[1]); }
+
+            //Sort the posting lists in ascending order to merge smaller lists first
+            list.Sort( (a, b) => a.Count.CompareTo(b.Count) );
 
             //Prepare the posting lists to send to the recursive method
             //pop a list off of the end of list
-            IList<Posting> first = list[list.Count - 1];
+            IList<Posting> biggest = list[list.Count - 1];
             list.RemoveAt(list.Count - 1);
             //Return the result of recursive merge
-            return AndMerge(first, list);
+            return AndMerge(list, biggest);
         }
 
         /// <summary>
         /// AND-Merge a posting list with a list of posting lists with recursion
         /// </summary>
-        /// <param name="pList">a posting list to be merged</param>
-        /// <param name="listOfPList">a list of posting lists to be merged</param>
+        /// <param name="list">a list of posting lists to be merged</param>
+        /// <param name="biggest">the biggest posting list to be merged</param>
         /// <returns>an AND-merged posting list</returns>
-        private static IList<Posting> AndMerge(IList<Posting> pList, List<IList<Posting>> listOfPList)
+        private static IList<Posting> AndMerge(List<IList<Posting>> list, IList<Posting> biggest)
         {
             //base case
-            //if listOfPList is empty, all in the list have been merged
-            if (listOfPList.Count == 0) { return pList; }
+            if (list.Count == 0) { return biggest; }    //all in the list have been merged
+            if (list.Count == 1) { return AndMerge(list[0], biggest); }  //merge the two
             
             //recursive case
-            //TODO: Merge larger posting lists first?
             //pop a list off of the end of listOfPList
-            IList<Posting> next = listOfPList[listOfPList.Count - 1];
-            listOfPList.RemoveAt(listOfPList.Count - 1);
-            
-            //return the result of recursion
-            return AndMerge( AndMerge(pList, next), listOfPList );
-
+            IList<Posting> secondBiggest = list[list.Count - 1];
+            list.RemoveAt(list.Count - 1);
+            //return the result of recursive merge
+            return AndMerge( AndMerge(list, secondBiggest), biggest);
         }
 
         /// <summary>
@@ -115,35 +117,37 @@ namespace Search.Query
             //exceptions
             if (list.Count == 0) { return new List<Posting>(); }
             if (list.Count == 1) { return list[0]; }
+            if (list.Count == 2) { return OrMerge(list[0], list[1]); }
+
+            //Sort the posting lists in ascending order to merge smaller lists first
+            list.Sort( (a, b) => a.Count.CompareTo(b.Count) );
 
             //Prepare the posting lists to send to the recursive method
             //pop a list off of the end of list
-            IList<Posting> first = list[list.Count - 1];
+            IList<Posting> biggest = list[list.Count - 1];
             list.RemoveAt(list.Count - 1);
             //Return the result of recursive merge
-            return OrMerge(first, list);
+            return OrMerge(list, biggest);
         }
 
         /// <summary>
         /// OR-Merge a posting list with a list of posting lists with recursion
         /// </summary>
-        /// <param name="pList">a posting list to be merged</param>
-        /// <param name="listOfPList">a list of posting lists to be merged</param>
+        /// <param name="list">a list of posting lists to be merged</param>
+        /// <param name="biggest">the biggest posting list to be merged</param>
         /// <returns>an OR-merged posting list</returns>
-        private static IList<Posting> OrMerge(IList<Posting> pList, List<IList<Posting>> listOfPList)
+        private static IList<Posting> OrMerge(List<IList<Posting>> list, IList<Posting> biggest)
         {
             //base case
-            //if listOfPList is empty, all in the list have been merged
-            if (listOfPList.Count == 0) { return pList; }
+            if (list.Count == 0) { return biggest; }    //all in the list have been merged
+            if (list.Count == 1) { return OrMerge(list[0], biggest); }  //merge the two
             
             //recursive case
-            //TODO: Merge larger posting lists first?
             //pop a list off of the end of listOfPList
-            IList<Posting> next = listOfPList[listOfPList.Count - 1];
-            listOfPList.RemoveAt(listOfPList.Count - 1);
-            
-            //return the result of recursion
-            return OrMerge( OrMerge(pList, next), listOfPList );
+            IList<Posting> secondBiggest = list[list.Count - 1];
+            list.RemoveAt(list.Count - 1);
+            //return the result of recursive merge
+            return OrMerge( OrMerge(list, secondBiggest), biggest);
         }
 
         /// <summary>

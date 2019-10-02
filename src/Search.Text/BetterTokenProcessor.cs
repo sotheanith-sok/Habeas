@@ -12,6 +12,24 @@ namespace Search.Text
         /// <summary>
         /// Process a token by applying multiple rules
         /// </summary>
+        /// <returns>a list of postprocessed tokens</returns>
+        public List<string> ProcessToken(string token)
+        {
+            List<string> tokens = this.HyphenateWords(token);
+            for (int i = 0; i < tokens.Count; i++)
+            {
+                tokens[i] = this.RemoveNonAlphanumeric(tokens[i]);
+                tokens[i] = this.RemoveApostrophes(tokens[i]);
+                tokens[i] = this.RemoveQuotationMarks(tokens[i]);
+                tokens[i] = this.LowercaseWords(tokens[i]);
+            }
+            return tokens;
+        }
+
+        //TODO: Split the implementation of different TokenProcessors into independent classes
+        /// <summary>
+        /// Process a token by applying multiple rules
+        /// </summary>
         /// <param name="token">Preprocess token</param>
         /// <param name="enableKGram">is K Gram processing enable. True by default</param>
         /// <returns>a list of postprocessed tokens</returns>
@@ -27,7 +45,6 @@ namespace Search.Text
                 tokens[i] = (enableSteam==true)? this.StemWords(tokens[i]):tokens[i];
             }
             return (enableKGram == false) ? tokens : this.KGramSplitter(tokens);
-            //NOTE: the changes on ProcesToken are reverted back to check enableKGram and enableSteam
         }
 
         /// <summary>
