@@ -230,8 +230,15 @@ namespace Search.Query
                 );
             }
             //TODO: Capture NearLiteral
-            // else if (subquery[startIndex] == '['])
-            // { ...
+            // else if (subquery[startIndex] == '[')
+            // {
+                //find closing bracket ']'
+                //split the string into term1, near/k, term2
+                //get first term
+                //detect "near/"
+                //get k value
+                //get second term
+                //create NearLiteral(term1, k, term2)
             // }
             // Capture WildcardLiteral or TermLiteral otherwise
             else
