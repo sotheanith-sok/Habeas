@@ -250,7 +250,7 @@ namespace UnitTests
                 Console.WriteLine("not a correct string to generate postings");
                 return null;
             }
-            Console.WriteLine($"Generating postings from string \'{str}\'");
+            // Console.WriteLine($"Generating postings from string \'{str}\'");
             IList<Posting> postingList = new List<Posting>();
             //untanggle the string of postings
             str = str.TrimStart('(').TrimEnd(')');
@@ -272,7 +272,7 @@ namespace UnitTests
                 //Console.WriteLine($"object: {posting.ToString()}");
             }
             
-            Console.WriteLine($"Generated: {postingList.Count} postings.");
+            // Console.WriteLine($"Generated: {postingList.Count} postings.");
             return postingList;
         }
     }

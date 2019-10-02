@@ -4,7 +4,7 @@ using Search.Index;
 using Search.Text;
 using System;
 using System.Collections.Generic;
-
+using System.Diagnostics;
 
 namespace Search.PositionalInvertedIndexer
 {
@@ -17,12 +17,15 @@ namespace Search.PositionalInvertedIndexer
         /// <param name="corpus">a corpus to be indexed</param>
         public static PositionalInvertedIndex IndexCorpus(IDocumentCorpus corpus)
         {
-            ITokenProcessor processor = new BetterTokenProcessor();
-
+            //Time how long it takes to index the corpus
+            Stopwatch elapsedTime = new Stopwatch();
+            elapsedTime.Start();
+            
             // Constuct a positional-inverted-index once 
             PositionalInvertedIndex index = new PositionalInvertedIndex();
+            Console.WriteLine($"Indexing {corpus.CorpusSize} documents in the corpus...");
+            ITokenProcessor processor = new BetterTokenProcessor();
 
-            Console.WriteLine("Indexing the corpus... with Positional Inverted Index");
             // Index the document
             foreach (IDocument doc in corpus.GetDocuments())
             {
@@ -49,6 +52,10 @@ namespace Search.PositionalInvertedIndexer
 
                 stream.Dispose();
             }
+            //Time ends
+            elapsedTime.Stop();
+            Console.WriteLine("Elapsed " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
+
 
             return index;
         }
