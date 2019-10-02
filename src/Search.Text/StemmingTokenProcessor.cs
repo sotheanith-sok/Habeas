@@ -20,13 +20,12 @@ namespace Search.Text
                 result[i] = this.RemoveQuotationMarks(result[i]);
                 result[i] = this.LowercaseWords(result[i]);
             }
-            
+
             for (int i = 0; i < result.Count; i++)
             {
                 string[] s = result[i].Split(" ");
                 for (int j = 0; j < s.Length; j++)
                 {
-                    Console.WriteLine(s[j] + "-->" + this.StemWords(s[j]));
                     s[j] = this.StemWords(s[j]);
                 }
                 result[i] = string.Join(" ", s);

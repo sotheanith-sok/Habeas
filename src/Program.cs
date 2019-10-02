@@ -1,6 +1,5 @@
 using Search.Document;
 using Search.Index;
-using Search.PositionalInvertedIndexer;
 using Search.Text;
 using System;
 using System.Collections.Generic;

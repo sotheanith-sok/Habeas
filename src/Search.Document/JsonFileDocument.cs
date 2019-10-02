@@ -14,7 +14,7 @@ namespace Search.Document
         public string body { get; set; }
         public string url { get; set; }
     }
-    
+
     public class JsonFileDocument : IFileDocument
     {
 
@@ -24,31 +24,31 @@ namespace Search.Document
         /// </summary>
         public string FilePath { get; }
 
-        public string Title { get;}
+        public string Title { get; }
 
-        public string articleTitle{get; set;}
+        public string articleTitle { get; set; }
 
         public JsonFileDocument(int documentId, string absoluteFilePath)
         {
-            
+
             DocumentId = documentId;
             FilePath = absoluteFilePath;
             Title = Path.GetFileName(absoluteFilePath);
-            
+
         }
 
-        
+
         public TextReader GetContent()
         {
             // Open a StreamReader from a high-performance memory-mapped file.
             MemoryMappedViewStream mmvs;
             try
             {
-                 mmvs = MemoryMappedFile.OpenExisting(Path.GetFileName(FilePath)).CreateViewStream();
+                mmvs = MemoryMappedFile.OpenExisting(Path.GetFullPath(FilePath).GetHashCode().ToString()).CreateViewStream();
             }
             catch (FileNotFoundException)
             {
-                mmvs = MemoryMappedFile.CreateFromFile(FilePath, System.IO.FileMode.Open, Path.GetFileName(FilePath)).CreateViewStream();
+                mmvs = MemoryMappedFile.CreateFromFile(FilePath, System.IO.FileMode.Open, Path.GetFullPath(FilePath).GetHashCode().ToString()).CreateViewStream();
             }
             StreamReader file = new StreamReader(mmvs);
             Document jobject = JsonConvert.DeserializeObject<Document>(file.ReadToEnd());

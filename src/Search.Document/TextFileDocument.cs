@@ -35,12 +35,13 @@ namespace Search.Document
             // Open a StreamReader from a high-performance memory-mapped file.
             try
             {
-                MemoryMappedViewStream mmvs = MemoryMappedFile.OpenExisting(Path.GetFileName(FilePath)).CreateViewStream();
+                MemoryMappedViewStream mmvs = MemoryMappedFile.OpenExisting(Path.GetFullPath(FilePath).GetHashCode().ToString()).CreateViewStream();
                 return new StreamReader(mmvs);
+
             }
             catch (FileNotFoundException)
             {
-                MemoryMappedViewStream mmvs = MemoryMappedFile.CreateFromFile(FilePath, System.IO.FileMode.Open, Path.GetFileName(FilePath)).CreateViewStream();
+                MemoryMappedViewStream mmvs = MemoryMappedFile.CreateFromFile(FilePath, System.IO.FileMode.Open, Path.GetFullPath(FilePath).GetHashCode().ToString()).CreateViewStream();
                 return new StreamReader(mmvs);
             }
         }

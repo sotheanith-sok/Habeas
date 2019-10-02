@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
-namespace Search.Text{
-    public class BaseTokenProcessor{
-               /// <summary>
+namespace Search.Text
+{
+    public class BaseTokenProcessor
+    {
+        /// <summary>
         /// A token processor uses to remove leading and trailing non-alphanumeric characters
         /// </summary>
         /// <param name="token">Preprocessing token</param>
