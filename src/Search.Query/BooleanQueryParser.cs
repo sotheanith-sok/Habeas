@@ -213,10 +213,11 @@ namespace Search.Query
                 }
                 //create the PhraseLiteral
                 return new Literal(
-              // startIndex and lengthOut identify the bounds of the literal
-              new StringBounds(startIndex, lengthOut),
-              // we assume this is a single term literal... for now
-              new PhraseLiteral(subquery.Substring(startIndex, lengthOut)));
+                    // startIndex and lengthOut identify the bounds of the literal
+                    new StringBounds(startIndex, lengthOut),
+                    // we assume this is a single term literal... for now
+                    new PhraseLiteral(subquery.Substring(startIndex, lengthOut))
+                );
             }
             // JESSE'S EASTER EGG:
             // POETRY INTERLUDE!

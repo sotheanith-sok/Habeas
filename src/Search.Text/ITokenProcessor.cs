@@ -11,8 +11,8 @@ namespace Search.Text {
 		/// <summary>
 		/// Normalize a token into a term.
 		/// </summary>
-		/// <param name="token">Preprocess token</param>
-		/// <returns>A list of terms</returns>
+		/// <param name="token">a token to process</param>
+		/// <returns>a list of terms (processed tokens)</returns>
 		List<string> ProcessToken(string token);
 	}
 }

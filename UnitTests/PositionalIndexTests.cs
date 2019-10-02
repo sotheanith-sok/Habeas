@@ -32,7 +32,6 @@ namespace UnitTests
             PositionalInvertedIndex index = IndexCorpus(corpus);
             var result = index.GetPostings(term);
             
-            
             //Assert
             index.Should().NotBeNull("because indexCorpus shouldn't return null");
             result.Should().HaveSameCount(expected);
@@ -50,8 +49,7 @@ namespace UnitTests
                 System.Console.WriteLine(" for MacOSX");
                 expected = new List<Posting>{ new Posting(2, new List<int>{0,2,3}),
                                               new Posting(4, new List<int>{0,1}) };
-            }
-            else {
+            } else {
                 System.Console.WriteLine(" for Windows and other OSs");
                 expected = new List<Posting>{ new Posting(0, new List<int>{0,1}),
                                               new Posting(2, new List<int>{0,2,3}) };
@@ -61,13 +59,11 @@ namespace UnitTests
             PositionalInvertedIndex index = IndexCorpus(corpus);
             var result = index.GetPostings(term);
             
-            
             //Assert
             index.Should().NotBeNull("because indexCorpus shouldn't return null");
             result.Should().HaveSameCount(expected);
             result.Should().BeEquivalentTo(expected, config => config.WithStrictOrdering());
         }
-
 
 
         //For independent unit testing, Copied from PositionalInvertedIndexer.IndexCorpus()

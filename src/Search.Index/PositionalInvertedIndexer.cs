@@ -4,7 +4,7 @@ using Search.Index;
 using Search.Text;
 using System;
 using System.Collections.Generic;
-
+using System.Diagnostics;
 
 namespace Search.Index
 {
@@ -18,10 +18,14 @@ namespace Search.Index
         /// <param name="corpus">a corpus to be indexed</param>
         public static PositionalInvertedIndex IndexCorpus(IDocumentCorpus corpus)
         {
-            ITokenProcessor normalProcessor = new NormalTokenProcessor();
-
+            //Time how long it takes to index the corpus
+            Stopwatch elapsedTime = new Stopwatch();
+            elapsedTime.Start();
+            
             // Constuct a positional-inverted-index once 
             PositionalInvertedIndex index = new PositionalInvertedIndex();
+            Console.WriteLine($"Indexing {corpus.CorpusSize} documents in the corpus...");
+            ITokenProcessor normalProcessor = new NormalTokenProcessor();
 
             Console.WriteLine("Indexing the corpus... with Positional Inverted Index");
 
@@ -59,21 +63,9 @@ namespace Search.Index
                 stream.Dispose();
             }
             kGram = new KGram(tokenSet);
+            elapsedTime.Stop();
+            Console.WriteLine("Elapsed " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
             return index;
-        }
-
-        /// <summary>
-        /// Prints the first 1000 terms in the sorted vocabulary and the count
-        /// </summary>
-        /// <param name="vocabulary">a sorted vocabulary to print</param>
-        /// <param name="count">the number of terms to print</param>
-        public static void PrintVocab(IReadOnlyList<string> vocabulary, int count)
-        {
-            for (int i = 0; i < Math.Min(count, vocabulary.Count); i++)
-            {
-                Console.WriteLine(vocabulary[i]);
-            }
-            Console.WriteLine($"Total: {vocabulary.Count} terms");
         }
 
     }

@@ -13,6 +13,12 @@ namespace Search.Index {
 		IList<Posting> GetPostings(string term);
 
 		/// <summary>
+		/// Retrieves a list of Postings of documents that contain the given list of terms.
+		/// </summary>
+		/// <param name="terms">a list of processed strings</param>
+		IList<Posting> GetPostings(List<string> term);
+
+		/// <summary>
 		/// A (sorted) list of all terms in the index vocabulary.
 		/// </summary>
 		IReadOnlyList<string> GetVocabulary();
