@@ -1,6 +1,7 @@
 using Search.Document;
 using Search.Index;
 using Search.PositionalInvertedIndexer;
+using Search.Query;
 using Search.Text;
 using System;
 using System.Collections.Generic;
@@ -12,13 +13,16 @@ namespace Program
     {
         private static PositionalInvertedIndex index;
         private static IDocumentCorpus corpus;
+        private static BooleanQueryParser parser;
 
         public static void Main(string[] args)
         {
-            
-            IDocumentCorpus corpus = AskDirectory();
+            parser = new BooleanQueryParser();
+
+            Console.WriteLine("[Search Engine 0.7]");
+            corpus = GetCorpusByAskingDirectory();
    
-            if (corpus != null && corpus.CorpusSize != 0)
+            if (corpus != null && corpus.CorpusSize != 0)   //NOTE: redundant..
             {
                 index = PositionalInvertedIndexer.IndexCorpus(corpus);
 
@@ -45,9 +49,9 @@ namespace Program
                         postings = index.GetPostings(query);
                         if (postings.Count > 0) {
                             //Print the documents (posting list)
-                            PrintPostings(postings);
+                            PrintPostings(postings, corpus);
                             //Ask a document to view and print the content
-                            IDocument doc = AskDocumentToView(postings);
+                            IDocument doc = AskDocumentToView(postings, corpus);
                             PrintContent(doc);
                         } else {
                             Console.WriteLine("Not Found.");
@@ -62,29 +66,35 @@ namespace Program
 
 
         ///<summary>
-        ///requests Directory/Folder path from user and creates corpus based off that directory
+        ///Requests Directory/Folder path from user and creates corpus based off that directory
         ///</summary>
-        public static IDocumentCorpus AskDirectory()
+        public static IDocumentCorpus GetCorpusByAskingDirectory()
         {
+            IDocumentCorpus corpus;
+            string directory;
+
             while(true){
-            string _directory;
-            //Habeas Corpus!!!
-            Console.WriteLine("Enter the path of the Folder or Directory you wish to search: ");
-            _directory = Console.ReadLine();
-            if (Directory.Exists(_directory))
-            {
-               corpus = DirectoryCorpus.LoadTextDirectory(_directory);
-               if(corpus != null && corpus.CorpusSize != 0){
-                   return corpus;
-               }
-               else{
-                   Console.WriteLine("Error: the selected path is empty...");
-               }
+                //Habeas Corpus!!! lol
+                Console.WriteLine("Enter the path of the directory you wish to search: ");
+                directory = Console.ReadLine();
+                
+                if (!Directory.Exists(directory)) {
+                    Console.WriteLine("The directory doesn't exist.");
+                    continue;
+                }
+                
+                corpus = DirectoryCorpus.LoadTextDirectory(directory);
+                
+                if(corpus == null || corpus.CorpusSize == 0) {
+                    Console.WriteLine("The directory is empty.");
+                    continue;
+                } else {
+                    // when valid corpus is constructed
+                    break;
+                }
             }
-               else{
-                   Console.WriteLine("Error: the selected path is invalid...");
-               }
-            }
+
+            return corpus;
         }
 
         /// <summary>
@@ -154,7 +164,8 @@ namespace Program
         /// Print the name and count of the documents from a posting list
         /// </summary>
         /// <param name="postings">postings to be printed</param>
-        public static void PrintPostings(IList<Posting> postings)
+        /// <param name="corpus">corpus to get the document title from</param>
+        public static void PrintPostings(IList<Posting> postings, IDocumentCorpus corpus)
         {
             int i = 1;
             foreach (Posting p in postings)
@@ -172,8 +183,9 @@ namespace Program
         /// Ask the user the document to view
         /// </summary>
         /// <param name="postings">posting list to search the selected document from</param>
+        /// <param name="corpus">corpus to get the document content from</param>
         /// <return>a selected document to view</return>
-        public static IDocument AskDocumentToView(IList<Posting> postings)
+        public static IDocument AskDocumentToView(IList<Posting> postings, IDocumentCorpus corpus)
         {
             int selected;
             IDocument selectedDocument;
