@@ -25,7 +25,7 @@ namespace UnitTests
         [InlineData("*!@)*)(*$)(*$192.168.1.1(!)@*)*(*($*)(*!@", "192.168.1.1")]
         public void TestRemoveNonAlphanumeric(string token, string expected)
         {
-            Assert.Equal(expected, ((BaseTokenProcessor)(this.normalProcesser)).RemoveNonAlphanumeric(token));
+            Assert.Equal(expected, ((NormalTokenProcessor)(this.normalProcesser)).RemoveNonAlphanumeric(token));
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace UnitTests
         [InlineData("'Y'all'll'nt've'd's", "Yallllntveds")]
         public void TestRemoveApostrophes(string token, string expected)
         {
-            Assert.Equal(expected, ((BaseTokenProcessor)(this.normalProcesser)).RemoveApostrophes(token));
+            Assert.Equal(expected, ((NormalTokenProcessor)(this.normalProcesser)).RemoveApostrophes(token));
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace UnitTests
         [InlineData("cklda\"fsafdki\"jfd", "ckldafsafdkijfd")]
         public void TestRemoveQuotationMarks(string token, string expected)
         {
-            Assert.Equal(expected, ((BaseTokenProcessor)(this.normalProcesser)).RemoveQuotationMarks(token));
+            Assert.Equal(expected, ((NormalTokenProcessor)(this.normalProcesser)).RemoveQuotationMarks(token));
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace UnitTests
         [Fact]
         public void TestHyphenateWords()
         {
-            Assert.Equal(new List<string> { "HewlettPackardComputing", "Hewlett", "Packard", "Computing" }, ((BaseTokenProcessor)(this.normalProcesser)).HyphenateWords("Hewlett-Packard-Computing"));
+            Assert.Equal(new List<string> { "HewlettPackardComputing", "Hewlett", "Packard", "Computing" }, ((NormalTokenProcessor)(this.normalProcesser)).HyphenateWords("Hewlett-Packard-Computing"));
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace UnitTests
         [InlineData("QuAntuS TreMoR est FutURUS", "quantus tremor est futurus")]
         public void TestLowercaseWords(string token, string expected)
         {
-            Assert.Equal(expected, ((BaseTokenProcessor)(this.normalProcesser)).LowercaseWords(token));
+            Assert.Equal(expected, ((NormalTokenProcessor)(this.normalProcesser)).LowercaseWords(token));
         }
 
         /// <summary>

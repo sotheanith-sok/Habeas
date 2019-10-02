@@ -3,14 +3,14 @@ using Porter2Stemmer;
 using System;
 namespace Search.Text
 {
-    public class StemmingTokenProcesor : BaseTokenProcessor, ITokenProcessor
+    public class StemmingTokenProcesor : NormalTokenProcessor, ITokenProcessor
     {
         /// <summary>
         /// Process token and stem each terms
         /// </summary>
         /// <param name="token"></param>
         /// <returns>A stem terms</returns>
-        public List<string> ProcessToken(string token)
+        public new List<string> ProcessToken(string token)
         {
             List<string> result = this.HyphenateWords(token);
             for (int i = 0; i < result.Count; i++)
