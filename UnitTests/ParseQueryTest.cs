@@ -65,6 +65,12 @@ namespace UnitTests
             //Assert
             actual.Should().BeOfType(typeof(PhraseLiteral));    //TODO: Parser should be fixed!
             ((PhraseLiteral)actual).Should().BeEquivalentTo(expected);
+
+            //Case2: query without ending quote
+            query = "\"ice smoothie";
+            actual = parser.ParseQuery(query);
+            actual.Should().BeOfType(typeof(PhraseLiteral));
+            ((PhraseLiteral)actual).Should().BeEquivalentTo(expected);
         }
 
         [Fact]
