@@ -25,7 +25,7 @@ namespace Search.Index
 
             Console.WriteLine("Indexing the corpus... with Positional Inverted Index");
 
-            HashSet<string> vocabularies = new HashSet<string>();
+            HashSet<string> tokenSet = new HashSet<string>();
 
             // Index the document
             foreach (IDocument doc in corpus.GetDocuments())
@@ -52,13 +52,13 @@ namespace Search.Index
 
                     //Keep track of vocabularies for K-gram
                     foreach (string term in normalProcessor.ProcessToken(token)){
-                        vocabularies.Add(term);
+                        tokenSet.Add(term);
                     }
                 }
 
                 stream.Dispose();
             }
-            kGram = new KGram(vocabularies);
+            kGram = new KGram(tokenSet);
             return index;
         }
 
