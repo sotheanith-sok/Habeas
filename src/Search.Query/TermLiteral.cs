@@ -16,10 +16,10 @@ namespace Search.Query {
 		}
 
 		public IList<Posting> GetPostings(IIndex index, ITokenProcessor processor) {
-			//TODO: TermLiteral better to get one processed token than a list of token...
-			
-			//string processedTerm = processor.ProcessToken(Term);
-			return index.GetPostings(Term);
+			//Process the term
+			List<string> processedTerms = processor.ProcessToken(Term);
+			//Gets a or-merged posting list from all results of multiple terms from index...
+			return index.GetPostings(processedTerms);
 		}
 
 		public override string ToString() {

@@ -27,13 +27,13 @@ namespace Search.Query
 		}
 
 		public IList<Posting> GetPostings(IIndex index, ITokenProcessor processor) {
-			//TODO: Process the tokens in mTerms(stemming and so..) before fetching posting lists from the index
-
 			//A list of posting lists (postings for each term in the phrase)
 			List<IList<Posting>> postingLists = new List<IList<Posting>>();
 			//Retrieves the postings for the individual terms in the phrase
 			foreach(string term in mTerms) {
-				postingLists.Add(index.GetPostings(term));
+				//Process the term
+				List<string> processedTerms = processor.ProcessToken(term);
+				postingLists.Add(index.GetPostings(processedTerms));
 			}
 			//positional merge all posting lists
 			return Merge.PositionalMerge(postingLists);
