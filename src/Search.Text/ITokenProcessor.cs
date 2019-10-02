@@ -12,9 +12,7 @@ namespace Search.Text {
 		/// Normalize a token into a term.
 		/// </summary>
 		/// <param name="token">a token to process</param>
-		/// <returns></returns>
+		/// <returns>a list of terms (processed tokens)</returns>
 		List<string> ProcessToken(string token);
-		//TODO: Change the return type to string
-		//NOTE: return type as a list of string is only for the case of a hyphenated token.. for storing them in index.
 	}
 }
