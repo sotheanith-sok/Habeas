@@ -15,7 +15,7 @@ namespace Search.Document
         public string url { get; set; }
     }
 
-    public class JsonFileDocument : IFileDocument
+    public class JsonFileDocument : IFileDocument, IDisposable
     {
 
         public int DocumentId { get; }
@@ -27,6 +27,8 @@ namespace Search.Document
         public string Title { get; }
 
         public string articleTitle { get; set; }
+
+        private MemoryMappedFile file;
 
         public JsonFileDocument(int documentId, string absoluteFilePath)
         {
@@ -40,21 +42,8 @@ namespace Search.Document
 
         public TextReader GetContent()
         {
-            StreamReader file = new StreamReader(MemoryMappedFile.CreateFromFile(FilePath).CreateViewStream());
-
-            //NOTE: mapName in OpenExisiting() is not supported in Unix
-            // // Open a StreamReader from a high-performance memory-mapped file.
-            // MemoryMappedViewStream mmvs;
-            // try
-            // {
-            //     mmvs = MemoryMappedFile.OpenExisting(Path.GetFullPath(FilePath).GetHashCode().ToString()).CreateViewStream();
-            // }
-            // catch (FileNotFoundException)
-            // {
-            //     mmvs = MemoryMappedFile.CreateFromFile(FilePath, System.IO.FileMode.Open, Path.GetFullPath(FilePath).GetHashCode().ToString()).CreateViewStream();
-            // }
-            // StreamReader file = new StreamReader(mmvs);
-            
+            this.file = MemoryMappedFile.CreateFromFile(FilePath);
+            StreamReader file = new StreamReader(this.file.CreateViewStream());
             Document jobject = JsonConvert.DeserializeObject<Document>(file.ReadToEnd());
             articleTitle = jobject.title;
             var content = jobject.title + jobject.body + jobject.url;
@@ -68,6 +57,8 @@ namespace Search.Document
             return new JsonFileDocument(documentId, absoluteFilePath);
         }
 
-
+        public void Dispose(){
+            file?.Dispose();
+        }
     }
 }

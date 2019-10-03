@@ -9,7 +9,7 @@ namespace Search.Document
     /// <summary>
     /// Represents a document that is saved as a simple text file in the local file system.
     /// </summary>
-    public class TextFileDocument : IFileDocument
+    public class TextFileDocument : IFileDocument, IDisposable
     {
         public int DocumentId { get; }
         /// <summary>
@@ -18,6 +18,8 @@ namespace Search.Document
         public string FilePath { get; }
 
         public string Title { get; }
+
+        private MemoryMappedFile file;
 
         /// <summary>
         /// Constructs a TextFileDocument with the given document ID representing the file at the given 
@@ -32,22 +34,8 @@ namespace Search.Document
 
         public TextReader GetContent()
         {
-            return new StreamReader(MemoryMappedFile.CreateFromFile(FilePath).CreateViewStream());
-            
-            //NOTE: mapName for OpenExisting() is not supported in Unix
-            // // Open a StreamReader from a high-performance memory-mapped file.
-            // string mapName = Path.GetFullPath(FilePath).GetHashCode().ToString();
-            // try
-            // {
-            //     MemoryMappedViewStream mmvs = MemoryMappedFile.OpenExisting(Path.GetFullPath(FilePath).GetHashCode().ToString()).CreateViewStream();
-            //     return new StreamReader(mmvs);
-
-            // }
-            // catch (FileNotFoundException)
-            // {
-            //     MemoryMappedViewStream mmvs = MemoryMappedFile.CreateFromFile(FilePath, System.IO.FileMode.Open, Path.GetFullPath(FilePath).GetHashCode().ToString()).CreateViewStream();
-            //     return new StreamReader(mmvs);
-            // }
+            this.file = MemoryMappedFile.CreateFromFile(FilePath);
+            return new StreamReader(this.file.CreateViewStream());
         }
 
         /// <summary>
@@ -56,6 +44,10 @@ namespace Search.Document
         public static TextFileDocument CreateTextFileDocument(string absoluteFilePath, int documentId)
         {
             return new TextFileDocument(documentId, absoluteFilePath);
+        }
+
+        public void Dispose(){
+            file?.Dispose();
         }
     }
 }
