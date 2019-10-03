@@ -153,6 +153,12 @@ namespace Program
             else if (specialQuery.StartsWith(":index "))
             {                           // :index
                 string directory = specialQuery.Substring(":index ".Length);
+                
+                if (!Directory.Exists(directory))
+                {
+                    Console.WriteLine("The directory doesn't exist.");
+                    return;
+                }
                 corpus = DirectoryCorpus.LoadTextDirectory(directory);
                 index = PositionalInvertedIndexer.IndexCorpus(corpus);
             }
@@ -262,6 +268,7 @@ namespace Program
                 ((IDisposable)doc).Dispose();
             }
         }
+        
     }
 
 
