@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Search.Text;
 
 namespace Search.Query
@@ -223,23 +224,60 @@ namespace Search.Query
                     //Otherwise, the position of the next '"' character is the end of the phrase
                     lengthOut = nextSpace - startIndex + 1;
                 }
+                string phrase = subquery.Substring(startIndex, lengthOut);
+                phrase = phrase.TrimStart('"').TrimEnd('"');
+
                 //create the PhraseLiteral
                 return new Literal(
                     new StringBounds(startIndex, lengthOut),
-                    new PhraseLiteral(subquery.Substring(startIndex, lengthOut))
+                    new PhraseLiteral(phrase)
                 );
             }
-            //TODO: Capture NearLiteral
-            // else if (subquery[startIndex] == '[')
-            // {
-                //find closing bracket ']'
-                //split the string into term1, near/k, term2
-                //get first term
-                //detect "near/"
-                //get k value
-                //get second term
-                //create NearLiteral(term1, k, term2)
-            // }
+            // Capture NearLiteral
+            else if (subquery[startIndex] == '[')
+            {
+                startIndex++;
+                // Find closing bracket ']'
+                int closingIndex = subquery.IndexOf(']', startIndex);
+                // Limit near query parts
+                if(closingIndex < 0) {  //not have closing bracket
+                    lengthOut = subquery.Length - startIndex;
+                } else {                //have closing bracket
+                    lengthOut = closingIndex - startIndex + 1;
+                }
+                // Extract the near query substring
+                string near = subquery.Substring(startIndex, lengthOut);
+                near = near.TrimStart('[').TrimEnd(']').ToLower();
+                Console.WriteLine(near);
+
+                //TODO: Handle exceptions with Regex. Not fully handling the exception yet
+                // 1) no "near/"
+                // 2) no k value
+                // 3) more than one word on either side
+                
+                // Regex rgx_near = new Regex(@"\b\s<near/>\d+\s\b");
+                // if (rgx_near.Matches(near).Count < 0) {
+                //     Console.WriteLine("not a proper near query");
+                //     return new Literal(
+                //         new StringBounds(startIndex, lengthOut),
+                //         new NearLiteral("term1",0,"term2")
+                //     );
+                // }
+
+                // Split the string into 3 parts
+                string[] parts = near.Split(' ');
+                // Get first and second term
+                string first = parts[0];
+                string second = parts[2];
+                // Detect "near/" and get k value
+                int k = Int32.Parse(parts[1].Substring("near/".Length));
+
+                // create NearLiteral(term1, k, term2)
+                return new Literal(
+                    new StringBounds(startIndex, lengthOut),
+                    new NearLiteral(first,k,second)
+                );
+            }
             // Capture WildcardLiteral or TermLiteral otherwise
             else
             {
@@ -271,17 +309,5 @@ namespace Search.Query
             
         }
 
-        /// <summary>
-        /// Removes quotaton mars from strngs
-        /// </summary>
-        private string cleanPhrase(string phrase){
-			if(phrase[0] == '"'){
-				phrase = phrase.Substring(1);
-			}
-			if(phrase[phrase.Length-1] == '"'){
-				phrase = phrase.Remove(phrase.Length - 1);
-			}
-            return phrase;
-        }
     }
 }
