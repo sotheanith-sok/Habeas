@@ -21,52 +21,56 @@ namespace Program
             IQueryComponent component;
             BooleanQueryParser parser = new BooleanQueryParser();
             ITokenProcessor processor = new NormalTokenProcessor();
-            
+
             AssemblyName appName = Assembly.GetEntryAssembly().GetName();
             string projectName = appName.Name;
             string projectVersion = appName.Version.Major.ToString()
-                              +'.'+ appName.Version.Minor.ToString();
+                              + '.' + appName.Version.Minor.ToString();
             Console.WriteLine($"[{projectName} {projectVersion}]");
 
             corpus = GetCorpusByAskingDirectory();
-   
-            if (corpus != null && corpus.CorpusSize != 0)   //NOTE: redundant..
+
+            index = PositionalInvertedIndexer.IndexCorpus(corpus);
+
+            while (true)
             {
-                index = PositionalInvertedIndexer.IndexCorpus(corpus);
-
-                while (true)
+                //get query input from user
+                Console.Write("\nSearch: ");
+                query = Console.ReadLine();
+                if (query.Equals(""))
                 {
-                    //get query input from user
-                    Console.Write("\nSearch: ");
-                    query = Console.ReadLine();
-                    if (query.Equals("")) {
-                        continue;
-                    }
+                    continue;
+                }
 
-                    //special queries
-                    if (query.StartsWith(":")) {
-                        PerformSpecialQueries(query);
-                        continue;
+                //special queries
+                if (query.StartsWith(":"))
+                {
+                    PerformSpecialQueries(query);
+                    continue;
+                }
+                //search queries
+                else
+                {
+                    component = parser.ParseQuery(query);
+                    postings = component.GetPostings(index, processor);
+                    if (postings.Count > 0)
+                    {
+                        //Print the documents (posting list)
+                        PrintPostings(postings, corpus);
+                        //Ask a document to view and print the content
+                        IDocument doc = AskDocumentToView(postings, corpus);
+                        PrintContent(doc);
                     }
-                    //search queries
-                    else {
-                        component = parser.ParseQuery(query);
-                        postings = component.GetPostings(index, processor);
-                        if (postings.Count > 0) {
-                            //Print the documents (posting list)
-                            PrintPostings(postings, corpus);
-                            //Ask a document to view and print the content
-                            IDocument doc = AskDocumentToView(postings, corpus);
-                            PrintContent(doc);
-                        } else {
-                            Console.WriteLine("Not Found.");
-                        }
+                    else
+                    {
+                        Console.WriteLine("Not Found.");
                     }
-
                 }
 
             }
-            
+
+
+
         }
 
 
@@ -78,22 +82,27 @@ namespace Program
             IDocumentCorpus corpus;
             string directory;
 
-            while(true){
+            while (true)
+            {
                 //Habeas Corpus!!! lol
                 Console.WriteLine("Enter the path of the directory you wish to search: ");
                 directory = Console.ReadLine();
-                
-                if (!Directory.Exists(directory)) {
+
+                if (!Directory.Exists(directory))
+                {
                     Console.WriteLine("The directory doesn't exist.");
                     continue;
                 }
-                
+
                 corpus = DirectoryCorpus.LoadTextDirectory(directory);
-                
-                if(corpus == null || corpus.CorpusSize == 0) {
+
+                if (corpus == null || corpus.CorpusSize == 0)
+                {
                     Console.WriteLine("The directory is empty.");
                     continue;
-                } else {
+                }
+                else
+                {
                     // when valid corpus is constructed
                     break;
                 }
@@ -107,7 +116,8 @@ namespace Program
         /// such as ':q', ':vocab', ':stem', ':index', ':help'
         /// </summary>
         /// <param name="specialQuery">a special query to be performed</param>
-        public static void PerformSpecialQueries(string specialQuery){
+        public static void PerformSpecialQueries(string specialQuery)
+        {
             string info_support = "1. single query             Y\n"
                                 + "2. boolean query            N  space for AND, + for OR\n"
                                 + "3. phrase query             N  \"term1 term2 ...\"\n"
@@ -120,32 +130,39 @@ namespace Program
                                 + ":vocab         print vocabulary of the current corpus\n"
                                 + ":h, :help      help";
 
-            if(!specialQuery.StartsWith(":")) {
+            if (!specialQuery.StartsWith(":"))
+            {
                 return;
             }
             specialQuery = specialQuery.ToLower();
 
-            if (specialQuery == ":q") {                                             // :q
+            if (specialQuery == ":q")
+            {                                             // :q
                 System.Environment.Exit(1); // Exit the console app
             }
-            else if (specialQuery.StartsWith(":stem ")) {                           // :stem
+            else if (specialQuery.StartsWith(":stem "))
+            {                           // :stem
                 string term = specialQuery.Substring(":stem ".Length);
                 Console.WriteLine(new StemmingTokenProcesor().StemWords(term));
                 Console.WriteLine();
             }
-            else if (specialQuery == ":vocab") {                                    // :vocab
+            else if (specialQuery == ":vocab")
+            {                                    // :vocab
                 PrintVocab(index, 1000);
             }
-            else if(specialQuery.StartsWith(":index ")) {                           // :index
+            else if (specialQuery.StartsWith(":index "))
+            {                           // :index
                 string directory = specialQuery.Substring(":index ".Length);
                 corpus = DirectoryCorpus.LoadTextDirectory(directory);
                 index = PositionalInvertedIndexer.IndexCorpus(corpus);
             }
-            else if( (specialQuery == ":help") || (specialQuery == ":h") ) {        // :help
+            else if ((specialQuery == ":help") || (specialQuery == ":h"))
+            {        // :help
                 Console.WriteLine("This search engine supports\n" + info_support);
                 Console.WriteLine("\nSpecial queries\n" + info_special);
             }
-            else {
+            else
+            {
                 Console.WriteLine("No such special query exist.");
                 Console.WriteLine(info_special);
             }
@@ -184,7 +201,7 @@ namespace Program
             }
             Console.WriteLine($"Found in {postings.Count} files.");
         }
-        
+
         /// <summary>
         /// Ask the user the document to view
         /// </summary>
@@ -196,28 +213,34 @@ namespace Program
             int selected;
             IDocument selectedDocument;
             string input;
-            
+
             //Ask user a document to view
-            while(true) {
+            while (true)
+            {
                 Console.Write("Select the number to view the document ([Enter] to exit): ");
                 input = Console.ReadLine();
                 //Enter to exit
-                if (input.Equals("")) {
+                if (input.Equals(""))
+                {
                     selectedDocument = null;
                     break;
                 }
                 //Take number or ask again if input is not numeric
-                try {
+                try
+                {
                     selected = Int32.Parse(input);
-                } catch {
+                }
+                catch
+                {
                     continue;
                 }
                 //Console.WriteLine($"selected: {selected}");
-                
+
                 //Ask again if input number is not in range
                 Boolean isSelectedInRange = (selected > 0) && (selected <= postings.Count);
-                if(isSelectedInRange) {
-                    selectedDocument = corpus.GetDocument(postings[selected-1].DocumentId);
+                if (isSelectedInRange)
+                {
+                    selectedDocument = corpus.GetDocument(postings[selected - 1].DocumentId);
                     break;
                 }
             }
@@ -228,13 +251,15 @@ namespace Program
         /// Print the content of a document.
         /// </summary>
         /// <param name="doc">document to be printed</param>
-        public static void PrintContent(IDocument doc) {
-            if(doc != null) {
+        public static void PrintContent(IDocument doc)
+        {
+            if (doc != null)
+            {
                 Console.WriteLine($"\n{doc.Title.ToUpper()}");
                 TextReader content = doc.GetContent();
                 Console.WriteLine(content.ReadToEnd());
                 content.Dispose();
-                ((IDisposable) doc).Dispose();
+                ((IDisposable)doc).Dispose();
             }
         }
     }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Search.Text;
+using Search.Index;
 
 namespace Search.Query
 {
@@ -208,7 +209,7 @@ namespace Search.Query
                 ++startIndex;
             }
 
-            // Capture PhraseLiteral
+            // Capture a Phrase query
             if (subquery[startIndex] == '"')
             {
                 //move the startIndex up by one, we don't care about the '"' character
@@ -233,7 +234,7 @@ namespace Search.Query
                     new PhraseLiteral(phrase)
                 );
             }
-            // Capture NearLiteral
+            // Capture a Near query
             else if (subquery[startIndex] == '[')
             {
                 startIndex++;
@@ -280,7 +281,7 @@ namespace Search.Query
                     new NearLiteral(first,k,second)
                 );
             }
-            // Capture WildcardLiteral or TermLiteral otherwise
+            // Capture a Wildcard or Single query otherwise
             else
             {
                 // Locate the next space to find the end of this literal.
@@ -292,16 +293,17 @@ namespace Search.Query
                     lengthOut = nextSpace - startIndex;
                 }
 
-                //Capture WildcardLiteral
+                //Capture a Wildcard query
                 if (subquery.Substring(startIndex, lengthOut).Contains("*"))
                 {
                     //create WildcardLiteral
                     return new Literal(
                         new StringBounds(startIndex, lengthOut),
-                        //TODO: change to WildcardLiteral
-                        new TermLiteral(subquery.Substring(startIndex, lengthOut))
+                        new WildcardLiteral(subquery.Substring(startIndex, lengthOut), PositionalInvertedIndexer.kGram)
                     );
                 }
+
+                //If it's not captured at any of the above, it's a Single query
                 //create TermLiteral
                 return new Literal(
                     new StringBounds(startIndex, lengthOut),
