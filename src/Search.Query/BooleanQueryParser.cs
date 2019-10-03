@@ -209,30 +209,16 @@ namespace Search.Query
                 else
                 {
                     //Otherwise, the position of the next '"' character is the end of the phrase
-                    lengthOut = nextSpace - startIndex - 1;
+                    lengthOut = nextSpace - startIndex + 1;
                 }
                 //create the PhraseLiteral
                 return new Literal(
                     // startIndex and lengthOut identify the bounds of the literal
                     new StringBounds(startIndex, lengthOut),
                     // we assume this is a single term literal... for now
-                    new PhraseLiteral(subquery.Substring(startIndex, lengthOut))
+                    new PhraseLiteral(cleanPhrase(subquery.Substring(startIndex, lengthOut)))
                 );
             }
-            // JESSE'S EASTER EGG:
-            // POETRY INTERLUDE!
-            // Do not stand at my grave and weep,
-            // I am no there, I do not sleep.
-            // I am a thousand winds that blow.
-            // I am the diamond glint on snow.
-            // I am the the sunlight on ripened grain.
-            // I am the gentle autumn rain.
-            // When you awake amid the morning hush,
-            // I am the swift uplifting rush,
-            // Of quiet birds in circling flight.
-            // I am the soft star that shine at night.
-            // Do not stand at my grave and cry,
-            //I am not there, I did not die.
             else
             {
                 // Locate the next space to find the end of this literal.
@@ -264,6 +250,19 @@ namespace Search.Query
                  // we assume this is a single term literal... for now
                  new TermLiteral(subquery.Substring(startIndex, lengthOut)));
             }
+        }
+
+        /// <summary>
+        /// Removes quotaton mars from strngs
+        /// </summary>
+        private string cleanPhrase(string phrase){
+			if(phrase[0] == '"'){
+				phrase = phrase.Substring(1);
+			}
+			if(phrase[phrase.Length-1] == '"'){
+				phrase = phrase.Remove(phrase.Length - 1);
+			}
+            return phrase;
         }
     }
 }

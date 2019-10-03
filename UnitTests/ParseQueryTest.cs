@@ -64,7 +64,7 @@ namespace UnitTests
             IQueryComponent actual = parser.ParseQuery(query);
             //Assert
             actual.Should().BeOfType(typeof(PhraseLiteral));
-            ((PhraseLiteral)actual).Should().BeEquivalentTo(expected);
+            ((PhraseLiteral)actual).ToString().Should().BeEquivalentTo(expected.ToString());
         }
 
         //TODO: near literal
