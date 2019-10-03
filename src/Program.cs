@@ -34,41 +34,41 @@ namespace Program
             {
                 index = PositionalInvertedIndexer.IndexCorpus(corpus);
 
-                while (true)
-                {
-                    //get query input from user
-                    Console.Write("\nSearch: ");
-                    query = Console.ReadLine();
-                    if (query.Equals(""))
-                    {
-                        continue;
-                    }
+            index = PositionalInvertedIndexer.IndexCorpus(corpus);
 
-                    //special queries
-                    if (query.StartsWith(":"))
+            while (true)
+            {
+                //get query input from user
+                Console.Write("\nSearch: ");
+                query = Console.ReadLine();
+                if (query.Equals(""))
+                {
+                    continue;
+                }
+
+                //special queries
+                if (query.StartsWith(":"))
+                {
+                    PerformSpecialQueries(query);
+                    continue;
+                }
+                //search queries
+                else
+                {
+                    component = parser.ParseQuery(query);
+                    postings = component.GetPostings(index, processor);
+                    if (postings.Count > 0)
                     {
-                        PerformSpecialQueries(query);
-                        continue;
+                        //Print the documents (posting list)
+                        PrintPostings(postings, corpus);
+                        //Ask a document to view and print the content
+                        IDocument doc = AskDocumentToView(postings, corpus);
+                        PrintContent(doc);
                     }
-                    //search queries
                     else
                     {
-                        component = parser.ParseQuery(query);
-                        postings = component.GetPostings(index, processor);
-                        if (postings.Count > 0)
-                        {
-                            //Print the documents (posting list)
-                            PrintPostings(postings, corpus);
-                            //Ask a document to view and print the content
-                            IDocument doc = AskDocumentToView(postings, corpus);
-                            PrintContent(doc);
-                        }
-                        else
-                        {
-                            Console.WriteLine("Not Found.");
-                        }
+                        Console.WriteLine("Not Found.");
                     }
-
                 }
 
             }
@@ -155,6 +155,17 @@ namespace Program
             else if (specialQuery.StartsWith(":index "))
             {                           // :index
                 string directory = specialQuery.Substring(":index ".Length);
+                
+                if (!Directory.Exists(directory))
+                {
+                    Console.WriteLine("The directory doesn't exist.");
+                    return;
+                }
+                if (corpus == null || corpus.CorpusSize == 0)
+                {
+                    Console.WriteLine("The directory is empty.");
+                    return;
+                }
                 corpus = DirectoryCorpus.LoadTextDirectory(directory);
                 index = PositionalInvertedIndexer.IndexCorpus(corpus);
             }
@@ -264,6 +275,7 @@ namespace Program
                 ((IDisposable)doc).Dispose();
             }
         }
+        
     }
 
 

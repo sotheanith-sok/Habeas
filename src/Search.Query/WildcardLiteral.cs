@@ -9,7 +9,7 @@ namespace Search.Query
     /// <summary>
     /// A representation of wildcard literal
     /// </summary>
-    public class WildcardLiteral
+    public class WildcardLiteral : IQueryComponent
     {
         //Token that user queury
         private string token;
