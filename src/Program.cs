@@ -5,6 +5,7 @@ using Search.Text;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 
 namespace Program
 {
@@ -20,8 +21,13 @@ namespace Program
             IQueryComponent component;
             BooleanQueryParser parser = new BooleanQueryParser();
             ITokenProcessor processor = new NormalTokenProcessor();
+            
+            AssemblyName appName = Assembly.GetEntryAssembly().GetName();
+            string projectName = appName.Name;
+            string projectVersion = appName.Version.Major.ToString()
+                              +'.'+ appName.Version.Minor.ToString();
+            Console.WriteLine($"[{projectName} {projectVersion}]");
 
-            Console.WriteLine("[Search Engine 0.7]");
             corpus = GetCorpusByAskingDirectory();
    
             if (corpus != null && corpus.CorpusSize != 0)   //NOTE: redundant..
