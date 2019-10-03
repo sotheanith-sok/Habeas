@@ -39,6 +39,7 @@ namespace Search.Query
         /// <returns></returns>
         public IList<Posting> GetPostings(IIndex index, ITokenProcessor processor)
         {
+            processor = ((NormalTokenProcessor)processor);
             //Normal proccessing of token and split them into literal by *
             string[] literals = this.token.Split("*");
             for (int i = 0; i < literals.Length; i++)

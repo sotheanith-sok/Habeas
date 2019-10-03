@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Porter2Stemmer;
 using System;
+using System.Linq;
 namespace Search.Text
 {
     public class StemmingTokenProcesor : NormalTokenProcessor, ITokenProcessor
@@ -12,14 +13,7 @@ namespace Search.Text
         /// <returns>A stem terms</returns>
         public new List<string> ProcessToken(string token)
         {
-            List<string> result = this.HyphenateWords(token);
-            for (int i = 0; i < result.Count; i++)
-            {
-                result[i] = this.RemoveNonAlphanumeric(result[i]);
-                result[i] = this.RemoveApostrophes(result[i]);
-                result[i] = this.RemoveQuotationMarks(result[i]);
-                result[i] = this.LowercaseWords(result[i]);
-            }
+            List<string> result = base.ProcessToken(token);
 
             for (int i = 0; i < result.Count; i++)
             {
