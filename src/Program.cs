@@ -159,6 +159,11 @@ namespace Program
                     Console.WriteLine("The directory doesn't exist.");
                     return;
                 }
+                if (corpus == null || corpus.CorpusSize == 0)
+                {
+                    Console.WriteLine("The directory is empty.");
+                    return;
+                }
                 corpus = DirectoryCorpus.LoadTextDirectory(directory);
                 index = PositionalInvertedIndexer.IndexCorpus(corpus);
             }
