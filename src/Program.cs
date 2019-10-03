@@ -1,6 +1,5 @@
 using Search.Document;
 using Search.Index;
-using Search.PositionalInvertedIndexer;
 using Search.Query;
 using Search.Text;
 using System;
@@ -20,7 +19,7 @@ namespace Program
             IList<Posting> postings;
             IQueryComponent component;
             BooleanQueryParser parser = new BooleanQueryParser();
-            ITokenProcessor processor = new BetterTokenProcessor();
+            ITokenProcessor processor = new NormalTokenProcessor();
 
             Console.WriteLine("[Search Engine 0.7]");
             corpus = GetCorpusByAskingDirectory();
@@ -125,7 +124,8 @@ namespace Program
             }
             else if (specialQuery.StartsWith(":stem ")) {                           // :stem
                 string term = specialQuery.Substring(":stem ".Length);
-                Console.WriteLine( new BetterTokenProcessor().StemWords(term) );
+                Console.WriteLine(new StemmingTokenProcesor().StemWords(term));
+                Console.WriteLine();
             }
             else if (specialQuery == ":vocab") {                                    // :vocab
                 PrintVocab(index, 1000);

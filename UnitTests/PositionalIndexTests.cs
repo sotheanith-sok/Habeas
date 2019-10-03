@@ -69,7 +69,7 @@ namespace UnitTests
         //For independent unit testing, Copied from PositionalInvertedIndexer.IndexCorpus()
         public static PositionalInvertedIndex IndexCorpus(IDocumentCorpus corpus)
         {
-            ITokenProcessor processor = new BetterTokenProcessor();
+            ITokenProcessor processor = new NormalTokenProcessor();
             PositionalInvertedIndex index = new PositionalInvertedIndex();
             Console.WriteLine($"UnitTest: Indexing {corpus.CorpusSize} documents in the corpus...");
             // Index the document

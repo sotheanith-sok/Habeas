@@ -1,5 +1,7 @@
 using Xunit;
 using System.Collections.Generic;
+using System.Linq;
+using Search.Text;
 using Search.Index;
 namespace UnitTests{
     public class KGramTests{
@@ -9,8 +11,12 @@ namespace UnitTests{
         /// </summary>
         [Fact]
         public void TestKGramRetrieval(){
-            HashSet<string> vocabularies = new HashSet<string>{"aPpLe", "apPreciation","Approachable"};
-            KGram kGram = new KGram(vocabularies);
+            ITokenProcessor processor = new NormalTokenProcessor();
+            List<string> vocabularies = new List<string>{"aPpLe", "apPreciation","Approachable"};
+            for(int i = 0; i<vocabularies.Count;i++){
+                vocabularies[i]= processor.ProcessToken(vocabularies[i])[0];
+            }
+            KGram kGram = new KGram(vocabularies.ToHashSet());
             Assert.Equal(new List<string>{"apple", "appreciation","approachable"},kGram.getVocabularies("$ap"));
         }
     }
