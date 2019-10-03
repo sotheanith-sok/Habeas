@@ -70,7 +70,7 @@ namespace UnitTests
             query = "\"ice smoothie";
             actual = parser.ParseQuery(query);
             actual.Should().BeOfType(typeof(PhraseLiteral));
-            ((PhraseLiteral)actual).Should().BeEquivalentTo(expected);
+            ((PhraseLiteral)actual).ToString().Should().BeEquivalentTo(expected.ToString());
         }
 
         [Fact]

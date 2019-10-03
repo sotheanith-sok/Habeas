@@ -6,11 +6,12 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace Search.PositionalInvertedIndexer
+namespace Search.Index
 {
     public class PositionalInvertedIndexer
     {
 
+        public static KGram kGram = null;
         /// <summary>
         /// Constructs an index from a corpus of documents
         /// </summary>
@@ -24,7 +25,11 @@ namespace Search.PositionalInvertedIndexer
             // Constuct a positional-inverted-index once 
             PositionalInvertedIndex index = new PositionalInvertedIndex();
             Console.WriteLine($"Indexing {corpus.CorpusSize} documents in the corpus...");
-            ITokenProcessor processor = new BetterTokenProcessor();
+            ITokenProcessor normalProcessor = new NormalTokenProcessor();
+
+            Console.WriteLine("Indexing the corpus... with Positional Inverted Index");
+
+            HashSet<string> tokenSet = new HashSet<string>();
 
             // Index the document
             foreach (IDocument doc in corpus.GetDocuments())
@@ -37,7 +42,7 @@ namespace Search.PositionalInvertedIndexer
                 foreach (string token in tokens)
                 {
                     //Process token to term
-                    List<string> terms = processor.ProcessToken(token);
+                    List<string> terms = normalProcessor.ProcessToken(token);
                     //Add term to the index
                     foreach (string term in terms)
                     {
@@ -48,15 +53,19 @@ namespace Search.PositionalInvertedIndexer
                     }
                     //Increase the position num
                     position += 1;
+
+                    //Keep track of vocabularies for K-gram
+                    foreach (string term in normalProcessor.ProcessToken(token)){
+                        tokenSet.Add(term);
+                    }
                 }
 
                 stream.Dispose();
+                ((IDisposable) doc).Dispose();
             }
-            //Time ends
+            kGram = new KGram(tokenSet);
             elapsedTime.Stop();
             Console.WriteLine("Elapsed " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
-
-
             return index;
         }
 

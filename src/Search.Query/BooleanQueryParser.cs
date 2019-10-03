@@ -221,7 +221,7 @@ namespace Search.Query
                 }
                 else {
                     //Otherwise, the position of the next '"' character is the end of the phrase
-                    lengthOut = nextSpace - startIndex;
+                    lengthOut = nextSpace - startIndex + 1;
                 }
                 //create the PhraseLiteral
                 return new Literal(
@@ -269,6 +269,19 @@ namespace Search.Query
                 );
             }
             
+        }
+
+        /// <summary>
+        /// Removes quotaton mars from strngs
+        /// </summary>
+        private string cleanPhrase(string phrase){
+			if(phrase[0] == '"'){
+				phrase = phrase.Substring(1);
+			}
+			if(phrase[phrase.Length-1] == '"'){
+				phrase = phrase.Remove(phrase.Length - 1);
+			}
+            return phrase;
         }
     }
 }
