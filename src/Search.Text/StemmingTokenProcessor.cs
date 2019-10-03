@@ -8,19 +8,14 @@ namespace Search.Text
         /// <summary>
         /// Process token and stem each terms
         /// </summary>
-        /// <param name="token"></param>
-        /// <returns>A stem terms</returns>
+        /// <param name="token">a token to be processed</param>
+        /// <returns>stemmed terms</returns>
         public new List<string> ProcessToken(string token)
         {
-            List<string> result = this.HyphenateWords(token);
-            for (int i = 0; i < result.Count; i++)
-            {
-                result[i] = this.RemoveNonAlphanumeric(result[i]);
-                result[i] = this.RemoveApostrophes(result[i]);
-                result[i] = this.RemoveQuotationMarks(result[i]);
-                result[i] = this.LowercaseWords(result[i]);
-            }
+            //process token with NormalTokenProcessor first
+            List<string> result = base.ProcessToken(token);
 
+            //Stem terms in the result
             for (int i = 0; i < result.Count; i++)
             {
                 string[] s = result[i].Split(" ");
