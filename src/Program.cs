@@ -34,8 +34,6 @@ namespace Program
             {
                 index = PositionalInvertedIndexer.IndexCorpus(corpus);
 
-                index = PositionalInvertedIndexer.IndexCorpus(corpus);
-
                 while (true)
                 {
                     //get query input from user

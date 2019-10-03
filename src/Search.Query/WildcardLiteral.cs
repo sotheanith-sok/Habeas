@@ -41,20 +41,24 @@ namespace Search.Query
         {
             processor = ((NormalTokenProcessor)processor);
             //Normal proccessing of token and split them into literal by *
-            string[] literals = this.token.Split("*");
+            string[] literals = this.token.Split("*").ToArray();
             for (int i = 0; i < literals.Length; i++)
             {
-                if (i == 0)
+                List<string> processedToken = processor.ProcessToken(literals[i]);
+                if (processedToken.Count > 0)
                 {
-                    literals[i] = "$" + processor.ProcessToken(literals[i])[0];
-                }
-                else if (i == literals.Length - 1)
-                {
-                    literals[i] = processor.ProcessToken(literals[i])[0] + "$";
-                }
-                else
-                {
-                    literals[i] = processor.ProcessToken(literals[i])[0];
+                    if (i == 0)
+                    {
+                        literals[i] = "$" + processedToken[0];
+                    }
+                    else if (i == literals.Length - 1)
+                    {
+                        literals[i] = processedToken[0] + "$";
+                    }
+                    else
+                    {
+                        literals[i] = processedToken[0];
+                    }
                 }
             }
 
