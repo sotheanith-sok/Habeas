@@ -32,18 +32,22 @@ namespace Search.Document
 
         public TextReader GetContent()
         {
-            // Open a StreamReader from a high-performance memory-mapped file.
-            try
-            {
-                MemoryMappedViewStream mmvs = MemoryMappedFile.OpenExisting(Path.GetFullPath(FilePath).GetHashCode().ToString()).CreateViewStream();
-                return new StreamReader(mmvs);
+            return new StreamReader(MemoryMappedFile.CreateFromFile(FilePath).CreateViewStream());
+            
+            //NOTE: mapName for OpenExisting() is not supported in Unix
+            // // Open a StreamReader from a high-performance memory-mapped file.
+            // string mapName = Path.GetFullPath(FilePath).GetHashCode().ToString();
+            // try
+            // {
+            //     MemoryMappedViewStream mmvs = MemoryMappedFile.OpenExisting(Path.GetFullPath(FilePath).GetHashCode().ToString()).CreateViewStream();
+            //     return new StreamReader(mmvs);
 
-            }
-            catch (FileNotFoundException)
-            {
-                MemoryMappedViewStream mmvs = MemoryMappedFile.CreateFromFile(FilePath, System.IO.FileMode.Open, Path.GetFullPath(FilePath).GetHashCode().ToString()).CreateViewStream();
-                return new StreamReader(mmvs);
-            }
+            // }
+            // catch (FileNotFoundException)
+            // {
+            //     MemoryMappedViewStream mmvs = MemoryMappedFile.CreateFromFile(FilePath, System.IO.FileMode.Open, Path.GetFullPath(FilePath).GetHashCode().ToString()).CreateViewStream();
+            //     return new StreamReader(mmvs);
+            // }
         }
 
         /// <summary>
