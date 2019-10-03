@@ -97,6 +97,7 @@ namespace UnitTests
                 }
 
                 stream.Dispose();
+                ((IDisposable) doc).Dispose();
             }
 
             return index;

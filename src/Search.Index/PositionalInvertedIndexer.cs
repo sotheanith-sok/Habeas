@@ -61,6 +61,7 @@ namespace Search.Index
                 }
 
                 stream.Dispose();
+                ((IDisposable) doc).Dispose();
             }
             kGram = new KGram(tokenSet);
             elapsedTime.Stop();

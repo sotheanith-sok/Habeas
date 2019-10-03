@@ -227,6 +227,8 @@ namespace Program
                 Console.WriteLine($"\n{doc.Title.ToUpper()}");
                 TextReader content = doc.GetContent();
                 Console.WriteLine(content.ReadToEnd());
+                content.Dispose();
+                ((IDisposable) doc).Dispose();
             }
         }
     }
