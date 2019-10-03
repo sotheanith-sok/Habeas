@@ -63,8 +63,8 @@ namespace UnitTests
             //Act
             IQueryComponent actual = parser.ParseQuery(query);
             //Assert
-            actual.Should().BeOfType(typeof(PhraseLiteral));    //TODO: Parser should be fixed!
-            ((PhraseLiteral)actual).Should().BeEquivalentTo(expected);
+            actual.Should().BeOfType(typeof(PhraseLiteral));
+            ((PhraseLiteral)actual).ToString().Should().BeEquivalentTo(expected.ToString());
 
             //Case2: query without ending quote
             query = "\"ice smoothie";
@@ -105,19 +105,18 @@ namespace UnitTests
             ((AndQuery)((OrQuery)actual).Components[2]).Components.Should().HaveCount(2);
         }
 
-        //TODO: near literal
-        // [Fact]
-        // public void ParseTest_NearQuery_ReturnsNearLiteral() {
-        //     //Arrange
-        //     BooleanQueryParser parser = new BooleanQueryParser();
-        //     string query = "[lemon NEAR/2 orange]";
-        //     NearLiteral expected = new NearLiteral(query);
-        //     //Act
-        //     IQueryComponent actual = parser.ParseQuery(query);
-        //     //Assert
-        //     actual.Should().BeOfType(typeof(NearLiteral));
-        //     ((NearLiteral)actual).Should().BeEquivalentTo(expected);
-        // }
+        [Fact]
+        public void ParseTest_NearQuery_ReturnsNearLiteral() {
+            //Arrange
+            BooleanQueryParser parser = new BooleanQueryParser();
+            string query = "[lemon NEAR/2 orange]";
+            NearLiteral expected = new NearLiteral("lemon", 2, "orange");
+            //Act
+            IQueryComponent actual = parser.ParseQuery(query);
+            //Assert
+            actual.Should().BeOfType(typeof(NearLiteral));
+            ((NearLiteral)actual).ToString().Should().BeEquivalentTo(expected.ToString());
+        }
 
         //TODO: wildcard literal
         // [Fact]
