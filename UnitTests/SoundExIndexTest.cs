@@ -21,9 +21,15 @@ namespace UnitTests
             PositionalInvertedIndex index = PositionalInvertedIndexer.IndexCorpus(corpus);
 
             SoundExIndex soundIndex = new SoundExIndex(index);
-            Dictionary<string, IList<Posting>> map = soundIndex.getSoundMap();
-            int length = map.Count;
-            Assert.Equal(0 , index.GetVocabulary().Count );
+            Dictionary<string, List<string>> map = soundIndex.getSoundMap();
+            
+    
+
+            var actual = map.ContainsKey("y200");
+            
+
+            //Assert
+            //actual.Should().Contain(expected);
         }
     }
 }

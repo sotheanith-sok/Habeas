@@ -1,25 +1,29 @@
 using System.Collections.Generic;
 using System;
+using Search.Document;
 
 namespace Search.Index
 {
     public class SoundExIndex
     {
 
-        private static Dictionary<string, IList<Posting>> soundMap;
+        private static Dictionary<string, List<string>> soundMap;
 
-        public SoundExIndex(PositionalInvertedIndex index)
+        public SoundExIndex(IDocumentCorpus corpus)
         {
-            soundMap = new Dictionary<string, IList<Posting>>();
+            soundMap = new Dictionary<string, List<string>>();
             SoundExHash(index);
 
         }
 
-        public static void SoundExHash(PositionalInvertedIndex index)
+        public static void SoundExHash(IDocumentCorpus corpus)
         {
 
 
+            foreach(IDocument d in corpus.GetDocuments() )
+            {
 
+            }
             string SoundExCode;
             foreach (string term in index.GetVocabulary())
             {
@@ -39,15 +43,14 @@ namespace Search.Index
 
                 if (soundMap.ContainsKey(SoundExCode))
                 {
-                    foreach (Posting p in index.GetPostings(term))
-                    {
-                        soundMap[SoundExCode].Add(p);
-                    }
+                
+                        soundMap[SoundExCode].Add(term);
+                    
                 }
                 else
                 {
-                    soundMap.Add(SoundExCode, index.GetPostings(term));
-                }
+                    soundMap.Add(SoundExCode, new List<String>{term});
+                } 
 
                 
             }
@@ -150,7 +153,7 @@ namespace Search.Index
 
         }
 
-        public Dictionary<string, IList<Posting>> getSoundMap()
+        public Dictionary<string, List<string>> getSoundMap()
         {
             return soundMap;
         }
