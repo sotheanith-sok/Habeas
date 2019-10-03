@@ -216,7 +216,7 @@ namespace Search.Query
                     // startIndex and lengthOut identify the bounds of the literal
                     new StringBounds(startIndex, lengthOut),
                     // we assume this is a single term literal... for now
-                    new PhraseLiteral(subquery.Substring(startIndex, lengthOut))
+                    new PhraseLiteral(cleanPhrase(subquery.Substring(startIndex, lengthOut)))
                 );
             }
             else
@@ -250,6 +250,19 @@ namespace Search.Query
                  // we assume this is a single term literal... for now
                  new TermLiteral(subquery.Substring(startIndex, lengthOut)));
             }
+        }
+
+        /// <summary>
+        /// Removes quotaton mars from strngs
+        /// </summary>
+        private string cleanPhrase(string phrase){
+			if(phrase[0] == '"'){
+				phrase = phrase.Substring(1);
+			}
+			if(phrase[phrase.Length-1] == '"'){
+				phrase = phrase.Remove(phrase.Length - 1);
+			}
+            return phrase;
         }
     }
 }
