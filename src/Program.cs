@@ -24,7 +24,7 @@ namespace Program
             if (corpus != null && corpus.CorpusSize != 0)
             {
                 index = PositIndex(corpus);
-                soundIndex = new SoundExIndex(index);
+                soundIndex = new SoundExIndex(corpus);
 
                 string query;
                 IList<Posting> postings;
