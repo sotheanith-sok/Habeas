@@ -250,19 +250,20 @@ namespace Search.Query
                 near = near.TrimStart('[').TrimEnd(']').ToLower();
                 Console.WriteLine(near);
 
-                //TODO: Handle exceptions with Regex. Not fully handling the exception yet
+                //Handle exceptions with Regex
                 // 1) no "near/"
-                // 2) no k value
+                //Regex rgx_near = new Regex(@"\s<near/>\d+\s");
+                if (near.Contains(" near/") == false) {
+                    //create TermLiteral instead with the first term appears
+                    string term1 = near.Substring(0, near.IndexOf(' '));
+                    Console.WriteLine($"not a proper near query, searching for the first term \"{term1}\"");
+                    return new Literal(
+                        new StringBounds(startIndex, lengthOut),
+                        new TermLiteral(term1)
+                    );
+                }
+                // TODO: 2) no k value
                 // 3) more than one word on either side
-                
-                // Regex rgx_near = new Regex(@"\b\s<near/>\d+\s\b");
-                // if (rgx_near.Matches(near).Count < 0) {
-                //     Console.WriteLine("not a proper near query");
-                //     return new Literal(
-                //         new StringBounds(startIndex, lengthOut),
-                //         new NearLiteral("term1",0,"term2")
-                //     );
-                // }
 
                 // Split the string into 3 parts
                 string[] parts = near.Split(' ');
@@ -270,7 +271,8 @@ namespace Search.Query
                 string first = parts[0];
                 string second = parts[2];
                 // Detect "near/" and get k value
-                int k = Int32.Parse(parts[1].Substring("near/".Length));
+                string k_str = parts[1].Substring("near/".Length);
+                int k = Int32.Parse(k_str);
 
                 // create NearLiteral(term1, k, term2)
                 return new Literal(
