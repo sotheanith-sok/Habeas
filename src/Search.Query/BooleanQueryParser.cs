@@ -209,7 +209,7 @@ namespace Search.Query
                 else
                 {
                     //Otherwise, the position of the next '"' character is the end of the phrase
-                    lengthOut = nextSpace - startIndex - 1;
+                    lengthOut = nextSpace - startIndex + 1;
                 }
                 //create the PhraseLiteral
                 return new Literal(
@@ -219,20 +219,6 @@ namespace Search.Query
                     new PhraseLiteral(subquery.Substring(startIndex, lengthOut))
                 );
             }
-            // JESSE'S EASTER EGG:
-            // POETRY INTERLUDE!
-            // Do not stand at my grave and weep,
-            // I am no there, I do not sleep.
-            // I am a thousand winds that blow.
-            // I am the diamond glint on snow.
-            // I am the the sunlight on ripened grain.
-            // I am the gentle autumn rain.
-            // When you awake amid the morning hush,
-            // I am the swift uplifting rush,
-            // Of quiet birds in circling flight.
-            // I am the soft star that shine at night.
-            // Do not stand at my grave and cry,
-            //I am not there, I did not die.
             else
             {
                 // Locate the next space to find the end of this literal.

@@ -23,6 +23,12 @@ namespace Search.Query
 		/// Constructs a PhraseLiteral given a string with one or more individual terms separated by spaces.
 		/// </summary>
 		public PhraseLiteral(string phrase) {
+			if(phrase[0] == '"'){
+				phrase = phrase.Substring(1);
+			}
+			if(phrase[phrase.Length-1] == '"'){
+				phrase = phrase.Remove(phrase.Length - 1);
+			}
 			mTerms.AddRange(phrase.Split(' '));
 		}
 
