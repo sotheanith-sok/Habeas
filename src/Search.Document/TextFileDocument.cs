@@ -16,6 +16,7 @@ namespace Search.Document {
 		public string FilePath { get; }
 
 		public string Title { get; }
+		public string Author { get; }
 
 		/// <summary>
 		/// Constructs a TextFileDocument with the given document ID representing the file at the given 

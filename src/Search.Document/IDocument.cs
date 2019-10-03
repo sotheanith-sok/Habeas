@@ -22,5 +22,7 @@ namespace Search.Document {
 		/// The title of the document, for displaying to the user.
 		/// </summary>
 		string Title { get; }
+
+		string Author { get; }
 	}
 }

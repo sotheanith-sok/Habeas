@@ -47,7 +47,7 @@ namespace Search.Document
             Document jobject = JsonConvert.DeserializeObject<Document>(file.ReadToEnd());
             articleTitle = jobject.title;
             Author = jobject.author;
-            var content = jobject.title + jobject.body + jobject.url + jobject.url+jobject.author;
+            var content = jobject.body;
             file.Dispose();
             return new StringReader(content);
         }
@@ -57,6 +57,8 @@ namespace Search.Document
         {
             return new JsonFileDocument(documentId, absoluteFilePath);
         }
+
+       
 
 
     }

@@ -7,12 +7,13 @@ namespace Search.Index
     public class SoundExIndex
     {
 
-        private static Dictionary<string, List<string>> soundMap;
+        private static Dictionary<string, List<IDocument>> soundMap;
 
         public SoundExIndex(IDocumentCorpus corpus)
         {
-            soundMap = new Dictionary<string, List<string>>();
-            SoundExHash(index);
+            soundMap = new Dictionary<string, List<IDocument>>();
+
+            SoundExHash(corpus);
 
         }
 
@@ -20,46 +21,44 @@ namespace Search.Index
         {
 
 
-            foreach(IDocument d in corpus.GetDocuments() )
+            foreach (IDocument d in corpus.GetDocuments())
             {
 
-            }
-            string SoundExCode;
-            foreach (string term in index.GetVocabulary())
-            {
-
-                SoundExCode = Change2Numbers(term);
-                SoundExCode = RemoveZeros(SoundExCode);
-                SoundExCode = RemoveDuplicateChar(SoundExCode);
-
-                if (SoundExCode.Length < 4)
-                    SoundExCode = SoundExCode.PadRight(4, '0');
-                else
+                if (d.Author.Length > 0)
                 {
-                    SoundExCode = SoundExCode.Substring(0,4);
+                    string SoundExCode;
+                    string author = d.Author.ToUpper();
+
+                    SoundExCode = Change2Numbers(author);
+                    SoundExCode = RemoveZeros(SoundExCode);
+                    SoundExCode = RemoveDuplicateChar(SoundExCode);
+
+                    if (SoundExCode.Length < 4)
+                        SoundExCode = SoundExCode.PadRight(4, '0');
+                    else
+                    {
+                        SoundExCode = SoundExCode.Substring(0, 4);
+                    }
+                    if (soundMap.ContainsKey(SoundExCode))
+                    {
+
+                        soundMap[SoundExCode].Add(d);
+
+                    }
+                    else
+                    {
+                        soundMap.Add(SoundExCode, new List<IDocument> { d });
+                    }
+
                 }
 
-
-
-                if (soundMap.ContainsKey(SoundExCode))
-                {
-                
-                        soundMap[SoundExCode].Add(term);
-                    
-                }
-                else
-                {
-                    soundMap.Add(SoundExCode, new List<String>{term});
-                } 
-
-                
             }
 
 
-            foreach(string soundex in soundMap.Keys)
-            {
-                Console.WriteLine(soundex);
-            }
+
+
+
+
 
 
         }
@@ -130,7 +129,7 @@ namespace Search.Index
         public static string RemoveDuplicateChar(string code)
         {
             string newCode = "";
-        
+
             if (code.Length < 2)
             {
                 return code;
@@ -153,7 +152,7 @@ namespace Search.Index
 
         }
 
-        public Dictionary<string, List<string>> getSoundMap()
+        public Dictionary<string, List<IDocument>> getSoundMap()
         {
             return soundMap;
         }
