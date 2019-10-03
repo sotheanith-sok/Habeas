@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Search.Text;
+using Search.Index;
 
 namespace Search.Query
 {
@@ -242,13 +243,12 @@ namespace Search.Query
                  // we assume this is a single term literal... for now
                  new TermLiteral(subquery.Substring(startIndex, lengthOut)));
                 }
-                //otherwise, stem
                 // This is a term literal containing a single term.
                 return new Literal(
                  // startIndex and lengthOut identify the bounds of the literal
                  new StringBounds(startIndex, lengthOut),
                  // we assume this is a single term literal... for now
-                 new TermLiteral(subquery.Substring(startIndex, lengthOut)));
+                 new WildcardLiteral(subquery.Substring(startIndex, lengthOut), PositionalInvertedIndexer.kGram));
             }
         }
 
