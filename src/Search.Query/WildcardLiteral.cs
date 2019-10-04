@@ -145,21 +145,25 @@ namespace Search.Query
                 }
             }
 
+            HashSet<string> stemmedFinalCandidates= new HashSet<string>();
+            foreach(string s in finalCandidates){
+                stemmedFinalCandidates.Add(stemmer.Stem(s).Value);
+            }
+
             Console.WriteLine("Get posting");
             //Get posting for final candidates
             List<IList<Posting>> finalPostingList = new List<IList<Posting>>();
-            foreach (string candidate in finalCandidates)
+            foreach (string candidate in stemmedFinalCandidates)
             {
-
-                // finalPostingList.Add(index.GetPostings(stemmer.Stem(candidate).Value));
+                Console.WriteLine("\n", stemmedFinalCandidates);
                 finalPostingList.Add(index.GetPostings(candidate));
+                // finalPostingList.Add(index.GetPostings(candidate));
 
             }
             Console.WriteLine("MergePosing");
             Console.WriteLine("Posing list size:", finalPostingList.Count);
             int l =0;
             for(int i =0; i<finalPostingList.Count;i++){
-                Console.WriteLine(i+":"+finalPostingList[i].Count);
                 l+=finalPostingList[i].Count;
             }
             Console.WriteLine("Sum: "+l);
