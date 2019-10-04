@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Search.Query;
 
 namespace Search.Index
 {
@@ -23,10 +24,10 @@ namespace Search.Index
         }
 
         /// <summary>
-        /// Gets Postings from index.
+        /// Gets Postings of a given term from index.
         /// </summary>
         /// <param name="term">a processed string</param>
-        /// <return>a Posting</return>
+        /// <return>a posting list</return>
         public IList<Posting> GetPostings(string term)
         {
             if (hashMap.ContainsKey(term)) {
@@ -34,6 +35,21 @@ namespace Search.Index
             } else {
                 return new List<Posting>();
             }
+        }
+
+        /// <summary>
+        /// Gets Postings of a given list of terms from index.
+        /// This or-merge the all the results from the multiple terms
+        /// </summary>
+        /// <param name="terms">a list of processed strings</param>
+        /// <return>a or-merged posting list</return>
+        public IList<Posting> GetPostings(List<string> terms)
+        {
+			List<IList<Posting>> postingLists = new List<IList<Posting>>();
+			foreach(string term in terms) {
+				postingLists.Add( GetPostings(term) );
+			}
+			return Merge.OrMerge(postingLists);
         }
 
         /// <summary>

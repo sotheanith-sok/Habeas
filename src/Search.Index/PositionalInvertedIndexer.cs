@@ -4,25 +4,33 @@ using Search.Index;
 using Search.Text;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
-
-namespace Search.PositionalInvertedIndexer
+namespace Search.Index
 {
     public class PositionalInvertedIndexer
     {
 
+        public static KGram kGram = null;
         /// <summary>
         /// Constructs an index from a corpus of documents
         /// </summary>
         /// <param name="corpus">a corpus to be indexed</param>
         public static PositionalInvertedIndex IndexCorpus(IDocumentCorpus corpus)
         {
-            ITokenProcessor processor = new BetterTokenProcessor();
-
+            //Time how long it takes to index the corpus
+            Stopwatch elapsedTime = new Stopwatch();
+            elapsedTime.Start();
+            
             // Constuct a positional-inverted-index once 
             PositionalInvertedIndex index = new PositionalInvertedIndex();
+            Console.WriteLine($"Indexing {corpus.CorpusSize} documents in the corpus...");
+            ITokenProcessor normalProcessor = new NormalTokenProcessor();
 
             Console.WriteLine("Indexing the corpus... with Positional Inverted Index");
+
+            HashSet<string> tokenSet = new HashSet<string>();
+
             // Index the document
             foreach (IDocument doc in corpus.GetDocuments())
             {
@@ -34,7 +42,7 @@ namespace Search.PositionalInvertedIndexer
                 foreach (string token in tokens)
                 {
                     //Process token to term
-                    List<string> terms = processor.ProcessToken(token, false, false);
+                    List<string> terms = normalProcessor.ProcessToken(token);
                     //Add term to the index
                     foreach (string term in terms)
                     {
@@ -45,26 +53,20 @@ namespace Search.PositionalInvertedIndexer
                     }
                     //Increase the position num
                     position += 1;
+
+                    //Keep track of vocabularies for K-gram
+                    foreach (string term in normalProcessor.ProcessToken(token)){
+                        tokenSet.Add(term);
+                    }
                 }
 
                 stream.Dispose();
+                ((IDisposable) doc).Dispose();
             }
-
+            kGram = new KGram(tokenSet);
+            elapsedTime.Stop();
+            Console.WriteLine("Elapsed " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
             return index;
-        }
-
-        /// <summary>
-        /// Prints the first 1000 terms in the sorted vocabulary and the count
-        /// </summary>
-        /// <param name="vocabulary">a sorted vocabulary to print</param>
-        /// <param name="count">the number of terms to print</param>
-        public static void PrintVocab(IReadOnlyList<string> vocabulary, int count)
-        {
-            for (int i = 0; i < Math.Min(count, vocabulary.Count); i++)
-            {
-                Console.WriteLine(vocabulary[i]);
-            }
-            Console.WriteLine($"Total: {vocabulary.Count} terms");
         }
 
     }

@@ -1,7 +1,6 @@
 using Xunit;
 using System.Collections.Generic;
 using Search.Document;
-using Search.PositionalInvertedIndexer;
 using Search.Index;
 
 namespace UnitTests

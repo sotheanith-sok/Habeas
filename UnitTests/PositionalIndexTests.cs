@@ -1,88 +1,77 @@
 using Xunit;
 using System.Collections.Generic;
 using Search.Document;
-using Search.PositionalInvertedIndexer;
 using Search.Index;
 using Search.Text;
 using System.Runtime.InteropServices;
 using System;
-
-//Aren't they too big to call unit tests?
+using FluentAssertions;
 
 namespace UnitTests
 {
-    public class PositionalIndexTests
-    {
+    public class PositionalIndexTests {
+        IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../UnitTests/testCorpus");
 
-        //Arrange
-        static IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../UnitTests/testCorpus");
-        PositionalInvertedIndex index = IndexCorpus(corpus);
-        [Theory]
-        [MemberData(nameof(Data))]
-        public void PositoinalPostingTest(string term, List<Posting> expected)
-        {
+        [Fact]
+        public void PostionalIndexTest_OnePosition(){
+            //Arrange
+            string term = "sun";
+            IList<Posting> expected;
+            System.Console.WriteLine("PositionalIndexTest_OnePosition: ");
+            System.Console.Write($"Set expected postings of \'{term}\'");
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) {
+                System.Console.WriteLine(" for MacOSX");
+                expected = new List<Posting>{ new Posting(1, new List<int>{3}) };
+            }
+            else {
+                System.Console.WriteLine(" for Windows and other OSs");
+                expected = new List<Posting>{ new Posting(3, new List<int>{3}) };
+            }
+
+            //Act
+            PositionalInvertedIndex index = IndexCorpus(corpus);
             var result = index.GetPostings(term);
-
+            
             //Assert
-            // TODO: Use FluentAssertion. It can check if A contains all in B.
-            // Use some assertions other than equal().
-            Assert.Equal(expected.Count, result.Count);
-            //Assert.Equal(expected, result);
-
-            Console.WriteLine($"term: {term}");
-            for (int i = 0; i < Math.Max(expected.Count, result.Count); i++)
-            {
-                Assert.Equal(expected[i].ToString(), result[i].ToString());
-                Console.WriteLine($"expected: {expected[i].ToString()} \t actual: {result[i].ToString()}");
-            }
-
+            index.Should().NotBeNull("because indexCorpus shouldn't return null");
+            result.Should().HaveSameCount(expected);
+            result.Should().BeEquivalentTo(expected, config => config.WithStrictOrdering());
         }
 
-        //Test data for positional inverted index
-        //Assumed the terms were processed with BasicTokenProcessor
-        //The docID in the data is generated depend on different OS
-        public static TheoryData<string, List<Posting>> Data()
-        {
-            var winData = new TheoryData<string, List<Posting>> {
-                {"hello", new List<Posting>{
-                    new Posting(0, new List<int>{0,1}),
-                    new Posting(2, new List<int>{0,2,3})
-                }},
-                {"snows", new List<Posting>{
-                    new Posting(1, new List<int>{7,8,9}),
-                    new Posting(4, new List<int>{1,2,3})
-                }},
-            };
-
-            var macData = new TheoryData<string, List<Posting>> {
-                {"hello", new List<Posting>{
-                    new Posting(2, new List<int>{0,2,3}),
-                    new Posting(4, new List<int>{0,1}),
-                }},
-                {"snows", new List<Posting>{
-                    new Posting(0, new List<int>{1,2,3}),
-                    new Posting(3, new List<int>{7,8,9}),
-                }},
-            };
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                System.Console.WriteLine("TestData for macOSX");
-                return macData;
+        [Fact]
+        public void PostionalIndexTest_MultiplePositions(){
+            //Arrange
+            string term = "hello";
+            IList<Posting> expected;
+            System.Console.WriteLine("PositionalIndexTest_MultiplePositions: ");
+            System.Console.Write($"Set expected postings of \'{term}\'");
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) {
+                System.Console.WriteLine(" for MacOSX");
+                expected = new List<Posting>{ new Posting(2, new List<int>{0,2,3}),
+                                              new Posting(4, new List<int>{0,1}) };
+            } else {
+                System.Console.WriteLine(" for Windows and other OSs");
+                expected = new List<Posting>{ new Posting(0, new List<int>{0,1}),
+                                              new Posting(2, new List<int>{0,2,3}) };
             }
-            else
-            {
-                System.Console.WriteLine("TestData for other OSs");
-                return winData;
-            }
+
+            //Act
+            PositionalInvertedIndex index = IndexCorpus(corpus);
+            var result = index.GetPostings(term);
+            
+            //Assert
+            index.Should().NotBeNull("because indexCorpus shouldn't return null");
+            result.Should().HaveSameCount(expected);
+            result.Should().BeEquivalentTo(expected, config => config.WithStrictOrdering());
         }
+
 
         //For independent unit testing, Copied from PositionalInvertedIndexer.IndexCorpus()
         public static PositionalInvertedIndex IndexCorpus(IDocumentCorpus corpus)
         {
-            ITokenProcessor processor = new BetterTokenProcessor();
+            ITokenProcessor processor = new NormalTokenProcessor();
             PositionalInvertedIndex index = new PositionalInvertedIndex();
-            Console.WriteLine("UnitTests: Indexing the corpus... with Positional Inverted Index");
+            Console.WriteLine($"UnitTest: Indexing {corpus.CorpusSize} documents in the corpus...");
             // Index the document
             foreach (IDocument doc in corpus.GetDocuments())
             {
@@ -94,7 +83,7 @@ namespace UnitTests
                 foreach (string token in tokens)
                 {
                     //Process token to term
-                    List<string> terms = processor.ProcessToken(token, false, false);
+                    List<string> terms = processor.ProcessToken(token);
                     //Add term to the index
                     foreach (string term in terms)
                     {
@@ -108,6 +97,7 @@ namespace UnitTests
                 }
 
                 stream.Dispose();
+                ((IDisposable) doc).Dispose();
             }
 
             return index;
