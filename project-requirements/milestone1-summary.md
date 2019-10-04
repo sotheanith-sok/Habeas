@@ -90,15 +90,29 @@ For more detailed requirements, check [milestone1.pdf](milestone1.pdf)
 
 ## Extra Modules
 Listed in Priority 
+
 ### 1. Unit Testing 
-- for Positional Index
-- for Query language
+- on Positional Index
+- on Query language
+- on other modules
 
 ### 2. GUI 
 ..
+
 ### 3. Wildcard Queries 
 ..
+
 ### 4. SoundEx 
 ..
+
 ### 5. Near Operator
-..
+- NearLiteral class
+- Implement GetPostings()
+- Upgrade findNextLiteral() to recognize NEAR query
+- unit test on it
+#### Near query example:  
+`[angels NEAR/2 baseball]`  
+To find documents that `baseball` appears at most 2 positions away from `angels`.  
+`angels baseball` - match  
+`angels love baseball` - match  
+`angels really love baseball` - not match  

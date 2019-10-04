@@ -1,11 +1,12 @@
 using Xunit;
-using System;
 using Search.Document;
 using Search.Index;
 using Search.Text;
 using Search.Query;
 using System.Collections.Generic;
 using FluentAssertions;
+using System.Runtime.InteropServices;
+
 namespace UnitTests
 {
     public class WildcardLiteralTest
@@ -19,8 +20,17 @@ namespace UnitTests
             ITokenProcessor processor = new NormalTokenProcessor();
             KGram kGram = PositionalInvertedIndexer.kGram;
             WildcardLiteral wildcard = new WildcardLiteral("*ell*", kGram);
-            List<Posting> p = (List<Posting>)(wildcard.GetPostings(index, processor));
-            p.Should().BeEquivalentTo(new List<Posting>{new Posting(0, new List<int>{0,1}), new Posting(2, new List<int>{0,2,3})});
+            
+            IList<Posting> result = (List<Posting>)(wildcard.GetPostings(index, processor));
+            
+            IList<Posting> expected;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) {
+                expected = MergeTests.GeneratePostings("(4,[0,1]), (2,[0,2,3])");
+            } else {
+                expected = MergeTests.GeneratePostings("(0,[0,1]), (2,[0,2,3])");
+            }
+
+            result.Should().BeEquivalentTo(expected);
         }
     }
 }
