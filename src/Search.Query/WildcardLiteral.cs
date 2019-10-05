@@ -17,6 +17,7 @@ namespace Search.Query
         //KGram for look up
         private KGram kGram;
 
+        //Use for internal stemming of words
         private EnglishPorter2Stemmer stemmer;
 
         /// <summary>
@@ -40,8 +41,8 @@ namespace Search.Query
         public IList<Posting> GetPostings(IIndex index, ITokenProcessor processor)
         {
             processor = ((NormalTokenProcessor)processor);
+
             //Normal proccessing of token and split them into literal by *
-            Console.WriteLine("Split by *");
             string[] literals = this.token.Split("*").ToArray();
             for (int i = 0; i < literals.Length; i++)
             {
@@ -62,20 +63,16 @@ namespace Search.Query
                     }
                 }
             }
-
             literals = literals.Where(x => !string.IsNullOrEmpty(x) && x != "$").ToArray();
 
             //Gather candidates for each literals
             List<List<string>> candidatesList = new List<List<string>>();
-
-            Console.WriteLine("Find candidateList");
             foreach (string literal in literals)
             {
                 List<string> candidates = new List<String>();
                 bool didMerge = false;
                 //KGram and AND merge results for a literal                
                 List<string> kGramTerms = this.KGramSplitter(literal);
-                Console.WriteLine("Find candidates");
                 foreach (string kGramTerm in kGramTerms)
                 {
                     if (!didMerge)
@@ -85,17 +82,10 @@ namespace Search.Query
                     }
                     else
                     {
-                        Console.WriteLine("Print Candidate Size");
-                        Console.WriteLine(candidates.Count);
-                        Console.WriteLine("Print new candidates size");
-                        Console.WriteLine(this.kGram.getVocabularies(kGramTerm).Count);
-                        Console.WriteLine("Starting Merge");
                         candidates = candidates.Intersect(this.kGram.getVocabularies(kGramTerm)).ToList();
-                        Console.WriteLine("Ending Merge");
                     }
                 }
 
-                Console.WriteLine("Filter candidates");
                 //Post filtering step
                 if (candidates.Count > 0)
                 {
@@ -114,23 +104,17 @@ namespace Search.Query
                     // *literal*
                     else if (literal.ElementAt(0) != '$' && literal.ElementAt(literal.Length - 1) != '$')
                     {
-                        candidates = candidates.Where(s=> s.ElementAt(0)!='$' && s.ElementAt(s.Length-1)!='$').ToList();
-                        candidates = candidates.Where(s=>s.Contains(literal)).ToList();
+                        candidates = candidates.Where(s => s.Contains(literal) && !s.StartsWith(literal) && !s.EndsWith(literal)).ToList();
                     }
-
-                    Console.WriteLine("Add candidate to list");
                     candidatesList.Add(candidates);
                 }
                 else
                 {
-                    Console.WriteLine("Add candidate to list");
                     candidatesList.Add(new List<string>());
                 }
 
             }
 
-
-            Console.WriteLine("Find the final candidate");
             //Generate the final candidates by merging candidates from all literals
             List<string> finalCandidates = new List<string>();
             for (int i = 0; i < candidatesList.Count; i++)
@@ -145,32 +129,20 @@ namespace Search.Query
                 }
             }
 
-            HashSet<string> stemmedFinalCandidates= new HashSet<string>();
-            foreach(string s in finalCandidates){
+            //Stem final candidates and remove duplicate
+            HashSet<string> stemmedFinalCandidates = new HashSet<string>();
+            foreach (string s in finalCandidates)
+            {
                 stemmedFinalCandidates.Add(stemmer.Stem(s).Value);
             }
 
-            Console.WriteLine("Get posting");
             //Get posting for final candidates
             List<IList<Posting>> finalPostingList = new List<IList<Posting>>();
             foreach (string candidate in stemmedFinalCandidates)
             {
-                Console.WriteLine("\n", stemmedFinalCandidates);
                 finalPostingList.Add(index.GetPostings(candidate));
-                // finalPostingList.Add(index.GetPostings(candidate));
+            }
 
-            }
-            Console.WriteLine("MergePosing");
-            Console.WriteLine("Posing list size:", finalPostingList.Count);
-            int l =0;
-            for(int i =0; i<finalPostingList.Count;i++){
-                l+=finalPostingList[i].Count;
-            }
-            Console.WriteLine("Sum: "+l);
-            Console.WriteLine("Averge: "+(l/finalPostingList.Count+1));
-            Console.WriteLine("Try merging");
-            Merge.OrMerge(finalPostingList);
-            Console.WriteLine("Return");
             return Merge.OrMerge(finalPostingList);
         }
 

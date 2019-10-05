@@ -11,6 +11,8 @@ namespace Search.Index
     {
         //Map uses to store data internally
         private Dictionary<string, List<string>> map;
+
+        //Map uses to manp k-gram less than size to k-gram
         private Dictionary<string, List<string>> miniMap;
 
         //size of each k-gram terms.
@@ -35,9 +37,13 @@ namespace Search.Index
         /// <param name="vocabularies">List of unique vocabularies</param>
         private void buildKGram(HashSet<string> vocabularies)
         {
+            //K-gram vocabularies and add them to dictionary
             foreach (string vocab in vocabularies)
             {
+                //Split the vocabulary
                 List<string> kGrams = this.KGramSplitter("$" + vocab + "$", this.size);
+
+                //Add k-grams to dictionary
                 foreach (string kGram in kGrams)
                 {
                     if (this.map.ContainsKey(kGram))
@@ -48,31 +54,31 @@ namespace Search.Index
                     {
                         this.map.Add(kGram, new List<string> { vocab });
                     }
+                }
+            }
 
-                    for (int k = 0; k < this.size; k++)
+            //Build lesser k-gram to handle wildcard query lesser than size
+            foreach (string kGram in this.map.Keys)
+            {
+                for (int k = 0; k < this.size; k++)
+                {
+                    List<string> miniKGrams = this.KGramSplitter(kGram, k);
+                    foreach (string miniKGram in miniKGrams)
                     {
-                        List<string> miniKGrams = this.KGramSplitter(kGram, k);
-                        foreach (string miniKGram in miniKGrams)
+                        if (!string.IsNullOrWhiteSpace(miniKGram) && miniKGram != "$")
                         {
-                            
-                            if (!string.IsNullOrWhiteSpace(miniKGram) && miniKGram != "$")
+                            if (this.miniMap.ContainsKey(miniKGram))
                             {
-                                if (this.miniMap.ContainsKey(miniKGram))
-                                {
-                                    this.miniMap[miniKGram].Add(kGram);
-                                }
-                                else
-                                {
-                                    this.miniMap.Add(miniKGram, new List<string> { kGram });
-                                }
+                                this.miniMap[miniKGram].Add(kGram);
+                            }
+                            else
+                            {
+                                this.miniMap.Add(miniKGram, new List<string> { kGram });
                             }
                         }
                     }
-
                 }
-
             }
-            Console.WriteLine(this.miniMap.Count);
         }
 
         /// <summary>
@@ -82,6 +88,7 @@ namespace Search.Index
         /// <returns>A list of vocabularies</returns>
         public List<string> getVocabularies(string kGram)
         {
+            //If requested k-gram's length is less than this k-gram size, use mini kgram to find the right k-gram 
             if (kGram.Length < this.size)
             {
                 HashSet<string> candidates = new HashSet<string>();
