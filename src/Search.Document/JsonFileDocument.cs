@@ -35,6 +35,13 @@ namespace Search.Document
             FilePath = absoluteFilePath;
             FileName = Path.GetFileName(absoluteFilePath);
 
+            //NOTE: it might slow the speed down? but it needs to open the file to get title and author first
+            this.file = MemoryMappedFile.CreateFromFile(FilePath);
+            StreamReader file = new StreamReader(this.file.CreateViewStream());
+            Document jobject = JsonConvert.DeserializeObject<Document>(file.ReadToEnd());
+            Title = (jobject.title != null) ? jobject.title : "";
+            Author = jobject.author;
+            file.Dispose();
         }
 
         /// <summary>
@@ -46,8 +53,8 @@ namespace Search.Document
             this.file = MemoryMappedFile.CreateFromFile(FilePath);
             StreamReader file = new StreamReader(this.file.CreateViewStream());
             Document jobject = JsonConvert.DeserializeObject<Document>(file.ReadToEnd());
-            Title = (jobject.title != null) ? jobject.title : "No Title";
-            Author = jobject.author;
+            // Title = (jobject.title != null) ? jobject.title : "No Title";
+            // Author = jobject.author;
             var content = (jobject.body!= null) ? jobject.body : "";
             file.Dispose();
             return new StringReader(content);
