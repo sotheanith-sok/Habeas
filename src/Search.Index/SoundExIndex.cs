@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System;
 using Search.Document;
+using Search.Query;
 
 namespace Search.Index
 {
@@ -145,13 +146,28 @@ namespace Search.Index
         /// <summary>
         /// Get Posting from by author name.
         /// </summary>
-        /// <param name="name">a term of a name to retrieve postings by</param>
+        /// <param name="name">name to retrieve postings by</param>
         /// <returns></returns>
         public IList<Posting> GetPostings(string name){
-            //TODO: is given author name be one here? or 
-            //Check author name only 
-            throw new NotImplementedException();
+            IList<Posting> result = new List<Posting>();
             
+            //Check author name only contains one
+            string[] terms = name.Split(' ');
+            List<IList<Posting>> list = new List<IList<Posting>>();
+
+            foreach(string term in terms) {
+                string soundCode = ParseToSoundCode(term);
+                List<int> docIDs = soundMap[soundCode];
+                IList<Posting> postings = new List<Posting>();
+
+                foreach (int id in docIDs) {
+                    postings.Add(new Posting(id, new List<int>()));
+                }
+                list.Add(postings);
+            }
+            result = Merge.AndMerge(list);
+
+            return result;
         }
 
     }
