@@ -37,53 +37,42 @@ namespace Program
 
             //SoundExIndex
             soundIndex = new SoundExIndex(corpus);
+            //TODO: Might be better to build soundIndex inside of PII.IndexCorpus()
+            //So that it reads through all documents in the corpus only once.
 
             while (true)
             {
                 //get query input from user
                 Console.Write("\nSearch: ");
                 query = Console.ReadLine();
-                if (query.Equals(""))
-                {
+                if (query.Equals("")) {
                     continue;
                 }
 
                 //special queries
-                if (query.StartsWith(":"))
-                {
+                if (query.StartsWith(":")) {
                     PerformSpecialQueries(query);
                     continue;
                 }
                 //search queries
-                else
-                {
+                else {
                     component = parser.ParseQuery(query);
                     postings = component.GetPostings(index, processor);
-                    if (postings.Count > 0)
-                    {
-                        //Print the documents (posting list)
-                        PrintPostings(postings, corpus);
-                        //Ask a document to view and print the content
-                        IDocument doc = AskDocumentToView(postings, corpus);
-                        PrintContent(doc);
-                    }
-                    else
-                    {
+                    if (postings.Count > 0) {
+                        PerformSearchResult(postings, corpus, false, true, false);
+                    } else {
                         Console.WriteLine("Not Found.");
                     }
                 }
-
             }
-
-
 
         }
 
        
         ///<summary>
-        ///Requests Directory/Folder path from user and creates corpus based off that directory
+        ///Requests directory path from user and creates corpus based off that directory
         ///</summary>
-        public static IDocumentCorpus GetCorpusByAskingDirectory()
+        private static IDocumentCorpus GetCorpusByAskingDirectory()
         {
             IDocumentCorpus corpus;
             string directory;
@@ -94,21 +83,19 @@ namespace Program
                 Console.WriteLine("Enter the path of the directory you wish to search: ");
                 directory = Console.ReadLine();
 
-                if (!Directory.Exists(directory))
-                {
+                if (!Directory.Exists(directory)) {
                     Console.WriteLine("The directory doesn't exist.");
                     continue;
                 }
 
+                //Build corpus
                 corpus = DirectoryCorpus.LoadTextDirectory(directory);
 
-                if (corpus == null || corpus.CorpusSize == 0)
-                {
+                if (corpus == null || corpus.CorpusSize == 0) {
                     Console.WriteLine("The directory is empty.");
                     continue;
                 }
-                else
-                {
+                else {
                     // when valid corpus is constructed
                     break;
                 }
@@ -118,11 +105,11 @@ namespace Program
         }
 
         /// <summary>
-        /// Perform special queries that start with ':'
+        /// Performs special queries that start with ':'
         /// such as ':q', ':vocab', ':stem', ':index', ':help'
         /// </summary>
         /// <param name="specialQuery">a special query to be performed</param>
-        public static void PerformSpecialQueries(string specialQuery)
+        private static void PerformSpecialQueries(string specialQuery)
         {
             string info_support = "1. single query             Y\n"
                                 + "2. boolean query            Y  space for AND, + for OR\n"
@@ -169,8 +156,8 @@ namespace Program
             }
             else if (specialQuery.StartsWith(":author ")) {                         // :author
                 string name = specialQuery.Substring(":author ".Length);
-                //TODO: Perform Author Query
-                //PrintPostings( soundIndex.GetPostings() );
+                IList<Posting> postings = soundIndex.GetPostings(name);
+                PerformSearchResult(postings, corpus, true, false, false);
             }
             else if ((specialQuery == ":help") || (specialQuery == ":h")) {         // :help
                 Console.WriteLine("This search engine supports\n" + info_support);
@@ -188,7 +175,7 @@ namespace Program
         /// </summary>
         /// <param name="index">the index to print a sorted vocabulary from</param>
         /// <param name="count">the number of terms to print</param>
-        public static void PrintVocab(IIndex index, int count)
+        private static void PrintVocab(IIndex index, int count)
         {
             IReadOnlyList<string> vocabulary = index.GetVocabulary();
             for (int i = 0; i < Math.Min(count, vocabulary.Count); i++)
@@ -199,33 +186,61 @@ namespace Program
         }
 
         /// <summary>
-        /// Print the name and count of the documents from a posting list
+        /// Performs after-search actions including
+        /// 1) printing the search result
+        /// 2) asking user which document to view
+        /// 3) printing the content
+        /// </summary>
+        /// <param name="postings"></param>
+        /// <param name="corpus">the corpus to get result from</param>
+        /// <param name="author">option to print author info</param>
+        /// <param name="termCount">option to print term frequency of each document</param>
+        /// <param name="details">option to print detail(docID, positions)</param>
+        private static void PerformSearchResult(IList<Posting> postings, IDocumentCorpus corpus, bool author, bool termCount, bool details) {
+            PrintPostings(postings, corpus, author, termCount, details);
+            IDocument doc = AskDocumentToView(postings, corpus);
+            PrintContent(doc);
+        }
+        /// <summary>
+        /// Prints the name and count of the documents from a posting list
         /// </summary>
         /// <param name="postings">postings to be printed</param>
         /// <param name="corpus">corpus to get the document title from</param>
-        public static void PrintPostings(IList<Posting> postings, IDocumentCorpus corpus)
+        /// <param name="author">option to print author info</param>
+        /// <param name="termCount">option to print term frequency of each document</param>
+        /// <param name="details">option to print detail(docID, positions)</param>
+        private static void PrintPostings(IList<Posting> postings, IDocumentCorpus corpus, bool bAuthor, bool bTermCount, bool bDetails)
         {
-            Console.WriteLine($"    NUM TITLE");
+            //Print header
+            if(bAuthor == true) {
+                Console.WriteLine($"    NUM  AUTHOR\t\tTITLE");
+            } else {
+                Console.WriteLine($"    NUM  TITLE");
+            }
+
+            //Print postings
             int i = 1;
             foreach (Posting p in postings)
             {
                 IDocument doc = corpus.GetDocument(p.DocumentId);
-                Console.Write($"    [{i}] {doc.Title}");
-                Console.Write($"\t{p.Positions.Count} terms");
-                //Console.Write($"\t\t{p.ToString()}"); //print posting details
+                Console.Write($"    [{i}]  ");
+                if(bAuthor)    { Console.Write($"{doc.Author}\t"); }
+                Console.Write($"{doc.Title}");
+                if(bTermCount) { Console.Write($"\t{p.Positions.Count} terms"); }
+                if(bDetails)   { Console.Write($"\t\t{p.ToString()}"); }
                 Console.WriteLine();
                 i += 1;
             }
-            Console.WriteLine($"Found in {postings.Count} files.");
+            Console.WriteLine($"Found {postings.Count} files.");
         }
 
         /// <summary>
-        /// Ask the user the document to view
+        /// Asks the user the document to view
         /// </summary>
         /// <param name="postings">posting list to search the selected document from</param>
         /// <param name="corpus">corpus to get the document content from</param>
         /// <return>a selected document to view</return>
-        public static IDocument AskDocumentToView(IList<Posting> postings, IDocumentCorpus corpus)
+        private static IDocument AskDocumentToView(IList<Posting> postings, IDocumentCorpus corpus)
         {
             int selected;
             IDocument selectedDocument;
@@ -265,10 +280,10 @@ namespace Program
         }
 
         /// <summary>
-        /// Print the content of a document.
+        /// Prints the content of a document.
         /// </summary>
         /// <param name="doc">document to be printed</param>
-        public static void PrintContent(IDocument doc)
+        private static void PrintContent(IDocument doc)
         {
             if (doc != null)
             {
