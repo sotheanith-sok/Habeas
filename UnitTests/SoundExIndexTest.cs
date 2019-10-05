@@ -29,10 +29,25 @@ namespace UnitTests
         [InlineData("bae","B000")]
         [InlineData("blacklock","B424")]
         [InlineData("sok","S200")]
-        public void ParseToSoundCodeTest(string name, string expected)
+        public void ParseToSoundexTest(string name, string expected)
         {
-            var actual = new SoundExIndex().ParseToSoundCode(name);
+            var actual = new SoundExIndex().ParseToSoundex(name);
             actual.Should().Be(expected);
+        }
+
+        [Fact]
+        public void AddDocIDByAuthorTest()
+        {
+            //Arrange
+            SoundExIndex authorIndex = new SoundExIndex();
+            var actual = authorIndex;
+            //Act
+            authorIndex.AddDocIdByAuthor("sella", 1);
+            authorIndex.AddDocIdByAuthor("selly", 2);
+            authorIndex.AddDocIdByAuthor("yashua", 3);
+            authorIndex.AddDocIdByAuthor("yoshi", 4);
+            //Assert
+            //TODO assert!
         }
 
         [Fact]

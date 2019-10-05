@@ -14,6 +14,8 @@ namespace Search.Index
             SoundMap = new Dictionary<string, List<int>>();
         }
 
+        //TODO: soundexIndex shouldn't worry about corpus.
+        //SoundMap better be independently built with name and docIDs
         public SoundExIndex(IDocumentCorpus corpus)
         {
             SoundMap = new Dictionary<string, List<int>>();
@@ -26,120 +28,111 @@ namespace Search.Index
         /// <param name="corpus">the corpus of documents</param>
         public void BuildSoundExHashMap(IDocumentCorpus corpus)
         {
+            //NOTE: the corpus doesn't have author or title field.
             foreach (IDocument d in corpus.GetDocuments())
             {
                 //Skip document with no author field
                 if (d.Author == null) {
                     continue;
                 }
-                
-                //names can consists of more than one name
-                string[] names = d.Author.Split(' ');
-                
-                foreach (string name in names)
-                {
-                    //Get the sound code
-                    string soundCode = ParseToSoundCode(name);
+                AddDocIdByAuthor(d.Author, d.DocumentId);
+            }
+        }
 
-                    //Add docID to soundMap
-                    if (SoundMap.ContainsKey(soundCode)) {
-                        SoundMap[soundCode].Add(d.DocumentId);
-                    } else {
-                        SoundMap.Add(soundCode, new List<int> { d.DocumentId });
-                    }
+        /// <summary>
+        /// Add docID to the soundexIndex(hashmap) by the sound code of author name as a key
+        /// </summary>
+        /// <param name="authorName">name to be parsed to sound code and used as key</param>
+        /// <param name="docID">document id to be added as value to the hashmap</param>
+        public void AddDocIdByAuthor(string authorName, int docID) {
+            //names can consists of more than one name
+            string[] terms = authorName.Split(' ');
+
+            foreach (string term in terms)
+            {
+                //Get the sound code
+                string soundCode = ParseToSoundex(term);
+
+                //Add docID to soundMap
+                if (SoundMap.ContainsKey(soundCode)) {
+                    SoundMap[soundCode].Add(docID);
+                } else {
+                    SoundMap.Add(soundCode, new List<int> { docID });
                 }
             }
         }
 
         /// <summary>
-        /// Parse a string to a soundEx code
+        /// Parse a string to a soundEx code following SoundEx algorithm
         /// </summary>
-        /// <param name="name">a name to be parsed to a soundEx code</param>
+        /// <param name="name">a name to be parsed to a soundEx code (name should be one term)</param>
         /// <returns>a soundEx code in string</returns>
-        public string ParseToSoundCode(string name)
+        public string ParseToSoundex(string name)
         {
-            string soundCode;
-            soundCode = name.ToUpper();
-            soundCode = Change2Numbers(soundCode);
-            soundCode = RemoveZeros(soundCode);
-            soundCode = RemoveDuplicateChar(soundCode);
+            //SoundEx algorithm
+            string soundex = name;
 
-            //make the length of sound code be 4
-            if (soundCode.Length < 4) {
-                soundCode = soundCode.PadRight(4, '0');     // Y02 -> Y020
+            //1. change string to soundcode
+            soundex = Convert2SoundCode(soundex);
+            
+            //2. remove zero
+            soundex = soundex.Replace("0", string.Empty);
+            
+            //3. remove duplicate of its substring
+            soundex = RemoveDuplicateChar(soundex);     // Y24424 -> Y242
+
+            //4. make the length of sound code be 4
+            if (soundex.Length < 4) {
+                soundex = soundex.PadRight(4, '0');     // Y02 -> Y020
             } else {
-                soundCode = soundCode.Substring(0, 4);      // Y0222 -> Y022
+                soundex = soundex.Substring(0, 4);      // Y0234 -> Y023
             }
 
-            Console.WriteLine(soundCode);
-
-            return soundCode;
-        }
-
-        private string RemoveZeros(string SoundExCode)
-        {
-            while (SoundExCode.Contains('0')) {
-                for (int i = 0; i < SoundExCode.Length; i++) {
-                    if (SoundExCode[i].Equals('0')) {
-                        SoundExCode = SoundExCode.Remove(i, 1);
-                        break;
-                    }
-                }
-            }
-            return SoundExCode;
+            Console.WriteLine($"{name} -> {soundex}");
+            return soundex;
         }
 
         ///<summary>///
         ///Converts characters to their proper soundex numerical representation.
         ///</summary>///
-        private string Change2Numbers(string term)
+        private string Convert2SoundCode(string term)
         {
+            term = term.ToUpper();
+
+            //keep the first letter of the string
             string code = term[0].ToString();
-            for (int i = 1; i < term.Length; i++)
+
+            //change all following letters to to proper soundcodes
+            foreach(char c in term.Remove(0,1))     
             {
-                if ("AEIOUWHY".Contains(term[i])) {
-                    code = code + "0";
-                }
-                else if ("BFPV".Contains(term[i])) {
-                    code = code + "1";
-                }
-                else if ("CGJKQSXZ".Contains(term[i])) {
-                    code = code + "2";
-                }
-                else if ("DT".Contains(term[i])) {
-                    code = code + "3";
-                }
-                else if ("L".Contains(term[i])) {
-                    code = code + "4";
-                }
-                else if ("MN".Contains(term[i])) {
-                    code = code + "5";
-                }
-                else {
-                    code = code + "6";
-                }
+                if ("AEIOUWHY".Contains(c)) {      code += "0"; }
+                else if ("BFPV".Contains(c)) {     code += "1"; }
+                else if ("CGJKQSXZ".Contains(c)) { code += "2"; }
+                else if ("DT".Contains(c)) {       code += "3"; }
+                else if ("L".Contains(c)) {        code += "4"; }
+                else if ("MN".Contains(c)) {       code += "5"; }
+                else {                             code += "6"; }
             }
 
             return code;
         }
 
+        /// <summary>
+        /// Removes duplicate characters from a substring(2) a string
+        /// </summary>
+        /// <param name="code">a string to be checked</param>
+        /// <returns>a string with distinct characters in its substring(2)</returns>
         private string RemoveDuplicateChar(string code)
         {
-            string newCode = "";
-
             if (code.Length < 2) {
                 return code;
             }
-            else {
-                newCode = code.Substring(0, 2);
-
-                for (int i = 2; i < code.Length; i++) {
-                    if (!(code[i].Equals(code[i - 1]))) {
-                        newCode = newCode + code[i].ToString();
-                    }
-                }
-                return newCode;
+            string distinct = "";
+            string firstTwo = code.Substring(0,2);
+            foreach(char c in code.Substring(2)) {
+                if(!distinct.Contains(c)) { distinct += c; }
             }
+            return firstTwo + distinct;
         }
 
         /// <summary>
@@ -155,7 +148,7 @@ namespace Search.Index
             List<IList<Posting>> list = new List<IList<Posting>>();
 
             foreach(string term in terms) {
-                string soundCode = ParseToSoundCode(term);
+                string soundCode = ParseToSoundex(term);
                 
                 List<int> docIDs;
                 try {
