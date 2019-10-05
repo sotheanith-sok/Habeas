@@ -35,7 +35,7 @@ namespace UnitTests
         [InlineData("nith","N300")]
         public void ParseSoundCodeTest(string name, string expected)
         {
-            var actual = SoundExIndex.ParseSoundCode(name);
+            var actual = SoundExIndex.ParseToSoundCode(name);
             actual.Should().Be(expected);
         }
     }
