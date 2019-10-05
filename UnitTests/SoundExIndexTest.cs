@@ -20,11 +20,9 @@ namespace UnitTests
 
 
             SoundExIndex soundIndex = new SoundExIndex(corpus);
-            var map = soundIndex.getSoundMap();
+            var actual = soundIndex.getSoundMap().Keys.Count;
             
-            var actual = map.ContainsKey("y200");
-            
-            actual.Should().BeTrue();
+            actual.Should().Be(0);
             
         }
 

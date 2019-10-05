@@ -65,6 +65,8 @@ namespace Search.Index
                 soundCode = soundCode.Substring(0, 4);      // Y0222 -> Y022
             }
 
+            Console.WriteLine(soundCode);
+
             return soundCode;
         }
 
@@ -89,22 +91,22 @@ namespace Search.Index
             string code = term[0].ToString();
             for (int i = 1; i < term.Length; i++)
             {
-                if ("aeiouwhy".Contains(term[i])) {
+                if ("AEIOUWHY".Contains(term[i])) {
                     code = code + "0";
                 }
-                else if ("bfpv".Contains(term[i])) {
+                else if ("BFPV".Contains(term[i])) {
                     code = code + "1";
                 }
-                else if ("cgjkqsxz".Contains(term[i])) {
+                else if ("CGJKQSXZ".Contains(term[i])) {
                     code = code + "2";
                 }
-                else if ("dt".Contains(term[i])) {
+                else if ("DT".Contains(term[i])) {
                     code = code + "3";
                 }
-                else if ("l".Contains(term[i])) {
+                else if ("L".Contains(term[i])) {
                     code = code + "4";
                 }
-                else if ("mn".Contains(term[i])) {
+                else if ("MN".Contains(term[i])) {
                     code = code + "5";
                 }
                 else {
