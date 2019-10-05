@@ -13,6 +13,42 @@ namespace UnitTests
         IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../UnitTests/testCorpus");
 
         [Fact]
+        public void VocabTest_WithoutStemmer(){
+            //Arrange
+            IDocumentCorpus corpus2 = DirectoryCorpus.LoadTextDirectory("../../../UnitTests/testCorpus2");
+            PositionalInvertedIndex index = IndexCorpus(corpus2);
+            var expectedVocab = new List<string>{
+                "hello","world","it","is","snowing",
+                "the","full","of","mystery","snows",
+                "mr.snowman","loves","sun","a"
+            };  //expected vocabulary with not stemmed terms
+            //Act
+            var actual = index.GetVocabulary();
+            //Assert
+            index.Should().NotBeNull("because indexCorpus shouldn't return null");
+            actual.Should().HaveSameCount(expectedVocab);
+            actual.Should().BeEquivalentTo(expectedVocab);
+        }
+        [Fact]
+        public void VocabTest_WithStemmer(){
+            //Arrange
+            IDocumentCorpus corpus2 = DirectoryCorpus.LoadTextDirectory("../../../UnitTests/testCorpus2");
+            PositionalInvertedIndex index = IndexCorpus(corpus2);
+            var expectedVocab = new List<string>{
+                "hello","world","it","is","snow",
+                "the","full","of","mystery","mr.snowman",
+                "love","sun","a"
+            };  //expected vocabulary with stemmed terms
+            //Act
+            var actual = index.GetVocabulary();
+            //Assert
+            index.Should().NotBeNull("because indexCorpus shouldn't return null");
+            actual.Should().HaveCount(13);
+            actual.Should().HaveSameCount(expectedVocab);
+            actual.Should().BeEquivalentTo(expectedVocab);
+        }
+
+        [Fact]
         public void PostionalIndexTest_OnePosition(){
             //Arrange
             string term = "sun";
@@ -33,7 +69,6 @@ namespace UnitTests
             var result = index.GetPostings(term);
             
             //Assert
-            index.Should().NotBeNull("because indexCorpus shouldn't return null");
             result.Should().HaveSameCount(expected);
             result.Should().BeEquivalentTo(expected, config => config.WithStrictOrdering());
         }
@@ -60,7 +95,6 @@ namespace UnitTests
             var result = index.GetPostings(term);
             
             //Assert
-            index.Should().NotBeNull("because indexCorpus shouldn't return null");
             result.Should().HaveSameCount(expected);
             result.Should().BeEquivalentTo(expected, config => config.WithStrictOrdering());
         }
