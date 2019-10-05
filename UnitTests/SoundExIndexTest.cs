@@ -72,7 +72,7 @@ namespace UnitTests
             //Act
             var actual = authorIndex.GetPostings("yashua ovando");
             //Assert
-            actual.Should().HaveCount(1);
+            actual.Should().HaveCount(2);
         }
 
         [Fact]
