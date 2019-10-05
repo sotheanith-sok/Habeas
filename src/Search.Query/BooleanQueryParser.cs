@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Search.Text;
 using Search.Index;
 
@@ -179,12 +180,26 @@ namespace Search.Query
             return new StringBounds(startIndex, lengthOut);
         }
 
+        // JESSE'S EASTER EGG:
+        // POETRY INTERLUDE!
+        // Do not stand at my grave and weep,
+        // I am no there, I do not sleep.
+        // I am a thousand winds that blow.
+        // I am the diamond glint on snow.
+        // I am the the sunlight on ripened grain.
+        // I am the gentle autumn rain.
+        // When you awake amid the morning hush,
+        // I am the swift uplifting rush,
+        // Of quiet birds in circling flight.
+        // I am the soft star that shine at night.
+        // Do not stand at my grave and cry,
+        //I am not there, I did not die.
+
         /// <summary>
         /// Locates and returns the next literal from the given subquery string.
         /// </summary>
         private Literal FindNextLiteral(String subquery, int startIndex)
         {
-
             int subLength = subquery.Length;
             int lengthOut;
 
@@ -194,7 +209,7 @@ namespace Search.Query
                 ++startIndex;
             }
 
-            //If a non-white space character starts with '"'
+            // Capture a Phrase query
             if (subquery[startIndex] == '"')
             {
                 //move the startIndex up by one, we don't care about the '"' character
@@ -202,67 +217,101 @@ namespace Search.Query
                 // Locate the next space to find the closing '"' character.
                 int nextSpace = subquery.IndexOf('"', startIndex);
                 // Assuming some loathsome Boetian forgets to end the quote
-                if (nextSpace < 0)
-                {
+                if (nextSpace < 0) {
                     // We'll just assume that they meant the rest of the subquery
                     lengthOut = subquery.Length - startIndex;
                 }
-                else
-                {
+                else {
                     //Otherwise, the position of the next '"' character is the end of the phrase
                     lengthOut = nextSpace - startIndex + 1;
                 }
+                string phrase = subquery.Substring(startIndex, lengthOut);
+                phrase = phrase.TrimStart('"').TrimEnd('"');
+
                 //create the PhraseLiteral
                 return new Literal(
-                    // startIndex and lengthOut identify the bounds of the literal
                     new StringBounds(startIndex, lengthOut),
-                    // we assume this is a single term literal... for now
-                    new PhraseLiteral(cleanPhrase(subquery.Substring(startIndex, lengthOut)))
+                    new PhraseLiteral(phrase)
                 );
             }
+            // Capture a Near query
+            else if (subquery[startIndex] == '[')
+            {
+                startIndex++;
+                // Find closing bracket ']'
+                int closingIndex = subquery.IndexOf(']', startIndex);
+                // Limit near query parts
+                if(closingIndex < 0) {  //not have closing bracket
+                    lengthOut = subquery.Length - startIndex;
+                } else {                //have closing bracket
+                    lengthOut = closingIndex - startIndex + 1;
+                }
+                // Extract the near query substring
+                string near = subquery.Substring(startIndex, lengthOut);
+                near = near.TrimStart('[').TrimEnd(']').ToLower();
+                Console.WriteLine(near);
+
+                //Handle exceptions with Regex
+                // 1) no "near/"
+                //Regex rgx_near = new Regex(@"\s<near/>\d+\s");
+                if (near.Contains(" near/") == false) {
+                    //create TermLiteral instead with the first term appears
+                    string term1 = near.Substring(0, near.IndexOf(' '));
+                    Console.WriteLine($"not a proper near query, searching for the first term \"{term1}\"");
+                    return new Literal(
+                        new StringBounds(startIndex, lengthOut),
+                        new TermLiteral(term1)
+                    );
+                }
+                // TODO: 2) no k value
+                // 3) more than one word on either side
+
+                // Split the string into 3 parts
+                string[] parts = near.Split(' ');
+                // Get first and second term
+                string first = parts[0];
+                string second = parts[2];
+                // Detect "near/" and get k value
+                string k_str = parts[1].Substring("near/".Length);
+                int k = Int32.Parse(k_str);
+
+                // create NearLiteral(term1, k, term2)
+                return new Literal(
+                    new StringBounds(startIndex, lengthOut),
+                    new NearLiteral(first,k,second)
+                );
+            }
+            // Capture a Wildcard or Single query otherwise
             else
             {
                 // Locate the next space to find the end of this literal.
                 int nextSpace = subquery.IndexOf(' ', startIndex);
-                if (nextSpace < 0)
-                {
-                    // No more literals in this subquery.
+                if (nextSpace < 0) { // No more literals in this subquery.
                     lengthOut = subLength - startIndex;
                 }
-                else
-                {
+                else {
                     lengthOut = nextSpace - startIndex;
                 }
-                //if it is not a wildcard: stem
-                if (!subquery.Substring(startIndex, lengthOut).Contains("*"))
+
+                //Capture a Wildcard query
+                if (subquery.Substring(startIndex, lengthOut).Contains("*"))
                 {
-
-                 return new Literal(
-                 // startIndex and lengthOut identify the bounds of the literal
-                 new StringBounds(startIndex, lengthOut),
-                 // we assume this is a single term literal... for now
-                 new TermLiteral(subquery.Substring(startIndex, lengthOut)));
+                    //create WildcardLiteral
+                    return new Literal(
+                        new StringBounds(startIndex, lengthOut),
+                        new WildcardLiteral(subquery.Substring(startIndex, lengthOut), PositionalInvertedIndexer.kGram)
+                    );
                 }
-                // This is a term literal containing a single term.
+
+                //If it's not captured at any of the above, it's a Single query
+                //create TermLiteral
                 return new Literal(
-                 // startIndex and lengthOut identify the bounds of the literal
-                 new StringBounds(startIndex, lengthOut),
-                 // we assume this is a single term literal... for now
-                 new WildcardLiteral(subquery.Substring(startIndex, lengthOut), PositionalInvertedIndexer.kGram));
+                    new StringBounds(startIndex, lengthOut),
+                    new TermLiteral(subquery.Substring(startIndex, lengthOut))
+                );
             }
+            
         }
 
-        /// <summary>
-        /// Removes quotaton mars from strngs
-        /// </summary>
-        private string cleanPhrase(string phrase){
-			if(phrase[0] == '"'){
-				phrase = phrase.Substring(1);
-			}
-			if(phrase[phrase.Length-1] == '"'){
-				phrase = phrase.Remove(phrase.Length - 1);
-			}
-            return phrase;
-        }
     }
 }

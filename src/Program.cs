@@ -119,10 +119,10 @@ namespace Program
         public static void PerformSpecialQueries(string specialQuery)
         {
             string info_support = "1. single query             Y\n"
-                                + "2. boolean query            N  space for AND, + for OR\n"
-                                + "3. phrase query             N  \"term1 term2 ...\"\n"
-                                + "4. near query               N  [term1 NEAR/k term2]\n"
-                                + "5. wildcard queryv          N  colo*r\n"
+                                + "2. boolean query            Y  space for AND, + for OR\n"
+                                + "3. phrase query             Y  \"term1 term2 ...\"\n"
+                                + "4. near query               Y  [term1 NEAR/k term2]\n"
+                                + "5. wildcard query           Y  colo*r\n"
                                 + "6. soundex for author name  N";
             string info_special = ":q             exit the program\n"
                                 + ":stem [token]  print the stemmed token\n"
@@ -136,22 +136,18 @@ namespace Program
             }
             specialQuery = specialQuery.ToLower();
 
-            if (specialQuery == ":q")
-            {                                             // :q
+            if (specialQuery == ":q") {                                             // :q
                 System.Environment.Exit(1); // Exit the console app
             }
-            else if (specialQuery.StartsWith(":stem "))
-            {                           // :stem
+            else if (specialQuery.StartsWith(":stem ")) {                           // :stem
                 string term = specialQuery.Substring(":stem ".Length);
                 Console.WriteLine(new StemmingTokenProcesor().StemWords(term));
                 Console.WriteLine();
             }
-            else if (specialQuery == ":vocab")
-            {                                    // :vocab
+            else if (specialQuery == ":vocab") {                                    // :vocab
                 PrintVocab(index, 1000);
             }
-            else if (specialQuery.StartsWith(":index "))
-            {                           // :index
+            else if (specialQuery.StartsWith(":index ")) {                          // :index
                 string directory = specialQuery.Substring(":index ".Length);
 
                 if (!Directory.Exists(directory))
@@ -167,8 +163,7 @@ namespace Program
                 corpus = DirectoryCorpus.LoadTextDirectory(directory);
                 index = PositionalInvertedIndexer.IndexCorpus(corpus);
             }
-            else if ((specialQuery == ":help") || (specialQuery == ":h"))
-            {        // :help
+            else if ((specialQuery == ":help") || (specialQuery == ":h")) {         // :help
                 Console.WriteLine("This search engine supports\n" + info_support);
                 Console.WriteLine("\nSpecial queries\n" + info_special);
             }

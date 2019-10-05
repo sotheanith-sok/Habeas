@@ -9,12 +9,14 @@ namespace Search.Text
         /// <summary>
         /// Process token and stem each terms
         /// </summary>
-        /// <param name="token"></param>
-        /// <returns>A stem terms</returns>
+        /// <param name="token">a token to be processed</param>
+        /// <returns>stemmed terms</returns>
         public new List<string> ProcessToken(string token)
         {
+            //process token with NormalTokenProcessor first
             List<string> result = base.ProcessToken(token);
 
+            //Stem terms in the result
             for (int i = 0; i < result.Count; i++)
             {
                 string[] s = result[i].Split(" ");
