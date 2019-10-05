@@ -8,14 +8,16 @@ namespace Search.Index
     public class SoundExIndex
     {
 
-        private static Dictionary<string, List<int>> soundMap;
+        private Dictionary<string, List<int>> SoundMap { get; }
+
+        public SoundExIndex(){
+            SoundMap = new Dictionary<string, List<int>>();
+        }
 
         public SoundExIndex(IDocumentCorpus corpus)
         {
-            soundMap = new Dictionary<string, List<int>>();
-
+            SoundMap = new Dictionary<string, List<int>>();
             BuildSoundExHashMap(corpus);
-
         }
 
         /// <summary>
@@ -40,10 +42,10 @@ namespace Search.Index
                     string soundCode = ParseToSoundCode(name);
 
                     //Add docID to soundMap
-                    if (soundMap.ContainsKey(soundCode)) {
-                        soundMap[soundCode].Add(d.DocumentId);
+                    if (SoundMap.ContainsKey(soundCode)) {
+                        SoundMap[soundCode].Add(d.DocumentId);
                     } else {
-                        soundMap.Add(soundCode, new List<int> { d.DocumentId });
+                        SoundMap.Add(soundCode, new List<int> { d.DocumentId });
                     }
                 }
             }
@@ -54,7 +56,7 @@ namespace Search.Index
         /// </summary>
         /// <param name="name">a name to be parsed to a soundEx code</param>
         /// <returns>a soundEx code in string</returns>
-        public static string ParseToSoundCode(string name)
+        public string ParseToSoundCode(string name)
         {
             string soundCode;
             soundCode = name.ToUpper();
@@ -74,7 +76,7 @@ namespace Search.Index
             return soundCode;
         }
 
-        private static string RemoveZeros(string SoundExCode)
+        private string RemoveZeros(string SoundExCode)
         {
             while (SoundExCode.Contains('0')) {
                 for (int i = 0; i < SoundExCode.Length; i++) {
@@ -90,7 +92,7 @@ namespace Search.Index
         ///<summary>///
         ///Converts characters to their proper soundex numerical representation.
         ///</summary>///
-        private static string Change2Numbers(string term)
+        private string Change2Numbers(string term)
         {
             string code = term[0].ToString();
             for (int i = 1; i < term.Length; i++)
@@ -121,7 +123,7 @@ namespace Search.Index
             return code;
         }
 
-        private static string RemoveDuplicateChar(string code)
+        private string RemoveDuplicateChar(string code)
         {
             string newCode = "";
 
@@ -140,35 +142,36 @@ namespace Search.Index
             }
         }
 
-        public Dictionary<string, List<int>> getSoundMap()
-        {
-            return soundMap;
-        }
-
         /// <summary>
-        /// Get Posting from by author name.
+        /// Get Postings of documents which contain the similar sounding author names.
         /// </summary>
-        /// <param name="name">name to retrieve postings by</param>
-        /// <returns></returns>
-        public IList<Posting> GetPostings(string name){
+        /// <param name="nameQuery">author name to find documents</param>
+        /// <returns>postings with document and empty positions</returns>
+        public IList<Posting> GetPostings(string nameQuery){
             IList<Posting> result = new List<Posting>();
             
-            //Check author name only contains one
-            string[] terms = name.Split(' ');
+            //Check author name can contains multiple terms
+            string[] terms = nameQuery.Split(' ');
             List<IList<Posting>> list = new List<IList<Posting>>();
 
             foreach(string term in terms) {
                 string soundCode = ParseToSoundCode(term);
-                List<int> docIDs = soundMap[soundCode];
-                IList<Posting> postings = new List<Posting>();
+                
+                List<int> docIDs;
+                try {
+                    docIDs = SoundMap[soundCode];
+                } catch(KeyNotFoundException){
+                    continue;
+                }
 
+                IList<Posting> postings = new List<Posting>();
                 foreach (int id in docIDs) {
                     postings.Add(new Posting(id, new List<int>()));
                 }
                 list.Add(postings);
             }
-            result = Merge.AndMerge(list);
 
+            result = Merge.AndMerge(list);
             return result;
         }
 
