@@ -120,28 +120,12 @@ namespace Search.Query
             if (list.Count == 2) { return OrMerge(list[0], list[1]); }
 
             //Sort the posting lists in ascending order to merge smaller lists first
-            list.Sort( (a, b) => a.Count.CompareTo(b.Count) );
-
-            int blockSize = 1000;
-            if(list.Count < blockSize) {
-                //Prepare the posting lists to send to the recursive method
-                //pop a list off of the end of list
-                IList<Posting> biggest = list[list.Count - 1];
-                list.RemoveAt(list.Count - 1);
-                //Return the result of recursive merge
-                return OrMerge(list, biggest);
-
+            list.Sort( (b, a) => a.Count.CompareTo(b.Count) );
+            IList<Posting> finalList = new List<Posting>(); 
+            foreach(List<Posting> lp in list){
+                finalList = OrMerge(lp, finalList);
             }
-            else {  //NOTE: Preventing stackoverflow from too many recursion
-                List<IList<Posting>> partialResults = new List<IList<Posting>>();
-                //Divide the list by block and Merge posting lists in each block
-                for(int i=0; i<list.Count; i+=blockSize) {
-                    List<IList<Posting>> block = list.GetRange(i, blockSize);
-                    partialResults.Add( OrMerge(block) );
-                }
-                //Merge the partial results
-                return OrMerge(partialResults);
-            }
+            return finalList;
         }
 
         /// <summary>
