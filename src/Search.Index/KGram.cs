@@ -37,6 +37,8 @@ namespace Search.Index
         /// <param name="vocabularies">List of unique vocabularies</param>
         private void buildKGram(HashSet<string> vocabularies)
         {
+            Console.WriteLine("Generating K-Gram...");
+            
             //K-gram vocabularies and add them to dictionary
             foreach (string vocab in vocabularies)
             {
@@ -79,6 +81,11 @@ namespace Search.Index
                     }
                 }
             }
+
+            //Print Results
+            Console.WriteLine("K-Gram: "+this.map.Keys.Count);
+            Console.WriteLine("Mini K-Gram: "+this.miniMap.Keys.Count);
+
         }
 
         /// <summary>
