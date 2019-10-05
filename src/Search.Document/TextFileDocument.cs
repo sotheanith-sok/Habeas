@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.MemoryMappedFiles;
-using System.Text;
 
 namespace Search.Document
 {
@@ -16,7 +14,7 @@ namespace Search.Document
         /// The absolute path to the document's file.
         /// </summary>
         public string FilePath { get; }
-
+        public string FileName { get; }
 		public string Title { get; }
 		public string Author { get; }
 
@@ -30,9 +28,13 @@ namespace Search.Document
         {
             DocumentId = id;
             FilePath = absoluteFilePath;
-            Title = Path.GetFileName(absoluteFilePath);
+            FileName = Path.GetFileName(absoluteFilePath);
+            Title = FileName;   //since text file doesn't have title field
         }
 
+        /// <summary>
+        /// Get content of a text file
+        /// </summary>
         public TextReader GetContent()
         {
             this.file = MemoryMappedFile.CreateFromFile(FilePath);

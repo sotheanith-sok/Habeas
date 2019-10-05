@@ -7,5 +7,6 @@
 		/// The absolute path to the file for the document.
 		/// </summary>
 		string FilePath { get; }
+		string FileName { get; }
 	}
 }
