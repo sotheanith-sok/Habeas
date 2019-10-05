@@ -120,7 +120,7 @@ namespace Search.Query
             if (list.Count == 2) { return OrMerge(list[0], list[1]); }
 
             //Sort the posting lists in ascending order to merge smaller lists first
-            list.Sort( (b, a) => a.Count.CompareTo(b.Count) );
+            list.Sort( (a, b) => a.Count.CompareTo(b.Count) );
             IList<Posting> finalList = new List<Posting>(); 
             foreach(List<Posting> lp in list){
                 finalList = OrMerge(lp, finalList);
