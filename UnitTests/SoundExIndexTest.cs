@@ -20,12 +20,23 @@ namespace UnitTests
 
 
             SoundExIndex soundIndex = new SoundExIndex(corpus);
-            Dictionary<string, List<IDocument>> map = soundIndex.getSoundMap();
+            var map = soundIndex.getSoundMap();
             
             var actual = map.ContainsKey("y200");
             
             actual.Should().BeTrue();
             
+        }
+
+        [Theory]
+        [InlineData("yashua","Y200")]
+        [InlineData("sella","S400")]
+        [InlineData("jesse","J200")]
+        [InlineData("nith","N300")]
+        public void ParseSoundCodeTest(string name, string expected)
+        {
+            var actual = SoundExIndex.ParseSoundCode(name);
+            actual.Should().Be(expected);
         }
     }
 }

@@ -156,18 +156,21 @@ namespace Program
             else if (specialQuery.StartsWith(":index ")) {                          // :index
                 string directory = specialQuery.Substring(":index ".Length);
                 
-                if (!Directory.Exists(directory))
-                {
+                if (!Directory.Exists(directory)) {
                     Console.WriteLine("The directory doesn't exist.");
                     return;
                 }
-                if (corpus == null || corpus.CorpusSize == 0)
-                {
+                if (corpus == null || corpus.CorpusSize == 0) {
                     Console.WriteLine("The directory is empty.");
                     return;
                 }
                 corpus = DirectoryCorpus.LoadTextDirectory(directory);
                 index = PositionalInvertedIndexer.IndexCorpus(corpus);
+            }
+            else if (specialQuery.StartsWith(":author ")) {                         // :author
+                string name = specialQuery.Substring(":author ".Length);
+                //TODO: Perform Author Query
+                //PrintPostings( soundIndex.GetPostings() );
             }
             else if ((specialQuery == ":help") || (specialQuery == ":h")) {         // :help
                 Console.WriteLine("This search engine supports\n" + info_support);
@@ -202,12 +205,14 @@ namespace Program
         /// <param name="corpus">corpus to get the document title from</param>
         public static void PrintPostings(IList<Posting> postings, IDocumentCorpus corpus)
         {
+            Console.WriteLine($"    NUM TITLE");
             int i = 1;
             foreach (Posting p in postings)
             {
                 IDocument doc = corpus.GetDocument(p.DocumentId);
-                Console.Write($"    [{i}] {doc.Title} \t{p.Positions.Count} terms");
-                Console.Write($"\t\t{p.ToString()}");
+                Console.Write($"    [{i}] {doc.Title}");
+                Console.Write($"\t{p.Positions.Count} terms");
+                //Console.Write($"\t\t{p.ToString()}"); //print posting details
                 Console.WriteLine();
                 i += 1;
             }
