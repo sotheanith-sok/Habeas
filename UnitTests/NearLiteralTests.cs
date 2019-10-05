@@ -11,7 +11,7 @@ namespace UnitTests
 {
     public class NearLiteralTests
     {
-        private static IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../UnitTests/testCorpus");
+        private static IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../UnitTests/testCorpus3");
         private IIndex index = IndexCorpus(corpus);
         private static ITokenProcessor processor = new StemmingTokenProcesor();
 
@@ -23,16 +23,16 @@ namespace UnitTests
             IList<Posting> result = near.GetPostings(index, processor);
             // IList<Posting> expected = MergeTests.GeneratePostings("...");
             result.Should().HaveCount(3);
-            Console.Write(near.ToString()+"\t"); PrintPostingResult(result);
+            Console.Write(near.ToString() + "\t"); PrintPostingResult(result);
 
             //Test for stemmed words
             //[it NEAR/2 snowing] will also search [it NEAR/2 snow] and [it NEAR/2 snows]
             NearLiteral near2 = new NearLiteral("it", 2, "snowing");   //[it NEAR/2 snowing]
             result = near2.GetPostings(index, processor);
             // result.Should().HaveCount(4, "because processed \'snowing\' should include result of \'snow\' and \'snows\'");
-            Console.Write(near2.ToString()+"\t"); PrintPostingResult(result);
+            Console.Write(near2.ToString() + "\t"); PrintPostingResult(result);
         }
-        
+
         [Fact]
         public void GetPostingsTest_NearNotExist_ReturnsEmpty()
         {
@@ -44,8 +44,10 @@ namespace UnitTests
         }
 
 
-        private void PrintPostingResult(IList<Posting> result) {
-            foreach(Posting p in result) {
+        private void PrintPostingResult(IList<Posting> result)
+        {
+            foreach (Posting p in result)
+            {
                 Console.Write(p.ToString() + "  ");
             }
             Console.WriteLine();
@@ -79,10 +81,9 @@ namespace UnitTests
                     //Increase the position num
                     position += 1;
                 }
-
+                ((IDisposable)doc).Dispose();
                 stream.Dispose();
             }
-
             return index;
         }
     }

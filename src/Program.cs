@@ -20,7 +20,7 @@ namespace Program
             IList<Posting> postings;
             IQueryComponent component;
             BooleanQueryParser parser = new BooleanQueryParser();
-            ITokenProcessor processor = new NormalTokenProcessor();
+            ITokenProcessor processor = new StemmingTokenProcesor();
 
             AssemblyName appName = Assembly.GetEntryAssembly().GetName();
             string projectName = appName.Name;
@@ -30,49 +30,49 @@ namespace Program
 
             corpus = GetCorpusByAskingDirectory();
 
-            index = PositionalInvertedIndexer.IndexCorpus(corpus);
-
-            while (true)
+            if (corpus != null && corpus.CorpusSize != 0)   //NOTE: redundant..
             {
-                //get query input from user
-                Console.Write("\nSearch: ");
-                query = Console.ReadLine();
-                if (query.Equals(""))
-                {
-                    continue;
-                }
+                index = PositionalInvertedIndexer.IndexCorpus(corpus);
 
-                //special queries
-                if (query.StartsWith(":"))
+                while (true)
                 {
-                    PerformSpecialQueries(query);
-                    continue;
-                }
-                //search queries
-                else
-                {
-                    component = parser.ParseQuery(query);
-                    postings = component.GetPostings(index, processor);
-                    if (postings.Count > 0)
+                    //get query input from user
+                    Console.Write("\nSearch: ");
+                    query = Console.ReadLine();
+                    if (query.Equals(""))
                     {
-                        //Print the documents (posting list)
-                        PrintPostings(postings, corpus);
-                        //Ask a document to view and print the content
-                        IDocument doc = AskDocumentToView(postings, corpus);
-                        PrintContent(doc);
+                        continue;
                     }
+
+                    //special queries
+                    if (query.StartsWith(":"))
+                    {
+                        PerformSpecialQueries(query);
+                        continue;
+                    }
+                    //search queries
                     else
                     {
-                        Console.WriteLine("Not Found.");
+                        component = parser.ParseQuery(query);
+                        postings = component.GetPostings(index, processor);
+                        if (postings.Count > 0)
+                        {
+                            //Print the documents (posting list)
+                            PrintPostings(postings, corpus);
+                            //Ask a document to view and print the content
+                            IDocument doc = AskDocumentToView(postings, corpus);
+                            PrintContent(doc);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Not Found.");
+                        }
                     }
+
                 }
 
             }
-
-
-
         }
-
 
         ///<summary>
         ///Requests Directory/Folder path from user and creates corpus based off that directory
@@ -149,7 +149,7 @@ namespace Program
             }
             else if (specialQuery.StartsWith(":index ")) {                          // :index
                 string directory = specialQuery.Substring(":index ".Length);
-                
+
                 if (!Directory.Exists(directory))
                 {
                     Console.WriteLine("The directory doesn't exist.");
@@ -268,7 +268,7 @@ namespace Program
                 ((IDisposable)doc).Dispose();
             }
         }
-        
+
     }
 
 

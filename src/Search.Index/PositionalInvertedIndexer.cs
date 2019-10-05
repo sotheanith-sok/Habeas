@@ -25,7 +25,7 @@ namespace Search.Index
             // Constuct a positional-inverted-index once 
             PositionalInvertedIndex index = new PositionalInvertedIndex();
             Console.WriteLine($"Indexing {corpus.CorpusSize} documents in the corpus...");
-            ITokenProcessor normalProcessor = new NormalTokenProcessor();
+            ITokenProcessor processor = new StemmingTokenProcesor();
 
             Console.WriteLine("Indexing the corpus... with Positional Inverted Index");
 
@@ -37,29 +37,28 @@ namespace Search.Index
                 //Tokenize the documents
                 ITokenStream stream = new EnglishTokenStream(doc.GetContent());
                 IEnumerable<string> tokens = stream.GetTokens();
-
                 int position = 0;
                 foreach (string token in tokens)
                 {
                     //Process token to term
-                    List<string> terms = normalProcessor.ProcessToken(token);
+                    List<string> terms = processor.ProcessToken(token);
                     //Add term to the index
                     foreach (string term in terms)
                     {
                         if (term.Length > 0)
                         {
                             index.AddTerm(term, doc.DocumentId, position);
+                            // Console.WriteLine("¾"); //This thing will print out as _. So index is correct.
                         }
                     }
                     //Increase the position num
                     position += 1;
 
                     //Keep track of vocabularies for K-gram
-                    foreach (string term in normalProcessor.ProcessToken(token)){
+                    foreach (string term in ((NormalTokenProcessor)processor).ProcessToken(token)){
                         tokenSet.Add(term);
                     }
                 }
-
                 stream.Dispose();
                 ((IDisposable) doc).Dispose();
             }
