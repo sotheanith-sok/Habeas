@@ -46,9 +46,9 @@ namespace Search.Document
             this.file = MemoryMappedFile.CreateFromFile(FilePath);
             StreamReader file = new StreamReader(this.file.CreateViewStream());
             Document jobject = JsonConvert.DeserializeObject<Document>(file.ReadToEnd());
-            Title = jobject.title;
+            Title = (jobject.title != null) ? jobject.title : "No Title";
             Author = jobject.author;
-            var content = jobject.body;
+            var content = (jobject.body!= null) ? jobject.body : "";
             file.Dispose();
             return new StringReader(content);
         }
