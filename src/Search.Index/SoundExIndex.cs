@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System;
 using Search.Document;
+using Search.Query;
 
 namespace Search.Index
 {
@@ -13,48 +14,51 @@ namespace Search.Index
         {
             soundMap = new Dictionary<string, List<int>>();
 
-            SoundExHash(corpus);
+            BuildSoundExHashMap(corpus);
 
         }
 
-        public static void SoundExHash(IDocumentCorpus corpus)
+        /// <summary>
+        /// Constructs soundex index(hash map) from the author of documents in the corpus
+        /// </summary>
+        /// <param name="corpus">the corpus of documents</param>
+        public void BuildSoundExHashMap(IDocumentCorpus corpus)
         {
-
-
             foreach (IDocument d in corpus.GetDocuments())
             {
-
-                if (d.Author != null)
+                //Skip document with no author field
+                if (d.Author == null) {
+                    continue;
+                }
+                
+                //names can consists of more than one name
+                string[] names = d.Author.Split(' ');
+                
+                foreach (string name in names)
                 {
-                    string author = d.Author.ToUpper();
-                    string soundCode = ParseSoundCode(author);
+                    //Get the sound code
+                    string soundCode = ParseToSoundCode(name);
 
-                    //Add documentID to soundMap
+                    //Add docID to soundMap
                     if (soundMap.ContainsKey(soundCode)) {
                         soundMap[soundCode].Add(d.DocumentId);
-                    }
-                    else {
+                    } else {
                         soundMap.Add(soundCode, new List<int> { d.DocumentId });
                     }
-
                 }
-
             }
-
-
-
-
-
-
-
-
         }
 
-
-        public static string ParseSoundCode(string name)
+        /// <summary>
+        /// Parse a string to a soundEx code
+        /// </summary>
+        /// <param name="name">a name to be parsed to a soundEx code</param>
+        /// <returns>a soundEx code in string</returns>
+        public static string ParseToSoundCode(string name)
         {
             string soundCode;
-            soundCode = Change2Numbers(name.ToUpper());
+            soundCode = name.ToUpper();
+            soundCode = Change2Numbers(soundCode);
             soundCode = RemoveZeros(soundCode);
             soundCode = RemoveDuplicateChar(soundCode);
 
@@ -144,12 +148,28 @@ namespace Search.Index
         /// <summary>
         /// Get Posting from by author name.
         /// </summary>
-        /// <param name="name">a term of a name to retrieve postings by</param>
+        /// <param name="name">name to retrieve postings by</param>
         /// <returns></returns>
         public IList<Posting> GetPostings(string name){
-            //TODO: is given author name be one here? or 
-            //Check author name only 
-            throw new NotImplementedException();
+            IList<Posting> result = new List<Posting>();
+            
+            //Check author name only contains one
+            string[] terms = name.Split(' ');
+            List<IList<Posting>> list = new List<IList<Posting>>();
+
+            foreach(string term in terms) {
+                string soundCode = ParseToSoundCode(term);
+                List<int> docIDs = soundMap[soundCode];
+                IList<Posting> postings = new List<Posting>();
+
+                foreach (int id in docIDs) {
+                    postings.Add(new Posting(id, new List<int>()));
+                }
+                list.Add(postings);
+            }
+            result = Merge.AndMerge(list);
+
+            return result;
         }
 
     }
