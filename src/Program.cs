@@ -22,7 +22,7 @@ namespace Program
             IList<Posting> postings;
             IQueryComponent component;
             BooleanQueryParser parser = new BooleanQueryParser();
-            ITokenProcessor processor = new NormalTokenProcessor();
+            ITokenProcessor processor = new StemmingTokenProcesor();
 
             AssemblyName appName = Assembly.GetEntryAssembly().GetName();
             string projectName = appName.Name;
@@ -63,6 +63,7 @@ namespace Program
                     } else {
                         Console.WriteLine("Not Found.");
                     }
+
                 }
             }
 
@@ -258,26 +259,21 @@ namespace Program
                 Console.Write("Select the number to view the document ([Enter] to exit): ");
                 input = Console.ReadLine();
                 //Enter to exit
-                if (input.Equals(""))
-                {
+                if (input.Equals("")) {
                     selectedDocument = null;
                     break;
                 }
                 //Take number or ask again if input is not numeric
-                try
-                {
+                try {
                     selected = Int32.Parse(input);
-                }
-                catch
-                {
+                } catch {
                     continue;
                 }
                 //Console.WriteLine($"selected: {selected}");
 
                 //Ask again if input number is not in range
                 Boolean isSelectedInRange = (selected > 0) && (selected <= postings.Count);
-                if (isSelectedInRange)
-                {
+                if (isSelectedInRange) {
                     selectedDocument = corpus.GetDocument(postings[selected - 1].DocumentId);
                     break;
                 }
@@ -300,7 +296,7 @@ namespace Program
                 ((IDisposable)doc).Dispose();
             }
         }
-        
+
     }
 
 

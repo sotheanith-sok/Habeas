@@ -17,6 +17,7 @@ namespace Search.Query
         //KGram for look up
         private KGram kGram;
 
+        //Use for internal stemming of words
         private EnglishPorter2Stemmer stemmer;
 
         /// <summary>
@@ -39,29 +40,33 @@ namespace Search.Query
         /// <returns></returns>
         public IList<Posting> GetPostings(IIndex index, ITokenProcessor processor)
         {
+            processor = ((NormalTokenProcessor)processor);
+
             //Normal proccessing of token and split them into literal by *
-            string[] literals = this.token.Split("*");
+            string[] literals = this.token.Split("*").ToArray();
             for (int i = 0; i < literals.Length; i++)
             {
-                if (i == 0)
+                List<string> processedToken = processor.ProcessToken(literals[i]);
+                if (processedToken.Count > 0)
                 {
-                    literals[i] = "$" + processor.ProcessToken(literals[i])[0];
-                }
-                else if (i == literals.Length - 1)
-                {
-                    literals[i] = processor.ProcessToken(literals[i])[0] + "$";
-                }
-                else
-                {
-                    literals[i] = processor.ProcessToken(literals[i])[0];
+                    if (i == 0)
+                    {
+                        literals[i] = "$" + processedToken[0];
+                    }
+                    else if (i == literals.Length - 1)
+                    {
+                        literals[i] = processedToken[0] + "$";
+                    }
+                    else
+                    {
+                        literals[i] = processedToken[0];
+                    }
                 }
             }
-
             literals = literals.Where(x => !string.IsNullOrEmpty(x) && x != "$").ToArray();
 
             //Gather candidates for each literals
             List<List<string>> candidatesList = new List<List<string>>();
-
             foreach (string literal in literals)
             {
                 List<string> candidates = new List<String>();
@@ -99,9 +104,8 @@ namespace Search.Query
                     // *literal*
                     else if (literal.ElementAt(0) != '$' && literal.ElementAt(literal.Length - 1) != '$')
                     {
-                        candidates = candidates.Where(s => s.Substring(1, s.Length - 2).Contains(literal)).ToList();
+                        candidates = candidates.Where(s => s.Contains(literal) && !s.StartsWith(literal) && !s.EndsWith(literal)).ToList();
                     }
-
                     candidatesList.Add(candidates);
                 }
                 else
@@ -110,8 +114,6 @@ namespace Search.Query
                 }
 
             }
-
-
 
             //Generate the final candidates by merging candidates from all literals
             List<string> finalCandidates = new List<string>();
@@ -127,14 +129,18 @@ namespace Search.Query
                 }
             }
 
+            //Stem final candidates and remove duplicate
+            HashSet<string> stemmedFinalCandidates = new HashSet<string>();
+            foreach (string s in finalCandidates)
+            {
+                stemmedFinalCandidates.Add(stemmer.Stem(s).Value);
+            }
+
             //Get posting for final candidates
             List<IList<Posting>> finalPostingList = new List<IList<Posting>>();
-            foreach (string candidate in finalCandidates)
+            foreach (string candidate in stemmedFinalCandidates)
             {
-
-                // finalPostingList.Add(index.GetPostings(stemmer.Stem(candidate).Value));
                 finalPostingList.Add(index.GetPostings(candidate));
-
             }
 
             return Merge.OrMerge(finalPostingList);

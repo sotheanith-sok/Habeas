@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Porter2Stemmer;
 using System;
+using System.Linq;
 namespace Search.Text
 {
     public class StemmingTokenProcesor : NormalTokenProcessor, ITokenProcessor

@@ -6,6 +6,7 @@ namespace Search.Text
     {
         public List<string> ProcessToken(string token)
         {
+
             List<string> tokens = this.HyphenateWords(token);
             for (int i = 0; i < tokens.Count; i++)
             {
@@ -14,6 +15,8 @@ namespace Search.Text
                 tokens[i] = this.RemoveQuotationMarks(tokens[i]);
                 tokens[i] = this.LowercaseWords(tokens[i]);
             }
+
+            tokens = tokens.FindAll(c => !string.IsNullOrWhiteSpace(c));
             return tokens;
         }
 
@@ -25,27 +28,32 @@ namespace Search.Text
         /// <returns>Postprocessing token</returns>
         public string RemoveNonAlphanumeric(string token)
         {
-
-            for (int i = 0; i < token.Length; i++)
+            List<char> result = new List<char>(token.ToCharArray());
+            while (result.Count > 0)
             {
-                if (Char.IsLetter(token[i]) || Char.IsNumber(token[i]))
+                if (!Char.IsLetter(result[0]) && !Char.IsNumber(result[0]))
                 {
-                    token = token.Substring(i);
+                    result.RemoveAt(0);
+                }
+                else
+                {
                     break;
                 }
             }
 
-            for (int i = token.Length - 1; i >= 0; i--)
+            while (result.Count > 0)
             {
-                if (Char.IsLetter(token[i]) || Char.IsNumber(token[i]))
+                if (!Char.IsLetter(result[result.Count - 1]) && !Char.IsNumber(result[result.Count - 1]))
                 {
-                    token = token.Substring(0, i + 1);
+                    result.RemoveAt(result.Count - 1);
+                }
+                else
+                {
                     break;
                 }
-
             }
 
-            return token;
+            return new string(result.ToArray());
         }
 
         /// <summary>
