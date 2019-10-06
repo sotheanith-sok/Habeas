@@ -1,6 +1,5 @@
 
 using Search.Document;
-using Search.Index;
 using Search.Text;
 using System;
 using System.Collections.Generic;
@@ -12,6 +11,7 @@ namespace Search.Index
     {
 
         public static KGram kGram = null;
+        
         /// <summary>
         /// Constructs an index from a corpus of documents
         /// </summary>
@@ -25,11 +25,10 @@ namespace Search.Index
             // Constuct a positional-inverted-index once 
             PositionalInvertedIndex index = new PositionalInvertedIndex();
             Console.WriteLine($"Indexing {corpus.CorpusSize} documents in the corpus...");
+            
             ITokenProcessor processor = new StemmingTokenProcesor();
 
-            Console.WriteLine("Indexing the corpus... with Positional Inverted Index");
-
-            HashSet<string> tokenSet = new HashSet<string>();
+            HashSet<string> unstemmedVocabulary = new HashSet<string>();
 
             // Index the document
             foreach (IDocument doc in corpus.GetDocuments())
@@ -56,15 +55,17 @@ namespace Search.Index
 
                     //Keep track of vocabularies for K-gram
                     foreach (string term in ((NormalTokenProcessor)processor).ProcessToken(token)){
-                        tokenSet.Add(term);
+                        unstemmedVocabulary.Add(term);
                     }
                 }
                 stream.Dispose();
                 ((IDisposable) doc).Dispose();
             }
-            kGram = new KGram(tokenSet);
+            kGram = new KGram(unstemmedVocabulary);
+            
             elapsedTime.Stop();
             Console.WriteLine("Elapsed " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
+            
             return index;
         }
 

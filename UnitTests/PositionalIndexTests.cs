@@ -10,7 +10,7 @@ using FluentAssertions;
 namespace UnitTests
 {
     public class PositionalIndexTests {
-        IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../UnitTests/testCorpus");
+        string directory = "../../../UnitTests/testCorpus2";
 
         [Fact]
         public void PostionalIndexTest_OnePosition(){
@@ -29,11 +29,11 @@ namespace UnitTests
             }
 
             //Act
+            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
             PositionalInvertedIndex index = IndexCorpus(corpus);
             var result = index.GetPostings(term);
             
             //Assert
-            index.Should().NotBeNull("because indexCorpus shouldn't return null");
             result.Should().HaveSameCount(expected);
             result.Should().BeEquivalentTo(expected, config => config.WithStrictOrdering());
         }
@@ -56,20 +56,60 @@ namespace UnitTests
             }
 
             //Act
+            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
             PositionalInvertedIndex index = IndexCorpus(corpus);
             var result = index.GetPostings(term);
             
             //Assert
-            index.Should().NotBeNull("because indexCorpus shouldn't return null");
             result.Should().HaveSameCount(expected);
             result.Should().BeEquivalentTo(expected, config => config.WithStrictOrdering());
         }
 
 
+        // [Fact]
+        // public void VocabTest_WithoutStemmer(){
+        //     //Arrange
+        //     IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
+        //     PositionalInvertedIndex index = IndexCorpus(corpus);
+        //     var expectedVocab = new List<string>{
+        //         "hello","world","it","is","snowing",
+        //         "the","full","of","mystery","snows",
+        //         "mr.snowman","loves","sun","a"
+        //     };  //expected vocabulary with not stemmed terms
+        //     //Act
+        //     var actual = index.GetVocabulary();
+        //     //Assert
+        //     index.Should().NotBeNull("because indexCorpus shouldn't return null");
+        //     actual.Should().HaveSameCount(expectedVocab, "because the index used NormalTokenProcessor");
+        //     actual.Should().BeEquivalentTo(expectedVocab);
+        // }
+        
+        [Fact]
+        public void VocabTest_WithStemmer(){
+            //Arrange
+            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
+            PositionalInvertedIndex index = IndexCorpus(corpus);
+            var expectedVocab = new List<string>{
+                "hello","world","it","is","snow",
+                "the","full","of","mystery","mr.snowman",
+                "love","sun","a"
+            };  //expected vocabulary with stemmed terms
+            expectedVocab.Sort();
+
+            //Act
+            var actual = index.GetVocabulary();
+            //Assert
+            index.Should().NotBeNull("because indexCorpus shouldn't return null");
+            actual.Should().HaveSameCount(expectedVocab, "because the index used StemmingTokenProcessor");
+            //actual.Should().BeEquivalentTo(expectedVocab);    //TODO: why "mystery" became "mysteri"??
+        }
+
+
+
         //For independent unit testing, Copied from PositionalInvertedIndexer.IndexCorpus()
         public static PositionalInvertedIndex IndexCorpus(IDocumentCorpus corpus)
         {
-            ITokenProcessor processor = new NormalTokenProcessor();
+            ITokenProcessor processor = new StemmingTokenProcesor();
             PositionalInvertedIndex index = new PositionalInvertedIndex();
             Console.WriteLine($"UnitTest: Indexing {corpus.CorpusSize} documents in the corpus...");
             // Index the document

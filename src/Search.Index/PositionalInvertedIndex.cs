@@ -90,6 +90,11 @@ namespace Search.Index
 
         }
 
+
+        public Posting GetLastPostingItem(string term)
+        {
+           return hashMap[term].Last();
+        }
     }
 
 }
