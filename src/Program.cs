@@ -111,16 +111,17 @@ namespace Program
         /// <param name="specialQuery">a special query to be performed</param>
         private static void PerformSpecialQueries(string specialQuery)
         {
-            string info_support = "1. single query             Y\n"
-                                + "2. boolean query            Y  space for AND, + for OR\n"
-                                + "3. phrase query             Y  \"term1 term2 ...\"\n"
-                                + "4. near query               Y  [term1 NEAR/k term2]\n"
-                                + "5. wildcard query           Y  colo*r\n"
-                                + "6. soundex for author name  N";
+            string info_support = "1. single query        Y\n"
+                                + "2. boolean query       Y  space for AND, + for OR\n"
+                                + "3. phrase query        Y  \"term1 term2 ...\"\n"
+                                + "4. near query          Y  [term1 NEAR/k term2]\n"
+                                + "5. wildcard query      Y  colo*r\n"
+                                + "6. author soundex      Y  :author name";
             string info_special = ":q             exit the program\n"
                                 + ":stem [token]  print the stemmed token\n"
                                 + ":index [dir]   index a folder\n"
                                 + ":vocab         print vocabulary of the current corpus\n"
+                                + ":author [name] find documents by similar-sounding authors"
                                 + ":h, :help      help";
 
             if (!specialQuery.StartsWith(":"))
@@ -178,7 +179,8 @@ namespace Program
         private static void PrintVocab(IIndex index, int count)
         {
             IReadOnlyList<string> vocabulary = index.GetVocabulary();
-            for (int i = 0; i < Math.Min(count, vocabulary.Count); i++)
+            int minCount = Math.Min(count, vocabulary.Count);
+            for (int i = 0; i < minCount; i++)
             {
                 Console.WriteLine(vocabulary[i]);
             }
@@ -225,7 +227,11 @@ namespace Program
                 IDocument doc = corpus.GetDocument(p.DocumentId);
                 Console.Write($"    [{i}]  ");
                 if(bAuthor)    { Console.Write($"{doc.Author}\t"); }
-                Console.Write($"{doc.Title}");
+                if( doc.Title == "" || doc.Title == null) {
+                    Console.Write("No Title");
+                } else {
+                    Console.Write($"{doc.Title}");
+                }
                 if(bTermCount) { Console.Write($"\t{p.Positions.Count} terms"); }
                 if(bDetails)   { Console.Write($"\t\t{p.ToString()}"); }
                 Console.WriteLine();

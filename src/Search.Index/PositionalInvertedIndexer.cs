@@ -27,8 +27,6 @@ namespace Search.Index
             Console.WriteLine($"Indexing {corpus.CorpusSize} documents in the corpus...");
             ITokenProcessor normalProcessor = new NormalTokenProcessor();
 
-            Console.WriteLine("Indexing the corpus... with Positional Inverted Index");
-
             HashSet<string> tokenSet = new HashSet<string>();
 
             // Index the document
