@@ -10,11 +10,17 @@ namespace Search.Index
 
         public Dictionary<string, List<int>> SoundMap {get;}
 
+        /// <summary>
+        /// Constructs SoundExIndex with an empty soundMap
+        /// </summary>
         public SoundExIndex(){
             SoundMap = new Dictionary<string, List<int>>();
         }
 
         //NOTE: SoundMap can be independently built with name and docIDs.
+        /// <summary>
+        /// Constructs SoundExIndex and builds its soundmap from the corpus
+        /// </summary>
         public SoundExIndex(IDocumentCorpus corpus)
         {
             SoundMap = new Dictionary<string, List<int>>();
@@ -38,7 +44,7 @@ namespace Search.Index
         }
 
         /// <summary>
-        /// Add docID to the soundexIndex(hashmap) by the sound code of author name as a key
+        /// Adds docID to the soundexIndex(hashmap) by the sound code of author name as a key
         /// </summary>
         /// <param name="authorName">name to be parsed to sound code and used as key</param>
         /// <param name="docID">document id to be added as value to the hashmap</param>
@@ -61,7 +67,7 @@ namespace Search.Index
         }
 
         /// <summary>
-        /// Parse a string to a soundEx code following SoundEx algorithm
+        /// Parses a string to a soundEx code following SoundEx algorithm
         /// </summary>
         /// <param name="name">a name to be parsed to a soundEx code (name should be one term)</param>
         /// <returns>a soundEx code in string</returns>
@@ -134,7 +140,7 @@ namespace Search.Index
         }
 
         /// <summary>
-        /// Get Postings of documents which contain the similar sounding author names.
+        /// Gets Postings of documents which contain the similar sounding author names.
         /// </summary>
         /// <param name="nameQuery">author name to find documents</param>
         /// <returns>postings with document and empty positions</returns>
@@ -167,7 +173,7 @@ namespace Search.Index
         }
 
         /// <summary>
-        /// Get all soundex codes of author names from all documents in the corpus
+        /// Gets all soundex codes of author names from all documents in the corpus
         /// which is stored in soundexIndex
         /// </summary>
         /// <returns>a sorted list of soundex</returns>
