@@ -1,27 +1,21 @@
 using Xunit;
-using System.Collections.Generic;
 using Search.Document;
 using Search.Index;
-using Search.Text;
-using System.Runtime.InteropServices;
-using System;
 using FluentAssertions;
-using Search;
 
 namespace UnitTests
 {
     public class SoundExIndexTests
     {
-        [Fact]
-        public void testSoundExIndex()
-        {
-            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../UnitTests/testCorpus");
+        string directory = "../../../UnitTests/testCorpus";
 
+        [Fact]
+        public void SoundExIndexTest()
+        {
+            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
             SoundExIndex soundIndex = new SoundExIndex(corpus);
-            //var actual = soundIndex.getSoundMap().Keys.Count;
-            
-            //actual.Should().Be(0);
-            
+            var actual = soundIndex.SoundMap;
+            actual.Keys.Count.Should().Be(5);
         }
 
         [Theory]
@@ -40,23 +34,24 @@ namespace UnitTests
         {
             //Arrange
             SoundExIndex authorIndex = new SoundExIndex();
-            var actual = authorIndex;
             //Act
             authorIndex.AddDocIdByAuthor("sella", 1);
             authorIndex.AddDocIdByAuthor("selly", 2);
             authorIndex.AddDocIdByAuthor("yashua", 3);
             authorIndex.AddDocIdByAuthor("yoshi", 4);
+            authorIndex.AddDocIdByAuthor("yesh", 5);
             //Assert
-            //TODO assert!
+            authorIndex.GetSoundexVocab().Should().HaveCount(2);
+            authorIndex.SoundMap["S440"].Should().HaveCount(2);
+            authorIndex.SoundMap["Y200"].Should().HaveCount(3);
         }
 
         [Fact]
         public void GetPostingsTest_OneName()
         {
             //Arrange
-            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../UnitTests/testCorpus");
-            SoundExIndex authorIndex = new SoundExIndex();
-            authorIndex.BuildSoundExHashMap(corpus);
+            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
+            SoundExIndex authorIndex = new SoundExIndex(corpus);
             //Act
             var actual = authorIndex.GetPostings("yash");
             //Assert
@@ -67,7 +62,7 @@ namespace UnitTests
         public void GetPostingsTest_MultipleNames()
         {
             //Arrange
-            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../UnitTests/testCorpus");
+            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
             SoundExIndex authorIndex = new SoundExIndex(corpus);
             //Act
             var actual = authorIndex.GetPostings("yashua ovando");
@@ -79,7 +74,7 @@ namespace UnitTests
         public void GetPostingsTest_SimilarSoundingName()
         {
             //Arrange
-            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../UnitTests/testCorpus");
+            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
             SoundExIndex authorIndex = new SoundExIndex(corpus);
             //Act
             var result1 = authorIndex.GetPostings("bloclic");
@@ -92,7 +87,7 @@ namespace UnitTests
         public void GetPostingsTest_NotExistingName_ReturnsEmpty()
         {
             //Arrange
-            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../UnitTests/testCorpus");
+            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
             SoundExIndex authorIndex = new SoundExIndex(corpus);
             //Act
             var actual = authorIndex.GetPostings("hella");

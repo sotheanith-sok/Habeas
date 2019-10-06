@@ -1,34 +1,32 @@
 using System.Collections.Generic;
-using System;
 using Search.Document;
 using Search.Query;
+using System.Linq;
 
 namespace Search.Index
 {
     public class SoundExIndex
     {
 
-        private Dictionary<string, List<int>> SoundMap { get; }
+        public Dictionary<string, List<int>> SoundMap {get;}
 
         public SoundExIndex(){
             SoundMap = new Dictionary<string, List<int>>();
         }
 
-        //TODO: soundexIndex shouldn't worry about corpus.
-        //SoundMap better be independently built with name and docIDs
+        //NOTE: SoundMap can be independently built with name and docIDs.
         public SoundExIndex(IDocumentCorpus corpus)
         {
             SoundMap = new Dictionary<string, List<int>>();
-            BuildSoundExHashMap(corpus);
+            BuildSoundexIndex(corpus);
         }
 
         /// <summary>
         /// Constructs soundex index(hash map) from the author of documents in the corpus
         /// </summary>
         /// <param name="corpus">the corpus of documents</param>
-        public void BuildSoundExHashMap(IDocumentCorpus corpus)
+        public void BuildSoundexIndex(IDocumentCorpus corpus)
         {
-            //NOTE: the corpus doesn't have author or title field.
             foreach (IDocument d in corpus.GetDocuments())
             {
                 //Skip document with no author field
@@ -88,7 +86,7 @@ namespace Search.Index
                 soundex = soundex.Substring(0, 4);      // Y0234 -> Y023
             }
 
-            Console.WriteLine($"{name} -> {soundex}");
+            //Console.WriteLine($"{name}\t-> {soundex}");
             return soundex;
         }
 
@@ -166,6 +164,17 @@ namespace Search.Index
 
             result = Merge.AndMerge(list);
             return result;
+        }
+
+        /// <summary>
+        /// Get all soundex codes of author names from all documents in the corpus
+        /// which is stored in soundexIndex
+        /// </summary>
+        /// <returns>a sorted list of soundex</returns>
+        public List<string> GetSoundexVocab(){
+            List<string> soundexVocab = SoundMap.Keys.ToList();
+            soundexVocab.Sort();
+            return soundexVocab;
         }
 
     }
