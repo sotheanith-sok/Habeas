@@ -31,22 +31,33 @@ namespace Habeas.Controllers
                     };
 
                     string[] files = await Electron.Dialog.ShowOpenDialogAsync(mainWindow, options);
-                    Console.WriteLine();
+                    Console.WriteLine("34");
                     string check = String.Join("", files);
+                    Console.WriteLine("36");
 
+                    Console.WriteLine(BEP.PathIsValid(check));
+                    Console.WriteLine(BEP.PathContainsContent(check));
                     if (BEP.PathIsValid(check) && BEP.PathContainsContent(check))
                     {
+
+                        Console.WriteLine("41");
                         BEP.GenerateIndex(check);
                         Electron.IpcMain.Send(mainWindow, "select-directory-reply", "true");
 
                     }
                     else if (!BEP.PathIsValid(check))
                     {
+
+                        Console.WriteLine("49");
                         Electron.IpcMain.Send(mainWindow, "select-directory-reply", "invalidPath");
                     }
                     else {
+
+                        Console.WriteLine("54");
                         Electron.IpcMain.Send(mainWindow, "select-directory-reply", "emptyFile");
                     }
+
+                    Console.WriteLine("58");
                 });
 
                 Electron.IpcMain.On("stemTerm", (args) =>

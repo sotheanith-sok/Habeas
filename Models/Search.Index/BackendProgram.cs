@@ -16,23 +16,26 @@ namespace Search.Index
         private static IDocumentCorpus corpus;
 
         public void GenerateIndex(string check) {
-            Console.WriteLine("");
+            Console.WriteLine("19");
             BooleanQueryParser parser = new BooleanQueryParser();
+            Console.WriteLine("21");
             ITokenProcessor processor = new StemmingTokenProcesor();
+            Console.WriteLine("23");
             AssemblyName appName = Assembly.GetEntryAssembly().GetName();
+            Console.WriteLine("25");
             string projectName = appName.Name;
+            Console.WriteLine("27");
             string projectVersion = appName.Version.Major.ToString()
                               + '.' + appName.Version.Minor.ToString();
 
+            Console.WriteLine("31");
             corpus = DirectoryCorpus.LoadTextDirectory(check);
-            Console.WriteLine("28");
+            Console.WriteLine("33");
 
             if (corpus != null && corpus.CorpusSize != 0)   //NOTE: redundant..
             {
                 index = PositionalInvertedIndexer.IndexCorpus(corpus);
                 soundIndex = new SoundExIndex(corpus);
-
-
             }
             Console.WriteLine("37");
         }
@@ -123,13 +126,15 @@ namespace Search.Index
         public bool PathContainsContent(string CandidatePath)
         {
 
-            corpus = DirectoryCorpus.LoadTextDirectory(CandidatePath);
+            //corpus = DirectoryCorpus.LoadTextDirectory(CandidatePath);
 
-            if (corpus == null || corpus.CorpusSize == 0)
-            {
-                return false;
-            }
-            else { return true; }
+            //if (corpus == null || corpus.CorpusSize == 0)
+            //{
+            //    return false;
+            //}
+            //else { return true; }
+
+            return Directory.GetFiles(CandidatePath).Length != 0;
 
         }
 
