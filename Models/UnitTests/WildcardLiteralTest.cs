@@ -19,7 +19,7 @@ namespace UnitTests
         {
             IDocumentCorpus c = DirectoryCorpus.LoadTextDirectory("../../../Models/UnitTests/testCorpus4");
             Console.WriteLine(Path.GetFullPath("./UnitTests/testCorpus2"));
-            IIndex index = PositionalInvertedIndexer.IndexCorpus(c);
+            IIndex index = Indexer.IndexCorpus(c);
             ITokenProcessor processor = new NormalTokenProcessor();
             KGram kGram = Indexer.kGram;
             WildcardLiteral wildcard = new WildcardLiteral("*ell*", kGram);

@@ -11,7 +11,6 @@ namespace Search.Index
 {
     public class BackendProgram
     {
-        private static SoundExIndex soundIndex;
         private static PositionalInvertedIndex index;
         private static IDocumentCorpus corpus;
 
@@ -32,8 +31,7 @@ namespace Search.Index
 
             if (corpus != null && corpus.CorpusSize != 0)   //NOTE: redundant..
             {
-                index = PositionalInvertedIndexer.IndexCorpus(corpus);
-                soundIndex = new SoundExIndex(corpus);
+                index = Indexer.IndexCorpus(corpus);
             }
         }
 
@@ -43,7 +41,7 @@ namespace Search.Index
         public List<string> soundexTerm(string term)
         {
             string name = term;
-            IList<Posting> postings = soundIndex.GetPostings(name);
+            IList<Posting> postings = Indexer.soundEx.GetPostings(name);
             List<String> results = new List<string>();
             if (postings.Count > 0)
             {
@@ -226,7 +224,7 @@ namespace Search.Index
                     return;
                 }
                 corpus = DirectoryCorpus.LoadTextDirectory(directory);
-                index = PositionalInvertedIndexer.IndexCorpus(corpus);
+                index = Indexer.IndexCorpus(corpus);
             }
             else if ((specialQuery == ":help") || (specialQuery == ":h"))
             {        // :help
