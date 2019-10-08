@@ -215,6 +215,17 @@
 
 	});
 
+		document.getElementById("headerIndex").addEventListener("click", () => {
+			chooseDirectoryDIV.style.display = "block";
+			searchDirectoryDIV.style.display = "none";
+			vocabTotal.innerHTML = "";
+			vocabContainer.innerHTML ="";
+			originalTerm.innerHTML ="";
+			sTerm.innerHTML ="";
+			stemInput.value="";
+			searchInput.value="";
+			soundexInput.value="";
+		});
 
 	ipcRenderer.on("select-directory-reply", (sender, path) => {
 		selectDirectoryDIV.style.display = "block";
