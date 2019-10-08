@@ -61,22 +61,23 @@ namespace Habeas
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
-
+            
             Bootstrap();
         }
 
-        public async void Bootstrap()
+        public void Bootstrap()
         {
-            var options = new BrowserWindowOptions {
+            var options = new BrowserWindowOptions
+            {
                 Show = false
             };
-
-            var mainWindow = await Electron.WindowManager.CreateWindowAsync(options);
+            var mainWindow = Electron.WindowManager.CreateWindowAsync(options).Result;
             mainWindow.SetMenuBarVisibility(false);
-            mainWindow.OnReadyToShow += () => {
+            mainWindow.OnReadyToShow += () =>
+            {
                 mainWindow.Show();
             };
-            
+
         }
 
     }
