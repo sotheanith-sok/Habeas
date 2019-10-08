@@ -11,7 +11,7 @@ namespace UnitTests.QueryTests
 {
     public class WildcardLiteralTests
     {
-        private static IDocumentCorpus c = DirectoryCorpus.LoadTextDirectory("../../../Models/UnitTests/testCorpus2");
+        private static IDocumentCorpus c = DirectoryCorpus.LoadTextDirectory("../../../Models/UnitTests/testCorpus6");
         private IIndex index = Indexer.IndexCorpus(c);
         private ITokenProcessor processor = new StemmingTokenProcesor();    //wildcard should use its parent processor anyway
         private KGram kGram = Indexer.kGram;

@@ -10,7 +10,7 @@ using FluentAssertions;
 namespace UnitTests
 {
     public class PositionalIndexTests {
-        string directory = "../../../Models/UnitTests/testCorpus2";
+        string directory = "../../../Models/UnitTests/testCorpus4";
 
         [Fact]
         public void PostionalIndexTest_OnePosition(){

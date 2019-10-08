@@ -10,7 +10,7 @@ namespace UnitTests.QueryTests
 {
     public class NearLiteralTests
     {
-        private static IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../Models/UnitTests/testCorpus3");
+        private static IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../Models/UnitTests/testCorpus1");
         private IIndex index = Indexer.IndexCorpus(corpus);
         private ITokenProcessor processor = new StemmingTokenProcesor();
 

@@ -11,7 +11,7 @@ namespace UnitTests.QueryTests
 {
     public class TermLiteralTests
     {
-        private static IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../Models/UnitTests/testCorpus3");
+        private static IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../Models/UnitTests/testCorpus5");
         private IIndex index = Indexer.IndexCorpus(corpus);
         private static ITokenProcessor processor = new StemmingTokenProcesor();
 

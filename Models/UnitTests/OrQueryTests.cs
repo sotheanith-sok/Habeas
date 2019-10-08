@@ -11,7 +11,7 @@ namespace UnitTests.QueryTests
 {
     public class OrQueryTests
     {
-        private static IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../Models/UnitTests/testCorpus3");
+        private static IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../Models/UnitTests/testCorpus2");
         private IIndex index = Indexer.IndexCorpus(corpus);
         private ITokenProcessor processor = new StemmingTokenProcesor();
 
