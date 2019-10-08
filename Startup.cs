@@ -68,7 +68,7 @@ namespace Habeas
         public async void Bootstrap()
         {
             var options = new BrowserWindowOptions {
-                Show = false
+                Show = true
             };
 
             var mainWindow = await Electron.WindowManager.CreateWindowAsync(options);
