@@ -20,6 +20,7 @@ namespace Habeas.Controllers
         {
             if (HybridSupport.IsElectronActive)
             {
+                //Responds to user selecting a directory
                 Electron.IpcMain.On("select-directory", async (args) => {
                     var mainWindow = Electron.WindowManager.BrowserWindows.First();
                     var options = new OpenDialogOptions
@@ -54,6 +55,7 @@ namespace Habeas.Controllers
 
                 });
 
+                //Responds to user choosing to stem a term
                 Electron.IpcMain.On("stemTerm", (args) =>
                 {
                     var mainWindow = Electron.WindowManager.BrowserWindows.First();
@@ -62,6 +64,7 @@ namespace Habeas.Controllers
                     Electron.IpcMain.Send(mainWindow, "stemmedTerm", stemmedTerm);
                 });
 
+                //Responds to user desiring to get info on Habeas
                 Electron.IpcMain.On("info-dialog", async (args) =>
                 {
                     var options = new MessageBoxOptions(
@@ -86,7 +89,7 @@ namespace Habeas.Controllers
                 });
 
                 
-
+                //Responds to user attempting to get the vocab list from the corpus
                 Electron.IpcMain.On("chooseVocab", (args) =>
                 {
                     List<String> result = BEP.PrintVocab(1000);
@@ -94,6 +97,7 @@ namespace Habeas.Controllers
                     Electron.IpcMain.Send(mainWindow, "vocabList", result);
                 });
 
+                //Responds to user searching the corpus
                 Electron.IpcMain.On("searchText", (args) =>
                 {
                     var mainWindow = Electron.WindowManager.BrowserWindows.First();
@@ -102,6 +106,7 @@ namespace Habeas.Controllers
                     Electron.IpcMain.Send(mainWindow, "searchText", Postings);
                 });
 
+                //Responds to user doing a soundex search
                 Electron.IpcMain.On("soundexText", (args) =>
                 {
                     var mainWindow = Electron.WindowManager.BrowserWindows.First();
@@ -110,6 +115,7 @@ namespace Habeas.Controllers
                     Electron.IpcMain.Send(mainWindow, "soundexText", Postings);
                 });
 
+                //Responds to user attempting to read a document
                 Electron.IpcMain.On("readDoc", (args) =>
                 {
                     string term = args.ToString();

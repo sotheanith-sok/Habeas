@@ -1,5 +1,5 @@
 ﻿@{
-	ViewData["Title"] = "Home Page";
+	ViewData["Title"] = "";
 }
 
 <div id="indicatePath" class="text-center">
@@ -73,6 +73,20 @@
 	var stemmedTerm = document.getElementById("sTerm");
 	var originalTerm = document.getElementById("originalTerm");
 	var vocabTotal = document.getElementById("vocabTotal");
+	var noResultsMessage = "Sorry, your query did not produce any results.¯\\_(ツ)_/¯";
+	
+	//Sending messages
+
+	document.getElementById("chooseVocab").addEventListener("click", () => {
+		stemDIV.style.display = "none";
+		ipcRenderer.send("chooseVocab");
+	});
+	
+	document.addEventListener('click', function (e) {
+		if (e.target && e.target.class == 'articles') {
+			ipcRenderer.send("readDoc", e.target.id);
+		}
+	});
 
 	dropdown.addEventListener("change", (sender, path) => {
 		stemInput.value = "";
@@ -131,32 +145,7 @@
 		ipcRenderer.send("select-directory");
 	});
 
-	ipcRenderer.on("select-directory-reply", (sender, path) => {
-		selectDirectoryDIV.style.display = "block";
-		indexingSpan.style.display = "none";
-		chooseDirectoryDIV.class = "text-center";
-		if (path == "true") {
-			noPathWarning.style.display = "none";
-			emptyPathWarning.style.display = "none";
-			chooseDirectoryDIV.style.display = "none";
-			searchDirectoryDIV.style.display = "block";
-			document.getElementById("headerIndex").style.display = "block";
-			document.getElementById("chooseVocab").style.display = "block";
-		}
-		else if (path == "invalidPath") {
-			noPathWarning.style.display = "block";
-			emptyPathWarning.style.display = "none";
-		}
-		else if (path == "emptyFile") {
-			emptyPathWarning.style.display = "block";
-			noPathWarning.style.display = "none";
-		}
-		else {
-			noPathWarning.style.display = "none";
-			emptyPathWarning.style.display = "none";
-		}
-
-	});
+	//getting messages
 
 	ipcRenderer.on("stemmedTerm", (sender, path) => {
 		stemDIV.style.display = "block"
@@ -183,7 +172,7 @@
 		enterButtonDIV.style.display = "block";
 		searchLoading.style.display = "none";
 		if (posting[0] == "0") {
-			vocabTotal.innerHTML = "Sorry, your query did not produce any results.¯\\_(ツ)_/¯";
+			vocabTotal.innerHTML = noResultsMessage;
 		}
 		else {
 			var limit = posting[0];
@@ -207,7 +196,7 @@
 		enterButtonDIV.style.display = "block";
 		searchLoading.style.display = "none";
 		if (posting[0] == "0") {
-			vocabTotal.innerHTML = "Sorry, your query did not produce any results.¯\\_(ツ)_/¯";
+			vocabTotal.innerHTML = noResultsMessage;
 		}
 		else {
 			var limit = posting[0];
@@ -225,19 +214,34 @@
 		}
 
 	});
-	
-	document.getElementById("chooseVocab").addEventListener("click", () => {
-		stemDIV.style.display = "none";
-		ipcRenderer.send("chooseVocab");
-	});
-	
 
-	document.addEventListener('click', function (e) {
-		if (e.target && e.target.class == 'articles') {
-			ipcRenderer.send("readDoc", e.target.id);
+
+	ipcRenderer.on("select-directory-reply", (sender, path) => {
+		selectDirectoryDIV.style.display = "block";
+		indexingSpan.style.display = "none";
+		chooseDirectoryDIV.class = "text-center";
+		if (path == "true") {
+			noPathWarning.style.display = "none";
+			emptyPathWarning.style.display = "none";
+			chooseDirectoryDIV.style.display = "none";
+			searchDirectoryDIV.style.display = "block";
+			document.getElementById("headerIndex").style.display = "block";
+			document.getElementById("chooseVocab").style.display = "block";
 		}
-	});
+		else if (path == "invalidPath") {
+			noPathWarning.style.display = "block";
+			emptyPathWarning.style.display = "none";
+		}
+		else if (path == "emptyFile") {
+			emptyPathWarning.style.display = "block";
+			noPathWarning.style.display = "none";
+		}
+		else {
+			noPathWarning.style.display = "none";
+			emptyPathWarning.style.display = "none";
+		}
 
+	});
 </script>
 
 <style>
