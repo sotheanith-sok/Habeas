@@ -101,9 +101,11 @@
 		document.getElementById("stemmedTerm").style.display = "none";
 		document.getElementById("vocabContainer").innerHTML = "";
 		if (document.getElementById("searchChoice").value == "searchOption") {
+			
 			document.getElementById("enterDIV").style.display = "none";
 			document.getElementById("loading").style.display = "block";
 			ipcRenderer.send("searchText", document.getElementById("searchText").value);
+			
 		}
 		else if (document.getElementById("searchChoice").value == "stem") {
 			document.getElementById("originalTerm").innerHTML = document.getElementById("stemText").value + " -> ";

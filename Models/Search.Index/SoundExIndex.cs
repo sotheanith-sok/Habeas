@@ -43,6 +43,7 @@ namespace Search.Index
                 }
                 AddDocIdByAuthor(d.Author, d.DocumentId);
             Console.WriteLine("In Foreach loop");
+            ((IDisposable)d).Dispose();
             }
         }
 
@@ -52,9 +53,12 @@ namespace Search.Index
         /// <param name="authorName">name to be parsed to sound code and used as key</param>
         /// <param name="docID">document id to be added as value to the hashmap</param>
         public void AddDocIdByAuthor(string authorName, int docID) {
+
+            if(authorName == null) {return; }
+
             //names can consists of more than one name
             string[] terms = authorName.Split(' ');
-
+            terms = terms.Where(x => !string.IsNullOrEmpty(x)).ToArray();    
             foreach (string term in terms)
             {
                 //Get the sound code
@@ -152,6 +156,7 @@ namespace Search.Index
             
             //Check author name can contains multiple terms
             string[] terms = nameQuery.Split(' ');
+            terms = terms.Where(x => !string.IsNullOrEmpty(x)).ToArray();
             List<IList<Posting>> list = new List<IList<Posting>>();
 
             foreach(string term in terms) {

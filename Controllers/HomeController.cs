@@ -137,10 +137,6 @@ namespace Habeas.Controllers
                     var mainWindow = Electron.WindowManager.BrowserWindows.First();
                     string term = args.ToString();
                     List<string> Postings = BEP.soundexTerm(term);
-                    foreach (string s in Postings)
-                    {
-                        Console.WriteLine(s);
-                    }
                     Electron.IpcMain.Send(mainWindow, "soundexText", Postings);
                 });
 
