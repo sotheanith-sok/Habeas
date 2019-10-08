@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Search.Document;
 using Search.Query;
 using System.Linq;
+using System;
 
 namespace Search.Index
 {
@@ -17,16 +18,6 @@ namespace Search.Index
             SoundMap = new Dictionary<string, List<int>>();
         }
 
-        //NOTE: SoundMap can be independently built with name and docIDs.
-        /// <summary>
-        /// Constructs SoundExIndex and builds its soundmap from the corpus
-        /// </summary>
-        public SoundExIndex(IDocumentCorpus corpus)
-        {
-            SoundMap = new Dictionary<string, List<int>>();
-            BuildSoundexIndex(corpus);
-        }
-
         /// <summary>
         /// Constructs soundex index(hash map) from the author of documents in the corpus
         /// </summary>
@@ -40,6 +31,7 @@ namespace Search.Index
                     continue;
                 }
                 AddDocIdByAuthor(d.Author, d.DocumentId);
+                ((IDisposable) d).Dispose();
             }
         }
 
@@ -48,7 +40,10 @@ namespace Search.Index
         /// </summary>
         /// <param name="authorName">name to be parsed to sound code and used as key</param>
         /// <param name="docID">document id to be added as value to the hashmap</param>
-        public void AddDocIdByAuthor(string authorName, int docID) {
+        public void AddDocIdByAuthor(string authorName, int docID)
+        {
+            if(authorName == null) { return; }
+
             //names can consists of more than one name
             string[] terms = authorName.Split(' ');
 

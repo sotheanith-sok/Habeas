@@ -7,16 +7,21 @@ using System.Diagnostics;
 
 namespace Search.Index
 {
-    public class PositionalInvertedIndexer
+    public class Indexer      //better to be called "Indexer"
     {
 
         public static KGram kGram = null;
+        public SoundExIndex SoundIndex { get; }
+
+        public Indexer (){
+            SoundIndex = new SoundExIndex();
+        }
         
         /// <summary>
         /// Constructs an index from a corpus of documents
         /// </summary>
         /// <param name="corpus">a corpus to be indexed</param>
-        public static PositionalInvertedIndex IndexCorpus(IDocumentCorpus corpus)
+        public PositionalInvertedIndex IndexCorpus(IDocumentCorpus corpus)
         {
             //Time how long it takes to index the corpus
             Stopwatch elapsedTime = new Stopwatch();
@@ -59,6 +64,11 @@ namespace Search.Index
                     }
                 }
                 stream.Dispose();
+                //Done token streaming for this document
+                
+                //
+                SoundIndex.AddDocIdByAuthor(doc.Author, doc.DocumentId);
+
                 ((IDisposable) doc).Dispose();
             }
             kGram = new KGram(unstemmedVocabulary);

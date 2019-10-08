@@ -12,9 +12,10 @@ namespace Program
 {
     class Program
     {
-        private static SoundExIndex soundIndex;
-        private static PositionalInvertedIndex index;
+        private static SoundExIndex soundIndex; //for author
+        private static PositionalInvertedIndex index;   //for body
         private static IDocumentCorpus corpus;
+        private static Indexer indexer;
 
         public static void Main(string[] args)
         {
@@ -32,13 +33,10 @@ namespace Program
 
             corpus = GetCorpusByAskingDirectory();
             
-            //Main Index
-            index = PositionalInvertedIndexer.IndexCorpus(corpus);
-
-            //SoundExIndex
-            soundIndex = new SoundExIndex(corpus);
-            //TODO: Might be better to build soundIndex inside of PII.IndexCorpus()
-            //So that it reads through all documents in the corpus only once.
+            //Use indexer to build the main index and soundexIndex
+            indexer = new Indexer();
+            index = indexer.IndexCorpus(corpus);
+            soundIndex = indexer.SoundIndex;
 
             while (true)
             {
@@ -154,7 +152,7 @@ namespace Program
                     return;
                 }
                 corpus = DirectoryCorpus.LoadTextDirectory(directory);
-                index = PositionalInvertedIndexer.IndexCorpus(corpus);
+                index = indexer.IndexCorpus(corpus);
             }
             else if (specialQuery.StartsWith(":author ")) {                         // :author
                 string name = specialQuery.Substring(":author ".Length);
@@ -237,6 +235,7 @@ namespace Program
                 if(bDetails)   { Console.Write($"\t\t{p.ToString()}"); }
                 Console.WriteLine();
                 i += 1;
+                ((IDisposable)doc).Dispose();
             }
             Console.WriteLine($"Found {postings.Count} files.");
         }

@@ -13,7 +13,8 @@ namespace UnitTests
         public void SoundExIndexTest()
         {
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
-            SoundExIndex soundIndex = new SoundExIndex(corpus);
+            SoundExIndex soundIndex = new SoundExIndex();
+            soundIndex.BuildSoundexIndex(corpus);
             var actual = soundIndex.SoundMap;
             actual.Keys.Count.Should().Be(5);
         }
@@ -51,7 +52,8 @@ namespace UnitTests
         {
             //Arrange
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
-            SoundExIndex authorIndex = new SoundExIndex(corpus);
+            SoundExIndex authorIndex = new SoundExIndex();
+            authorIndex.BuildSoundexIndex(corpus);
             //Act
             var actual = authorIndex.GetPostings("yash");
             //Assert
@@ -63,7 +65,8 @@ namespace UnitTests
         {
             //Arrange
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
-            SoundExIndex authorIndex = new SoundExIndex(corpus);
+            SoundExIndex authorIndex = new SoundExIndex();
+            authorIndex.BuildSoundexIndex(corpus);
             //Act
             var actual = authorIndex.GetPostings("yashua ovando");
             //Assert
@@ -75,7 +78,8 @@ namespace UnitTests
         {
             //Arrange
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
-            SoundExIndex authorIndex = new SoundExIndex(corpus);
+            SoundExIndex authorIndex = new SoundExIndex();
+            authorIndex.BuildSoundexIndex(corpus);
             //Act
             var result1 = authorIndex.GetPostings("bloclic");
             var result2 = authorIndex.GetPostings("blacklock");
@@ -88,7 +92,8 @@ namespace UnitTests
         {
             //Arrange
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
-            SoundExIndex authorIndex = new SoundExIndex(corpus);
+            SoundExIndex authorIndex = new SoundExIndex();
+            authorIndex.BuildSoundexIndex(corpus);
             //Act
             var actual = authorIndex.GetPostings("hella");
             //Assert

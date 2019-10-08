@@ -81,8 +81,8 @@ namespace UnitTests
                     //Increase the position num
                     position += 1;
                 }
-                ((IDisposable)doc).Dispose();
                 stream.Dispose();
+                ((IDisposable)doc).Dispose();
             }
             return index;
         }
