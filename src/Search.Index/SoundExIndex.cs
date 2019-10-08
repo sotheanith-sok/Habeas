@@ -146,6 +146,9 @@ namespace Search.Index
             
             //Check author name can contains multiple terms
             string[] terms = nameQuery.Split(' ');
+            //remove the empry string in the string array
+            terms = terms.Where(x => !string.IsNullOrEmpty(x)).ToArray();
+            
             List<IList<Posting>> list = new List<IList<Posting>>();
 
             foreach(string term in terms) {

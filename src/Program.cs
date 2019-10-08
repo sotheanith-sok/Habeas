@@ -157,6 +157,7 @@ namespace Program
                 index = indexer.IndexCorpus(corpus);
             }
             else if (specialQuery.StartsWith(":author ")) {                         // :author
+
                 string name = specialQuery.Substring(":author ".Length);
                 IList<Posting> postings = soundIndex.GetPostings(name);
                 PerformSearchResult(postings, corpus, true, false, false);
