@@ -43,9 +43,11 @@ namespace Program
                 //get query input from user
                 Console.Write("\nSearch: ");
                 query = Console.ReadLine();
+                
                 if (query.Equals("")) {
                     continue;
                 }
+                query = query.TrimStart(' ').TrimEnd(' ');
 
                 //special queries
                 if (query.StartsWith(":")) {
