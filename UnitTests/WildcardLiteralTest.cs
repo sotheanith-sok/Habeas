@@ -16,7 +16,7 @@ namespace UnitTests
         public void TestWildCardLiteral()
         {
             IDocumentCorpus c = DirectoryCorpus.LoadTextDirectory("../../../UnitTests/testCorpus2");
-            IIndex index = PositionalInvertedIndexer.IndexCorpus(c);
+            IIndex index = new PositionalInvertedIndexer().IndexCorpus(c);
             ITokenProcessor processor = new NormalTokenProcessor();
             KGram kGram = PositionalInvertedIndexer.kGram;
             WildcardLiteral wildcard = new WildcardLiteral("*ell*", kGram);
