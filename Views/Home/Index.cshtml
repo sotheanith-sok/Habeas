@@ -1,0 +1,275 @@
+﻿@{
+	ViewData["Title"] = "Home Page";
+}
+
+<div id="indicatePath" class="text-center">
+	<h1 class="display-4">Habeas Corpus!</h1>
+	<p>Please specify a directory to index:</p>
+	<div id="walla">
+	<button id="select-directory">
+		Select Path
+	</button>
+	</div>
+	<h4 class="display-6" id="indexing" style="display: none">Loading...</h4>
+	<br />
+	<div class="alert-danger" id="NoPath" style="display:none; padding: 20px; text-align:center; border-radius: 10px;"> The selected path does not exist: please select another path.</div>
+	<div class="alert-danger" id="EmptyFile" style="display:none; padding: 20px; text-align:center; border-radius: 10px;"> The selected path does not contain any content: please select another path.</div>
+	@*<a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">View Article</a>*@
+
+</div>
+<div id="searchDirectory" style="display:none" class="text-center">
+	<h1 class="display-4">Habeas</h1>
+	<span id="titleHeading">Search Corpus</span>
+	<br />
+	<select id="searchChoice">
+		<option value="searchOption" selected>Search</option>
+		<option value="stem">Stem</option>
+		<option value="soundex">Soundex</option>
+	</select><input id="searchText" type="text" /><input style="display: none;" id="stemText" type="text" /><input style="display: none;" id="soundexText" type="text" />
+	<br />
+	<br />
+	<div id="enterDIV">
+		<button id="search" class="btn-primary">Enter</button>
+	</div>
+	<h4 class="display-6" id="loading" style="display: none">Searchin'...</h4>
+	<br />
+	@*<a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">View Article</a>*@
+	<div id="vocabSection" style="display:none;">
+		<span id="vocabTotal"></span>
+		<div id="vocabContainer"> </div>
+
+	</div>
+
+	<div id="stemmedTerm" style="display:none;">
+		<span id="originalTerm"></span><span id="sTerm"></span>
+
+	</div>
+
+
+</div>
+
+<script>
+	const { ipcRenderer } = require("electron");
+
+	document.getElementById("searchChoice").addEventListener("change", (sender, path) => {
+		document.getElementById("stemText").value = "";
+		document.getElementById("searchText").value = "";
+		if (document.getElementById("searchChoice").value == "searchOption") {
+			document.getElementById("stemText").style.display = "none";
+			document.getElementById("soundexText").style.display = "none";
+			document.getElementById("searchText").style.display = "inline-block";
+			document.getElementById("titleHeading").innerHTML = "Search Corpus";
+		}
+		else if (document.getElementById("searchChoice").value == "stem") {
+			document.getElementById("stemText").style.display = "inline-block";
+			document.getElementById("searchText").style.display = "none";
+			document.getElementById("soundexText").style.display = "none";
+			document.getElementById("titleHeading").innerHTML = "Stem Term";
+		}
+		else {
+			document.getElementById("titleHeading").innerHTML = "Search Corpus";
+			document.getElementById("soundexText").style.display = "inline-block";
+			document.getElementById("stemText").style.display = "none";
+			document.getElementById("searchText").style.display = "none";
+		}
+	});
+
+	document.getElementById("search").addEventListener("click", (sender, path) => {
+		document.getElementById("vocabSection").style.display = "none";
+		document.getElementById("stemmedTerm").style.display = "none";
+		document.getElementById("vocabContainer").innerHTML = "";
+		if (document.getElementById("searchChoice").value == "searchOption") {
+			document.getElementById("enterDIV").style.display = "none";
+			document.getElementById("loading").style.display = "block";
+			ipcRenderer.send("searchText", document.getElementById("searchText").value);
+		}
+		else if (document.getElementById("searchChoice").value == "stem") {
+			document.getElementById("originalTerm").innerHTML = document.getElementById("stemText").value + " -> ";
+			ipcRenderer.send("stemTerm", document.getElementById("stemText").value);
+		}
+		else {
+			document.getElementById("enterDIV").style.display = "none";
+			document.getElementById("loading").style.display = "block";
+			ipcRenderer.send("soundexText", document.getElementById("soundexText").value);
+		}
+	});
+
+	document.getElementById("select-directory").addEventListener("click", () => {
+		document.getElementById("NoPath").style.display = "none";
+		document.getElementById("EmptyFile").style.display = "none";
+		document.getElementById("walla").style.display = "none";
+		document.getElementById("indexing").style.display = "block";
+		document.getElementById("indicatePath").class = "text-center";
+		ipcRenderer.send("select-directory");
+	});
+
+	ipcRenderer.on("select-directory-reply", (sender, path) => {
+		document.getElementById("walla").style.display = "block";
+		document.getElementById("indexing").style.display = "none";
+		document.getElementById("indicatePath").class = "text-center";
+		if (path == "true") {
+			document.getElementById("NoPath").style.display = "none";
+			document.getElementById("EmptyFile").style.display = "none";
+			document.getElementById("indicatePath").style.display = "none";
+			document.getElementById("searchDirectory").style.display = "block";
+			document.getElementById("headerIndex").style.display = "block";
+			document.getElementById("chooseVocab").style.display = "block";
+		}
+		else if (path == "invalidPath") {
+			document.getElementById("NoPath").style.display = "block";
+			document.getElementById("EmptyFile").style.display = "none";
+		}
+		else if (path == "emptyFile") {
+			document.getElementById("EmptyFile").style.display = "block";
+			document.getElementById("NoPath").style.display = "none";
+		}
+		else {
+			document.getElementById("NoPath").style.display = "none";
+			document.getElementById("EmptyFile").style.display = "none";
+		}
+
+	});
+
+	ipcRenderer.on("stemmedTerm", (sender, path) => {
+		document.getElementById("stemmedTerm").style.display = "block"
+		document.getElementById("stemText").value = "";
+		document.getElementById("sTerm").innerHTML = path;
+	});
+
+
+
+	ipcRenderer.on("vocabList", (sender, vocab) => {
+		document.getElementById("vocabSection").style.display = "block";
+		document.getElementById("vocabTotal").innerHTML = "The total number of items in the vocabulary is: " + vocab[0];
+		document.getElementById("vocabContainer").innerHTML = "";
+		for (i = 1; i <= 1000; i++) {
+		var node = document.createElement("P");
+			node.innerText = "#" + [i] + ") " +vocab[i];   
+		document.getElementById("vocabContainer").appendChild(node);
+	}
+		
+	});
+
+	ipcRenderer.on("soundexText", (sender, posting) => {
+		document.getElementById("vocabSection").style.display = "block";
+		document.getElementById("enterDIV").style.display = "block";
+		document.getElementById("loading").style.display = "none";
+		if (posting[0] == "0") {
+			document.getElementById("vocabTotal").innerHTML = "Sorry, your query did not produce any results.¯\\_(ツ)_/¯";
+		}
+		else {
+			var limit = posting[0];
+			document.getElementById("vocabTotal").innerHTML = "Habeas found " + limit + " results for your query";
+			for (i = 1; i <= (limit * 2); i += 2) {
+				var node = document.createElement("BUTTON");
+				//var param = posting[i];
+				node.innerHTML = posting[i];
+				node.class = "articles";
+				node.id = posting[i + 1];
+				//node.value = posting[i];
+				document.getElementById("vocabContainer").appendChild(node);
+				var newElem = document.createElement("BR");
+				var newElem2 = document.createElement("BR");
+				document.getElementById("vocabContainer").appendChild(newElem);
+				document.getElementById("vocabContainer").appendChild(newElem2);
+			}
+		}
+
+	});
+
+	ipcRenderer.on("searchText", (sender, posting) => {
+		document.getElementById("vocabSection").style.display = "block";
+		document.getElementById("enterDIV").style.display = "block";
+		document.getElementById("loading").style.display = "none";
+		if (posting[0] == "0") {
+			document.getElementById("vocabTotal").innerHTML = "Sorry, your query did not produce any results.¯\\_(ツ)_/¯";
+		}
+		else {
+			var limit = posting[0];
+			document.getElementById("vocabTotal").innerHTML = "Habeas found "+limit+" results for your query";
+			for (i = 1; i <= (limit*2) ; i +=2) {
+				var node = document.createElement("BUTTON");
+				//var param = posting[i];
+				node.innerHTML = posting[i];
+				node.class = "articles";
+				node.id = posting[i+1];
+				//node.value = posting[i];
+				document.getElementById("vocabContainer").appendChild(node);
+				var newElem = document.createElement("BR");
+				var newElem2 = document.createElement("BR");
+				document.getElementById("vocabContainer").appendChild(newElem);
+				document.getElementById("vocabContainer").appendChild(newElem2);
+			}
+		}
+
+	});
+	
+	document.getElementById("chooseVocab").addEventListener("click", () => {
+		document.getElementById("stemmedTerm").style.display = "none";
+		ipcRenderer.send("chooseVocab");
+	});
+	
+
+	//document.getElementsByClassName("articles").addEventListener("click", (sender, path) => {
+	//	ipcRenderer.send("readDoc", document.getElementsByClassName("articles").value);
+	//});
+
+	document.addEventListener('click', function (e) {
+		if (e.target && e.target.class == 'articles') {
+			ipcRenderer.send("readDoc", e.target.id);
+		}
+	});
+
+	document.getElementById("headerIndex").addEventListener("click", () => {
+		document.getElementById("indicatePath").style.display = "block";
+		document.getElementById("searchDirectory").style.display = "none";
+		document.getElementById("headerIndex").style.display = "none";
+		document.getElementById("chooseVocab").style.display = "none";
+		document.getElementById("stemmedTerm").style.display = "none";
+		document.getElementById("stemText").innerHTML = "";
+		document.getElementById("searchText").value = "";
+		document.getElementById("vocabContainer").innerHTML = "";
+		document.getElementById("vocabTotal").innerHTML = "";
+		
+		
+	});
+</script>
+
+<style>
+	select,
+	input {
+		margin: 0;
+		padding: 0;
+		border: 1px solid black;
+	}
+
+	select,
+	input, button, h1, h4, p, span, div {
+		user-select: none;
+		-moz-user-select: none;
+		-webkit-user-select: none;
+	}
+	select {
+		height: 29px;
+		border-radius: 20px 0 0 20px;
+		padding-left: 5px;
+		border-right: 0;
+		background-color: #192841;
+		color: white;
+	}
+
+	input {
+		height: 28px;
+		border-radius: 0 20px 20px 0;
+		padding-left: 5px;
+	}
+
+		select, input::after active {
+			margin: 0px;
+		}
+
+	#search {
+		color: white;
+	}
+
+</style>
