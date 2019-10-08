@@ -16,15 +16,15 @@ namespace Search.Index
         private static IDocumentCorpus corpus;
 
         public void GenerateIndex(string check) {
-            Console.WriteLine("19");
+        
             BooleanQueryParser parser = new BooleanQueryParser();
-            Console.WriteLine("21");
+       
             ITokenProcessor processor = new StemmingTokenProcesor();
-            Console.WriteLine("23");
+        
             AssemblyName appName = Assembly.GetEntryAssembly().GetName();
-            Console.WriteLine("25");
+
             string projectName = appName.Name;
-            Console.WriteLine("27");
+      
             string projectVersion = appName.Version.Major.ToString()
                               + '.' + appName.Version.Minor.ToString();
 
@@ -51,7 +51,7 @@ namespace Search.Index
                 foreach (Posting p in postings)
                 {
                     IDocument doc = corpus.GetDocument(p.DocumentId);
-                    results.Add(doc.Title);
+                    results.Add(doc.Title+" (Author: "+doc.Author+")");
                     results.Add(doc.DocumentId.ToString());
                 }
             }
@@ -97,7 +97,7 @@ namespace Search.Index
         public string termStemmer(string term)
         {
             string result = new StemmingTokenProcesor().StemWords(term);
-            Console.WriteLine(result);
+      
             return result;
         }
 
@@ -265,49 +265,16 @@ namespace Search.Index
             return nVocab;
         }
 
-        //private static void PrintPostings(IList<Posting> postings, IDocumentCorpus corpus, bool bAuthor, bool bTermCount, bool bDetails)
-        //{
-        //    //Print header
-        //    if (bAuthor == true)
-        //    {
-        //        Console.WriteLine($"    NUM  AUTHOR\t\tTITLE");
-        //    }
-        //    else
-        //    {
-        //        Console.WriteLine($"    NUM  TITLE");
-        //    }
 
-        //    //Print postings
-        //    int i = 1;
-        //    foreach (Posting p in postings)
-        //    {
-        //        IDocument doc = corpus.GetDocument(p.DocumentId);
-        //        Console.Write($"    [{i}]  ");
-        //        if (bAuthor) { Console.Write($"{doc.Author}\t"); }
-        //        if (doc.Title == "" || doc.Title == null)
-        //        {
-        //            Console.Write("No Title");
-        //        }
-        //        else
-        //        {
-        //            Console.Write($"{doc.Title}");
-        //        }
-        //        if (bTermCount) { Console.Write($"\t{p.Positions.Count} terms"); }
-        //        if (bDetails) { Console.Write($"\t\t{p.ToString()}"); }
-        //        Console.WriteLine();
-        //        i += 1;
-        //    }
-        //    Console.WriteLine($"Found {postings.Count} files.");
-        //}
 
         public string getDocContent(string doc)
         {
             string finalString;
             int selected = Int32.Parse(doc);
-            //Console.WriteLine(selected);
+         
             IDocument selectedDocument;
             selectedDocument = corpus.GetDocument(selected);
-            //finalString.($"\n{doc.Title.ToUpper()}");
+          
             TextReader content = selectedDocument.GetContent();
             finalString = (content.ReadToEnd());
             content.Dispose();
@@ -359,7 +326,7 @@ namespace Search.Index
                 {
                     continue;
                 }
-                //Console.WriteLine($"selected: {selected}");
+            
 
                 //Ask again if input number is not in range
                 Boolean isSelectedInRange = (selected > 0) && (selected <= postings.Count);

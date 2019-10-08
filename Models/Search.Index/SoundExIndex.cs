@@ -34,7 +34,7 @@ namespace Search.Index
         /// <param name="corpus">the corpus of documents</param>
         public void BuildSoundexIndex(IDocumentCorpus corpus)
         {
-            Console.WriteLine("In BuildSoundexIndex");
+      
             foreach (IDocument d in corpus.GetDocuments())
             {
                 //Skip document with no author field
@@ -42,7 +42,7 @@ namespace Search.Index
                     continue;
                 }
                 AddDocIdByAuthor(d.Author, d.DocumentId);
-            Console.WriteLine("In Foreach loop");
+     
             ((IDisposable)d).Dispose();
             }
         }
@@ -99,7 +99,6 @@ namespace Search.Index
                 soundex = soundex.Substring(0, 4);      // Y0234 -> Y023
             }
 
-            //Console.WriteLine($"{name}\t-> {soundex}");
             return soundex;
         }
 

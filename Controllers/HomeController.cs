@@ -21,7 +21,6 @@ namespace Habeas.Controllers
             if (HybridSupport.IsElectronActive)
             {
                 Electron.IpcMain.On("select-directory", async (args) => {
-                    Console.WriteLine(24);
                     var mainWindow = Electron.WindowManager.BrowserWindows.First();
                     var options = new OpenDialogOptions
                     {
@@ -32,16 +31,13 @@ namespace Habeas.Controllers
                     };
 
                     string[] files = await Electron.Dialog.ShowOpenDialogAsync(mainWindow, options);
-                    Console.WriteLine("34");
+                    
                     string check = String.Join("", files);
-                    Console.WriteLine("36");
+                    
 
-                    Console.WriteLine(BEP.PathIsValid(check));
-                    Console.WriteLine(BEP.PathContainsContent(check));
                     if (BEP.PathIsValid(check) && BEP.PathContainsContent(check))
                     {
 
-                        Console.WriteLine("41");
                         BEP.GenerateIndex(check);
                         Electron.IpcMain.Send(mainWindow, "select-directory-reply", "true");
 
@@ -49,16 +45,13 @@ namespace Habeas.Controllers
                     else if (!BEP.PathIsValid(check))
                     {
 
-                        Console.WriteLine("49");
                         Electron.IpcMain.Send(mainWindow, "select-directory-reply", "invalidPath");
                     }
                     else {
 
-                        Console.WriteLine("54");
                         Electron.IpcMain.Send(mainWindow, "select-directory-reply", "emptyFile");
                     }
 
-                    Console.WriteLine("58");
                 });
 
                 Electron.IpcMain.On("stemTerm", (args) =>
@@ -66,7 +59,6 @@ namespace Habeas.Controllers
                     var mainWindow = Electron.WindowManager.BrowserWindows.First();
                     string term = args.ToString();
                     string stemmedTerm = BEP.termStemmer(term);
-                    //works up to here
                     Electron.IpcMain.Send(mainWindow, "stemmedTerm", stemmedTerm);
                 });
 
@@ -93,32 +85,10 @@ namespace Habeas.Controllers
                     Electron.IpcMain.Send(mainWindow, "information-dialog-reply", result.Response);
                 });
 
-                Electron.IpcMain.On("headerInfo", async (args) =>
-                {
-                    var options = new MessageBoxOptions(
-                        "Habeas supports" + Environment.NewLine + Environment.NewLine +
-                        "1. single query" + Environment.NewLine +
-                        "2. boolean query -> put a space between keywords for AND queries, put a '+' for OR queries" + Environment.NewLine +
-                        "3. phrase query -> \"term1 term2...\"" + Environment.NewLine +
-                        "4. near query -> [term1 NEAR/k term2]" + Environment.NewLine +
-                        "5. wildcard query -> colo*r" + Environment.NewLine +
-                        "6. soundex for author name" + Environment.NewLine + Environment.NewLine +
-                        "To STEM a word, select 'stem' on the dropdown to the left of the search field. Then type the word you wish to stem into the search field and click the enter button." + Environment.NewLine + Environment.NewLine + "To view the VOCAB list for an index, click the 'Vocab' label on the navigation bar." + Environment.NewLine + Environment.NewLine + "To INDEX a new directory, click the 'Index' label on the navigation bar."
-                        )
-                    {
-                        Type = MessageBoxType.info,
-                        Title = "Information"
-                    };
-
-                    var result = await Electron.Dialog.ShowMessageBoxAsync(options);
-
-                    var mainWindow = Electron.WindowManager.BrowserWindows.First();
-                    Electron.IpcMain.Send(mainWindow, "information-dialog-reply", result.Response);
-                });
+                
 
                 Electron.IpcMain.On("chooseVocab", (args) =>
                 {
-                    Console.WriteLine("here");
                     List<String> result = BEP.PrintVocab(1000);
                     var mainWindow = Electron.WindowManager.BrowserWindows.First();
                     Electron.IpcMain.Send(mainWindow, "vocabList", result);
