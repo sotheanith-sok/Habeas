@@ -1,0 +1,289 @@
+﻿@{
+	ViewData["Title"] = "";
+}
+
+<div id="indicatePath" class="text-center">
+	<h1 class="display-4">Habeas Corpus!</h1>
+	<p>Please specify a directory to index:</p>
+	<div id="walla">
+	<button id="select-directory">
+		Select Path
+	</button>
+	</div>
+	<h4 class="display-6" id="indexing" style="display: none">Loading...</h4>
+	<br />
+	<div class="alert-danger" id="NoPath" style="display:none; padding: 20px; text-align:center; border-radius: 10px;"> The selected path does not exist: please select another path.</div>
+	<div class="alert-danger" id="EmptyFile" style="display:none; padding: 20px; text-align:center; border-radius: 10px;"> The selected path does not contain any content: please select another path.</div>
+	@*<a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">View Article</a>*@
+
+</div>
+<div id="searchDirectory" style="display:none" class="text-center">
+	<h1 class="display-4">Habeas</h1>
+	<span id="titleHeading">Search Corpus</span>
+	<br />
+	<select id="searchChoice">
+		<option value="searchOption" selected>Search</option>
+		<option value="stem">Stem</option>
+		<option value="soundex">Soundex</option>
+	</select><input id="searchText" type="text" /><input style="display: none;" id="stemText" type="text" /><input style="display: none;" id="soundexText" type="text" />
+	<br />
+	<br />
+	<div id="enterDIV">
+		<button id="search" class="btn-primary">Enter</button>
+	</div>
+	<h4 class="display-6" id="loading" style="display: none">Searchin'...</h4>
+	<br />
+	@*<a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">View Article</a>*@
+	<div id="vocabSection" style="display:none;">
+		<span id="vocabTotal"></span>
+		<br/><br/>
+		<div id="vocabContainer"> </div>
+
+	</div>
+
+	<div id="stemmedTerm" style="display:none;">
+		<span id="originalTerm"></span><span id="sTerm"></span>
+
+	</div>
+
+
+</div>
+
+<script>
+	const { ipcRenderer } = require("electron");
+
+	var dropdown = document.getElementById("searchChoice");
+	var stemInput = document.getElementById("stemText");
+	var searchInput = document.getElementById("searchText");
+	var soundexInput = document.getElementById("soundexText");
+	var mainHeading= document.getElementById("titleHeading");
+	var enterButton = document.getElementById("search");
+	var vocabDIV = document.getElementById("vocabSection");
+	var stemDIV = document.getElementById("stemmedTerm");
+	var vocabList = document.getElementById("vocabContainer");
+	var enterButtonDIV = document.getElementById("enterDIV");
+	var searchLoading = document.getElementById("loading");
+	var noPathWarning = document.getElementById("NoPath");
+	var emptyPathWarning = document.getElementById("EmptyFile");
+	var selectDirectoryDIV = document.getElementById("walla");
+	var indexingSpan = document.getElementById("indexing");
+	var chooseDirectoryDIV = document.getElementById("indicatePath");
+	var directorySelecter = document.getElementById("select-directory");
+	var searchDirectoryDIV = document.getElementById("searchDirectory");
+	var stemmedTerm = document.getElementById("sTerm");
+	var originalTerm = document.getElementById("originalTerm");
+	var vocabTotal = document.getElementById("vocabTotal");
+	var noResultsMessage = "Sorry, your query did not produce any results.¯\\_(ツ)_/¯";
+	
+	//Sending messages
+
+	document.getElementById("chooseVocab").addEventListener("click", () => {
+		stemDIV.style.display = "none";
+		ipcRenderer.send("chooseVocab");
+	});
+	
+	document.addEventListener('click', function (e) {
+		if (e.target && e.target.class == 'articles') {
+			ipcRenderer.send("readDoc", e.target.id);
+		}
+	});
+
+	dropdown.addEventListener("change", (sender, path) => {
+		stemInput.value = "";
+		searchInput.value = "";
+		if (dropdown.value == "searchOption") {
+			stemInput.style.display = "none";
+			soundexInput.style.display = "none";
+			searchInput.style.display = "inline-block";
+			mainHeading.innerHTML = "Search Corpus";
+		}
+		else if (dropdown.value == "stem") {
+			stemInput.style.display = "inline-block";
+			searchInput.style.display = "none";
+			soundexInput.style.display = "none";
+			mainHeading.innerHTML = "Stem Term";
+		}
+		else {
+			mainHeading.innerHTML = "Search Corpus";
+			soundexInput.style.display = "inline-block";
+			stemInput.style.display = "none";
+			searchInput.style.display = "none";
+		}
+	});
+
+	enterButton.addEventListener("click", (sender, path) => {
+		vocabDIV.style.display = "none";
+		stemDIV.style.display = "none";
+		vocabList.innerHTML = "";
+		if (dropdown.value == "searchOption") {
+			
+			if(searchInput.value != ""){
+			enterButtonDIV.style.display = "none";
+			searchLoading.style.display = "block";
+			ipcRenderer.send("searchText", searchInput.value);
+			}
+		}
+		else if (dropdown.value == "stem") {
+			originalTerm.innerHTML = stemInput.value + " -> ";
+			ipcRenderer.send("stemTerm", stemInput.value);
+		}
+		else {
+			if(soundexInput.value != ""){
+			enterButtonDIV.style.display = "none";
+			searchLoading.style.display = "block";
+			ipcRenderer.send("soundexText", soundexInput.value);
+			}
+		}
+	});
+
+	directorySelecter.addEventListener("click", () => {
+		noPathWarning.style.display = "none";
+		emptyPathWarning.style.display = "none";
+		selectDirectoryDIV.style.display = "none";
+		indexingSpan.style.display = "block";
+		chooseDirectoryDIV.class = "text-center";
+		ipcRenderer.send("select-directory");
+	});
+
+	//getting messages
+
+	ipcRenderer.on("stemmedTerm", (sender, path) => {
+		stemDIV.style.display = "block"
+		stemInput.value = "";
+		stemmedTerm.innerHTML = path;
+	});
+
+
+
+	ipcRenderer.on("vocabList", (sender, vocab) => {
+		vocabDIV.style.display = "block";
+		vocabTotal.innerHTML = "The total number of items in the vocabulary is: " + vocab[0];
+		vocabList.innerHTML = "";
+		for (i = 1; i <= 1000; i++) {
+		var node = document.createElement("P");
+			node.innerText = "#" + [i] + ") " +vocab[i];   
+		vocabList.appendChild(node);
+	}
+		
+	});
+
+	ipcRenderer.on("soundexText", (sender, posting) => {
+		vocabDIV.style.display = "block";
+		enterButtonDIV.style.display = "block";
+		searchLoading.style.display = "none";
+		if (posting[0] == "0") {
+			vocabTotal.innerHTML = noResultsMessage;
+		}
+		else {
+			var limit = posting[0];
+			vocabTotal.innerHTML = "Habeas found " + limit + " results for your query";
+			for (i = 1; i <= (limit * 2); i += 2) {
+				var node = document.createElement("a");
+				node.innerHTML = posting[i];
+				node.class = "articles";
+				node.id = posting[i + 1];
+				node.style.cursor = "pointer";
+				vocabList.appendChild(node);
+				var newElem = document.createElement("BR");
+				vocabList.appendChild(newElem);
+			}
+		}
+
+	});
+
+	ipcRenderer.on("searchText", (sender, posting) => {
+		vocabDIV.style.display = "block";
+		enterButtonDIV.style.display = "block";
+		searchLoading.style.display = "none";
+		if (posting[0] == "0") {
+			vocabTotal.innerHTML = noResultsMessage;
+		}
+		else {
+			var limit = posting[0];
+			vocabTotal.innerHTML = "Habeas found "+limit+" results for your query";
+			for (i = 1; i <= (limit*2) ; i +=2) {
+				var node = document.createElement("a");
+				node.innerHTML = posting[i];
+				node.class = "articles";
+				node.id = posting[i+1];
+				node.style.cursor = "pointer";
+				vocabList.appendChild(node);
+				var newElem = document.createElement("BR");
+				vocabList.appendChild(newElem);
+			}
+		}
+
+	});
+
+
+	ipcRenderer.on("select-directory-reply", (sender, path) => {
+		selectDirectoryDIV.style.display = "block";
+		indexingSpan.style.display = "none";
+		chooseDirectoryDIV.class = "text-center";
+		if (path == "true") {
+			noPathWarning.style.display = "none";
+			emptyPathWarning.style.display = "none";
+			chooseDirectoryDIV.style.display = "none";
+			searchDirectoryDIV.style.display = "block";
+			document.getElementById("headerIndex").style.display = "block";
+			document.getElementById("chooseVocab").style.display = "block";
+		}
+		else if (path == "invalidPath") {
+			noPathWarning.style.display = "block";
+			emptyPathWarning.style.display = "none";
+		}
+		else if (path == "emptyFile") {
+			emptyPathWarning.style.display = "block";
+			noPathWarning.style.display = "none";
+		}
+		else {
+			noPathWarning.style.display = "none";
+			emptyPathWarning.style.display = "none";
+		}
+
+	});
+</script>
+
+<style>
+
+	.articles:hover{
+		cursor: pointer;
+	}
+
+	select,
+	input {
+		margin: 0;
+		padding: 0;
+		border: 1px solid black;
+	}
+
+	select,
+	input, button, h1, h4, p, span, div {
+		user-select: none;
+		-moz-user-select: none;
+		-webkit-user-select: none;
+	}
+	select {
+		height: 29px;
+		border-radius: 20px 0 0 20px;
+		padding-left: 5px;
+		border-right: 0;
+		background-color: #192841;
+		color: white;
+	}
+
+	input {
+		height: 28px;
+		border-radius: 0 20px 20px 0;
+		padding-left: 5px;
+	}
+
+		select, input::after active {
+			margin: 0px;
+		}
+
+	#search {
+		color: white;
+	}
+
+</style>
