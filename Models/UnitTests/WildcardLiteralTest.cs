@@ -21,7 +21,7 @@ namespace UnitTests
             Console.WriteLine(Path.GetFullPath("./UnitTests/testCorpus2"));
             IIndex index = PositionalInvertedIndexer.IndexCorpus(c);
             ITokenProcessor processor = new NormalTokenProcessor();
-            KGram kGram = PositionalInvertedIndexer.kGram;
+            KGram kGram = Indexer.kGram;
             WildcardLiteral wildcard = new WildcardLiteral("*ell*", kGram);
             
             IList<Posting> result = (List<Posting>)(wildcard.GetPostings(index, processor));

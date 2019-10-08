@@ -18,16 +18,6 @@ namespace Search.Index
             SoundMap = new Dictionary<string, List<int>>();
         }
 
-        //NOTE: SoundMap can be independently built with name and docIDs.
-        /// <summary>
-        /// Constructs SoundExIndex and builds its soundmap from the corpus
-        /// </summary>
-        public SoundExIndex(IDocumentCorpus corpus)
-        {
-            SoundMap = new Dictionary<string, List<int>>();
-            BuildSoundexIndex(corpus);
-        }
-
         /// <summary>
         /// Constructs soundex index(hash map) from the author of documents in the corpus
         /// </summary>
@@ -52,13 +42,15 @@ namespace Search.Index
         /// </summary>
         /// <param name="authorName">name to be parsed to sound code and used as key</param>
         /// <param name="docID">document id to be added as value to the hashmap</param>
-        public void AddDocIdByAuthor(string authorName, int docID) {
-
-            if(authorName == null) {return; }
+        public void AddDocIdByAuthor(string authorName, int docID)
+        {
+            if(authorName == null) { return; }
 
             //names can consists of more than one name
             string[] terms = authorName.Split(' ');
-            terms = terms.Where(x => !string.IsNullOrEmpty(x)).ToArray();    
+            //remove the empry string in the string array
+            terms = terms.Where(x => !string.IsNullOrEmpty(x)).ToArray();
+
             foreach (string term in terms)
             {
                 //Get the sound code
@@ -155,7 +147,9 @@ namespace Search.Index
             
             //Check author name can contains multiple terms
             string[] terms = nameQuery.Split(' ');
+            //remove the empry string in the string array
             terms = terms.Where(x => !string.IsNullOrEmpty(x)).ToArray();
+            
             List<IList<Posting>> list = new List<IList<Posting>>();
 
             foreach(string term in terms) {
