@@ -237,6 +237,7 @@ namespace Program
                 if(bDetails)   { Console.Write($"\t\t{p.ToString()}"); }
                 Console.WriteLine();
                 i += 1;
+                ((IDisposable)doc).Dispose();
             }
             Console.WriteLine($"Found {postings.Count} files.");
         }

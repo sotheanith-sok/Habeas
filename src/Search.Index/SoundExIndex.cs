@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Search.Document;
 using Search.Query;
 using System.Linq;
+using System;
 
 namespace Search.Index
 {
@@ -40,6 +41,7 @@ namespace Search.Index
                     continue;
                 }
                 AddDocIdByAuthor(d.Author, d.DocumentId);
+                ((IDisposable) d).Dispose();
             }
         }
 
