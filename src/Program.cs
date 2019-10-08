@@ -15,7 +15,7 @@ namespace Program
         private static SoundExIndex soundIndex; //for author
         private static PositionalInvertedIndex index;   //for body
         private static IDocumentCorpus corpus;
-        private static PositionalInvertedIndexer indexer;
+        private static Indexer indexer;
 
         public static void Main(string[] args)
         {
@@ -34,7 +34,7 @@ namespace Program
             corpus = GetCorpusByAskingDirectory();
             
             //Use indexer to build the main index and soundexIndex
-            indexer = new PositionalInvertedIndexer();
+            indexer = new Indexer();
             index = indexer.IndexCorpus(corpus);
             soundIndex = indexer.SoundIndex;
 

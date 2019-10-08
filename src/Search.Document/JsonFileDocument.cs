@@ -35,7 +35,6 @@ namespace Search.Document
             FilePath = absoluteFilePath;
             FileName = Path.GetFileName(absoluteFilePath);
 
-            //NOTE: it might slow the speed down? but it needs to open the file to get title and author first
             this.file = MemoryMappedFile.CreateFromFile(FilePath);
             StreamReader fileStreamReader = new StreamReader(this.file.CreateViewStream());
             Document jobject = JsonConvert.DeserializeObject<Document>(fileStreamReader.ReadToEnd());

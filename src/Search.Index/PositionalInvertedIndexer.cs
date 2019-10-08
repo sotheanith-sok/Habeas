@@ -7,13 +7,13 @@ using System.Diagnostics;
 
 namespace Search.Index
 {
-    public class PositionalInvertedIndexer      //better to be called "Indexer"
+    public class Indexer      //better to be called "Indexer"
     {
 
         public static KGram kGram = null;
         public SoundExIndex SoundIndex { get; }
 
-        public PositionalInvertedIndexer (){
+        public Indexer (){
             SoundIndex = new SoundExIndex();
         }
         

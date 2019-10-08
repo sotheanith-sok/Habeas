@@ -299,7 +299,7 @@ namespace Search.Query
                     //create WildcardLiteral
                     return new Literal(
                         new StringBounds(startIndex, lengthOut),
-                        new WildcardLiteral(subquery.Substring(startIndex, lengthOut), PositionalInvertedIndexer.kGram)
+                        new WildcardLiteral(subquery.Substring(startIndex, lengthOut), Indexer.kGram)
                     );
                 }
 
