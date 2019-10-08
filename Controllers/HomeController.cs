@@ -21,6 +21,7 @@ namespace Habeas.Controllers
             if (HybridSupport.IsElectronActive)
             {
                 Electron.IpcMain.On("select-directory", async (args) => {
+                    Console.WriteLine(24);
                     var mainWindow = Electron.WindowManager.BrowserWindows.First();
                     var options = new OpenDialogOptions
                     {

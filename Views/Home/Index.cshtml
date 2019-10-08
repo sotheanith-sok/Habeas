@@ -51,6 +51,28 @@
 <script>
 	const { ipcRenderer } = require("electron");
 
+	//var dropdown = document.getElementById("searchChoice");
+	//var stemInput = document.getElementById("stemText");
+	//var searchInput = document.getElementById("searchText");
+	//var soundexInput = document.getElementById("soundexText");
+	//var mainHeading= document.getElementById("titleHeading");
+	//var enterButton = document.getElementById("search");
+	//var vocabDIV = document.getElementById("vocabSection");
+	//var stemDIV = document.getElementById("stemmedTerm");
+	//var vocabList = document.getElementById("vocabContainer");
+	//var enterButtonDIV = document.getElementById("enterDIV");
+	//var searchLoading = document.getElementById("loading");
+	//var noPathWarning = document.getElementById("NoPath");
+	//var emptyPathWarning = document.getElementById("EmptyFile");
+	//var selectDirectoryDIV = document.getElementById("selectDirectoryDIV");
+	//var indexingSpan = document.getElementById("indexing");
+	//var chooseDirectoryDIV = document.getElementById("indicatePath");
+	//var directorySelecter = document.getElementById("select-directory");
+	//var searchDirectoryDIV = document.getElementById("searchDirectory");
+	//var stemmedTerm = document.getElementById("sTerm");
+	//var originalTerm = document.getElementById("originalTerm");
+	//var vocabTotal = document.getElementById("vocabTotal");
+
 	document.getElementById("searchChoice").addEventListener("change", (sender, path) => {
 		document.getElementById("stemText").value = "";
 		document.getElementById("searchText").value = "";
@@ -161,17 +183,13 @@
 			var limit = posting[0];
 			document.getElementById("vocabTotal").innerHTML = "Habeas found " + limit + " results for your query";
 			for (i = 1; i <= (limit * 2); i += 2) {
-				var node = document.createElement("BUTTON");
-				//var param = posting[i];
+				var node = document.createElement("a");
 				node.innerHTML = posting[i];
 				node.class = "articles";
 				node.id = posting[i + 1];
-				//node.value = posting[i];
 				document.getElementById("vocabContainer").appendChild(node);
 				var newElem = document.createElement("BR");
-				var newElem2 = document.createElement("BR");
 				document.getElementById("vocabContainer").appendChild(newElem);
-				document.getElementById("vocabContainer").appendChild(newElem2);
 			}
 		}
 
@@ -188,17 +206,13 @@
 			var limit = posting[0];
 			document.getElementById("vocabTotal").innerHTML = "Habeas found "+limit+" results for your query";
 			for (i = 1; i <= (limit*2) ; i +=2) {
-				var node = document.createElement("BUTTON");
-				//var param = posting[i];
+				var node = document.createElement("a");
 				node.innerHTML = posting[i];
 				node.class = "articles";
 				node.id = posting[i+1];
-				//node.value = posting[i];
 				document.getElementById("vocabContainer").appendChild(node);
 				var newElem = document.createElement("BR");
-				var newElem2 = document.createElement("BR");
 				document.getElementById("vocabContainer").appendChild(newElem);
-				document.getElementById("vocabContainer").appendChild(newElem2);
 			}
 		}
 
@@ -230,12 +244,11 @@
 		document.getElementById("searchText").value = "";
 		document.getElementById("vocabContainer").innerHTML = "";
 		document.getElementById("vocabTotal").innerHTML = "";
-		
-		
 	});
 </script>
 
 <style>
+
 	select,
 	input {
 		margin: 0;

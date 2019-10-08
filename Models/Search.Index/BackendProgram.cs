@@ -28,16 +28,13 @@ namespace Search.Index
             string projectVersion = appName.Version.Major.ToString()
                               + '.' + appName.Version.Minor.ToString();
 
-            Console.WriteLine("31");
             corpus = DirectoryCorpus.LoadTextDirectory(check);
-            Console.WriteLine("33");
 
             if (corpus != null && corpus.CorpusSize != 0)   //NOTE: redundant..
             {
                 index = PositionalInvertedIndexer.IndexCorpus(corpus);
                 soundIndex = new SoundExIndex(corpus);
             }
-            Console.WriteLine("37");
         }
 
         /// <summary>
