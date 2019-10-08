@@ -43,9 +43,11 @@ namespace Program
                 //get query input from user
                 Console.Write("\nSearch: ");
                 query = Console.ReadLine();
+                
                 if (query.Equals("")) {
                     continue;
                 }
+                query = query.TrimStart(' ').TrimEnd(' ');
 
                 //special queries
                 if (query.StartsWith(":")) {
@@ -155,6 +157,7 @@ namespace Program
                 index = indexer.IndexCorpus(corpus);
             }
             else if (specialQuery.StartsWith(":author ")) {                         // :author
+
                 string name = specialQuery.Substring(":author ".Length);
                 IList<Posting> postings = soundIndex.GetPostings(name);
                 PerformSearchResult(postings, corpus, true, false, false);

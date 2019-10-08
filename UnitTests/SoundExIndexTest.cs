@@ -56,6 +56,7 @@ namespace UnitTests
             authorIndex.AddDocIdByAuthor(" sella", 1);
             authorIndex.AddDocIdByAuthor("sella  ", 2);
             authorIndex.AddDocIdByAuthor("yashua  ovando", 2);
+            authorIndex.AddDocIdByAuthor(" yashua     ovando     ",3);
             //Assert
             authorIndex.GetSoundexVocab().Should().HaveCount(3);
         }
