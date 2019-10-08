@@ -46,6 +46,8 @@ namespace Search.Index
 
             //names can consists of more than one name
             string[] terms = authorName.Split(' ');
+            //remove the empry string in the string array
+            terms = terms.Where(x => !string.IsNullOrEmpty(x)).ToArray();
 
             foreach (string term in terms)
             {

@@ -48,6 +48,19 @@ namespace UnitTests
         }
 
         [Fact]
+        public void AddDocIDByAuthorTest_InputExceptionWithSpace()
+        {
+            //Arrange
+            SoundExIndex authorIndex = new SoundExIndex();
+            //Act
+            authorIndex.AddDocIdByAuthor(" sella", 1);
+            authorIndex.AddDocIdByAuthor("sella  ", 2);
+            authorIndex.AddDocIdByAuthor("yashua  ovando", 2);
+            //Assert
+            authorIndex.GetSoundexVocab().Should().HaveCount(3);
+        }
+
+        [Fact]
         public void GetPostingsTest_OneName()
         {
             //Arrange
