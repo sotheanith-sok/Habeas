@@ -7,13 +7,13 @@ using Search.Index;
 using Search.Text;
 using System.Collections.Generic;
 
-namespace UnitTests
+namespace UnitTests.Query
 {
     public class NearLiteralTests
     {
         private static IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../UnitTests/testCorpus3");
-        private IIndex index = IndexCorpus(corpus);
-        private static ITokenProcessor processor = new StemmingTokenProcesor();
+        private IIndex index = new Indexer().IndexCorpus(corpus);
+        private ITokenProcessor processor = new StemmingTokenProcesor();
 
         [Fact]
         public void GetPostingsTest_NearExist_ReturnsSomePos()
@@ -37,7 +37,6 @@ namespace UnitTests
         public void GetPostingsTest_NearNotExist_ReturnsEmpty()
         {
             NearLiteral near = new NearLiteral("is", 1, "mystery"); //[is NEAR/1 mystery]
-            ITokenProcessor processor = new StemmingTokenProcesor();
             IList<Posting> result = near.GetPostings(index, processor);
 
             result.Should().BeEmpty("because there's no document that \'mystery\' appears 1 away from \'is\'");
@@ -53,38 +52,5 @@ namespace UnitTests
             Console.WriteLine();
         }
 
-        //For independent unit testing, Copied from PositionalInvertedIndexer.IndexCorpus()
-        private static PositionalInvertedIndex IndexCorpus(IDocumentCorpus corpus)
-        {
-            PositionalInvertedIndex index = new PositionalInvertedIndex();
-            Console.WriteLine($"UnitTest: Indexing {corpus.CorpusSize} documents in the corpus...");
-            // Index the document
-            foreach (IDocument doc in corpus.GetDocuments())
-            {
-                //Tokenize the documents
-                ITokenStream stream = new EnglishTokenStream(doc.GetContent());
-                IEnumerable<string> tokens = stream.GetTokens();
-
-                int position = 0;
-                foreach (string token in tokens)
-                {
-                    //Process token to term
-                    List<string> terms = processor.ProcessToken(token);
-                    //Add term to the index
-                    foreach (string term in terms)
-                    {
-                        if (term.Length > 0)
-                        {
-                            index.AddTerm(term, doc.DocumentId, position);
-                        }
-                    }
-                    //Increase the position num
-                    position += 1;
-                }
-                stream.Dispose();
-                ((IDisposable)doc).Dispose();
-            }
-            return index;
-        }
     }
 }

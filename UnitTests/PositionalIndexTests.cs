@@ -30,7 +30,7 @@ namespace UnitTests
 
             //Act
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
-            PositionalInvertedIndex index = IndexCorpus(corpus);
+            PositionalInvertedIndex index = new Indexer().IndexCorpus(corpus);
             var result = index.GetPostings(term);
             
             //Assert
@@ -57,7 +57,7 @@ namespace UnitTests
 
             //Act
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
-            PositionalInvertedIndex index = IndexCorpus(corpus);
+            PositionalInvertedIndex index = new Indexer().IndexCorpus(corpus);
             var result = index.GetPostings(term);
             
             //Assert
@@ -88,7 +88,7 @@ namespace UnitTests
         public void VocabTest_WithStemmer(){
             //Arrange
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
-            PositionalInvertedIndex index = IndexCorpus(corpus);
+            PositionalInvertedIndex index = new Indexer().IndexCorpus(corpus);
             var expectedVocab = new List<string>{
                 "hello","world","it","is","snow",
                 "the","full","of","mystery","mr.snowman",
@@ -104,44 +104,34 @@ namespace UnitTests
             //actual.Should().BeEquivalentTo(expectedVocab);    //TODO: why "mystery" became "mysteri"??
         }
 
+        //AddTermTests
+        //TODO: test 3 different exit points
+        // In index
+        // 1. term X                        -> Add term with everything into the hashMap
+        // 2. term O, docId X, position X   -> Add a Posting to the List<Posting>
+        // 3. term O, docId O, position X   -> Add the position to the Posting of docId
 
+        // [Fact]
+        // public void AddTermTest_TermNotExist_AddsNewKey(){
+        //     //use these later when making [Theory] [InlineCode]
+        //     // string term;
+        //     // int docId;
+        //     // int position;
 
-        //For independent unit testing, Copied from PositionalInvertedIndexer.IndexCorpus()
-        public static PositionalInvertedIndex IndexCorpus(IDocumentCorpus corpus)
-        {
-            ITokenProcessor processor = new StemmingTokenProcesor();
-            PositionalInvertedIndex index = new PositionalInvertedIndex();
-            Console.WriteLine($"UnitTest: Indexing {corpus.CorpusSize} documents in the corpus...");
-            // Index the document
-            foreach (IDocument doc in corpus.GetDocuments())
-            {
-                //Tokenize the documents
-                ITokenStream stream = new EnglishTokenStream(doc.GetContent());
-                IEnumerable<string> tokens = stream.GetTokens();
+        //     //Arrange
+        //     Dictionary<string, List<Posting>> map = new Dictionary<string, List<Posting>>(){
+        //         ["hello"] = new List<Posting>(){new Posting(1,new List<int>(){1})}
+        //     };
+        //     // PositionalInvertedIndex index = new PositionalInvertedIndex(){
+        //     //     ["hello"] = new List<Posting>(){new Posting(1,new List<int>(){1})}
+        //     // };
 
-                int position = 0;
-                foreach (string token in tokens)
-                {
-                    //Process token to term
-                    List<string> terms = processor.ProcessToken(token);
-                    //Add term to the index
-                    foreach (string term in terms)
-                    {
-                        if (term.Length > 0)
-                        {
-                            index.AddTerm(term, doc.DocumentId, position);
-                        }
-                    }
-                    //Increase the position num
-                    position += 1;
-                }
+        //     // //Act
+        //     // PositionalInvertedIndex.AddTerm("world",1,2);
 
-                stream.Dispose();
-                ((IDisposable) doc).Dispose();
-            }
-
-            return index;
-        }
+        //     // //Assert
+        //     // Assert.True(index.GetPosting("world",1).Positions.Contains(2));
+        // }
 
     }
 

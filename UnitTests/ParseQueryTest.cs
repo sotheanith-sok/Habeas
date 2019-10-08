@@ -3,7 +3,7 @@ using FluentAssertions;
 using Search.Query;
 using System.Collections.Generic;
 
-namespace UnitTests
+namespace UnitTests.Query
 {
     public class ParseQueryTest
     {
