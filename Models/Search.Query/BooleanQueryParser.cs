@@ -67,18 +67,20 @@ namespace Search.Query
         /// <summary>
         /// Parses a Boolean search query to produce an IQueryComponent for that query.
         /// </summary>
-        /// <param name="query"></param>
-        /// <returns></returns>
+        /// <param name="query">query to be parsed to a query component</param>
+        /// <returns>a query component</returns>
         public IQueryComponent ParseQuery(String query)
         {
-            int start = 0;
-
             // General routine: scan the query to identify a literal, and put that literal into a list.
             //	Repeat until a + or the end of the query is encountered; build an AND query with each
             //	of the literals found. Repeat the scan-and-build-AND-query phase for each segment of the
             // query separated by + signs. In the end, build a single OR query that composes all of the built
             // AND subqueries.
+            if(query == null) { return null; }
+            query = query.TrimStart(' ').TrimEnd(' ');
+            if(query == "" || query == null) { return null; }
 
+            int start = 0;
             var allSubqueries = new List<IQueryComponent>();
             do
             {

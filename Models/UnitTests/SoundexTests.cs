@@ -5,12 +5,12 @@ using FluentAssertions;
 
 namespace UnitTests
 {
-    public class SoundExIndexTests
+    public class SoundexTests
     {
         string directory = "../../../Models/UnitTests/testCorpus";
 
         [Fact]
-        public void SoundExIndexTest()
+        public void SoundexIndexTest()
         {
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
             SoundExIndex soundIndex = new SoundExIndex();
@@ -56,7 +56,7 @@ namespace UnitTests
             authorIndex.AddDocIdByAuthor(" sella", 1);
             authorIndex.AddDocIdByAuthor("sella  ", 2);
             authorIndex.AddDocIdByAuthor("yashua  ovando", 2);
-            authorIndex.AddDocIdByAuthor(" yashua     ovando     ",3);
+            authorIndex.AddDocIdByAuthor(" yashua     ovando     ", 3);
             //Assert
             authorIndex.GetSoundexVocab().Should().HaveCount(3);
         }
