@@ -12,7 +12,7 @@ namespace Search.Index
 
         public static KGram kGram = null;
         public static SoundExIndex soundEx = null;
-        
+
         /// <summary>
         /// Constructs an index from a corpus of documents
         /// </summary>
@@ -26,7 +26,7 @@ namespace Search.Index
             // Constuct a positional-inverted-index once 
             PositionalInvertedIndex index = new PositionalInvertedIndex();
             Console.WriteLine($"Indexing {corpus.CorpusSize} documents in the corpus...");
-            
+
             ITokenProcessor processor = new StemmingTokenProcesor();
 
             HashSet<string> unstemmedVocabulary = new HashSet<string>();
@@ -55,20 +55,21 @@ namespace Search.Index
                     position += 1;
 
                     //Keep track of vocabularies for K-gram
-                    foreach (string term in ((NormalTokenProcessor)processor).ProcessToken(token)){
+                    foreach (string term in ((NormalTokenProcessor)processor).ProcessToken(token))
+                    {
                         unstemmedVocabulary.Add(term);
                     }
                 }
-                soundEx.AddDocIdByAuthor(doc.Author,doc.DocumentId);
-                stream.Dispose();   
-                ((IDisposable) doc).Dispose();
+                soundEx.AddDocIdByAuthor(doc.Author, doc.DocumentId);
+                stream.Dispose();
+                ((IDisposable)doc).Dispose();
 
             }
             kGram = new KGram(unstemmedVocabulary);
-            
+
             elapsedTime.Stop();
             Console.WriteLine("Elapsed " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
-            
+
             return index;
         }
 

@@ -20,7 +20,8 @@ namespace Search.Query
         /// <param name="first">the first token</param>
         /// <param name="k">a value of how far the second is away from the first at most</param>
         /// <param name="second">the second token</param>
-        public NearLiteral(string first, int k, string second) {
+        public NearLiteral(string first, int k, string second)
+        {
             this.firstTerm = first;
             this.k = k;
             this.secondTerm = second;
@@ -33,19 +34,21 @@ namespace Search.Query
             List<string> termsFromSecond = processor.ProcessToken(secondTerm);
             IList<Posting> firstPostings = index.GetPostings(termsFromFirst);
             IList<Posting> secondPostings = index.GetPostings(termsFromSecond);
-            
+
             //PositionalMerge to any postings found with gap(distance) 1 to k (up to k)
             List<IList<Posting>> list = new List<IList<Posting>>();
-            for(int i=1; i<=k; i++) {
-                list.Add( Merge.PositionalMerge(firstPostings, secondPostings, i) );
+            for (int i = 1; i <= k; i++)
+            {
+                list.Add(Merge.PositionalMerge(firstPostings, secondPostings, i));
             }
 
             //OrMerge all of them
             return Merge.OrMerge(list);
         }
 
-        public override string ToString() {
-			return "[" + firstTerm + " NEAR/"+k+" " + secondTerm + "]";
-		}
+        public override string ToString()
+        {
+            return "[" + firstTerm + " NEAR/" + k + " " + secondTerm + "]";
+        }
     }
 }

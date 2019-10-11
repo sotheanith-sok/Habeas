@@ -20,10 +20,10 @@ namespace UnitTests
         }
 
         [Theory]
-        [InlineData("ovando","O153")]
-        [InlineData("bae","B000")]
-        [InlineData("blacklock","B424")]
-        [InlineData("sok","S200")]
+        [InlineData("ovando", "O153")]
+        [InlineData("bae", "B000")]
+        [InlineData("blacklock", "B424")]
+        [InlineData("sok", "S200")]
         public void ParseToSoundexTest(string name, string expected)
         {
             var actual = new SoundExIndex().ParseToSoundex(name);

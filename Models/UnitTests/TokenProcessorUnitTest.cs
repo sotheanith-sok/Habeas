@@ -96,7 +96,7 @@ namespace UnitTests
         [Fact]
         public void TestProcessTokenWithoutKGram()
         {
-            Assert.Equal(new List<string> { "hello..192.168.1.1.hewlettpackardcomputingjohn legendm","hello","192.168.1.1","hewlett","packard","comput","john legend","m","eat" },
+            Assert.Equal(new List<string> { "hello..192.168.1.1.hewlettpackardcomputingjohn legendm", "hello", "192.168.1.1", "hewlett", "packard", "comput", "john legend", "m", "eat" },
             this.stemmingProcessor.ProcessToken("Hello.-.192.168.1.1.-Hewlett-Packard-Computing-\"John Legend\"-'M'-Eating"));
         }
 

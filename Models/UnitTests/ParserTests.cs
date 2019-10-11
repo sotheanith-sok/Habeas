@@ -14,7 +14,8 @@ namespace UnitTests
         BooleanQueryParser parser = new BooleanQueryParser();
 
         [Fact]
-        public void ParsingSingleQueryTest_ReturnsTermLiteral() {
+        public void ParsingSingleQueryTest_ReturnsTermLiteral()
+        {
             //Arrange
             string query = "smoothie";
             TermLiteral expected = new TermLiteral(query);
@@ -26,7 +27,8 @@ namespace UnitTests
         }
 
         [Fact]
-        public void ParsingAndQueryTest_ReturnsAndQuery() {
+        public void ParsingAndQueryTest_ReturnsAndQuery()
+        {
             //Arrange
             string query = "kiwi banana";
             AndQuery expected = new AndQuery(
@@ -42,7 +44,8 @@ namespace UnitTests
         }
 
         [Fact]
-        public void ParsingOrQueryTest_ReturnsOrQuery() {
+        public void ParsingOrQueryTest_ReturnsOrQuery()
+        {
             //Arrange
             string query = "kiwi + banana";
             OrQuery expected = new OrQuery(
@@ -58,7 +61,8 @@ namespace UnitTests
         }
 
         [Fact]
-        public void ParsingPhraseQueryTest_ReturnsPhraseLiteral() {
+        public void ParsingPhraseQueryTest_ReturnsPhraseLiteral()
+        {
             //Arrange
             string query = "\"ice smoothie\"";
             PhraseLiteral expected = new PhraseLiteral("ice smoothie");
@@ -76,7 +80,8 @@ namespace UnitTests
         }
 
         [Fact]
-        public void ParsingNearQueryTest_ReturnsNearLiteral() {
+        public void ParsingNearQueryTest_ReturnsNearLiteral()
+        {
             //Arrange
             string query = "[lemon NEAR/2 orange]";
             NearLiteral expected = new NearLiteral("lemon", 2, "orange");
@@ -88,7 +93,8 @@ namespace UnitTests
         }
 
         [Fact]
-        public void ParseTest_WildcardQuery_ReturnsWildcardLiteral() {
+        public void ParseTest_WildcardQuery_ReturnsWildcardLiteral()
+        {
             //Arrange
             string query = "colo*r";
             //Act
@@ -98,7 +104,8 @@ namespace UnitTests
         }
 
         [Fact]
-        public void ParsingTest_WithOrAnd() {
+        public void ParsingTest_WithOrAnd()
+        {
             //Arrange
             string query = "kiwi + banana mango apple + cherry tomato";
             // Expected structure: OR( Term, AND(Term,Term,Term), AND(Term,Term) )
@@ -119,11 +126,12 @@ namespace UnitTests
         }
 
         [Fact]
-        public void ParseTest_WithEverything() {
+        public void ParseTest_WithEverything()
+        {
             //Arrange
             string query = "str*berry kiwi + banana \"ice smoothie\" party + [lemon NEAR/2 orange]";
             // Expected structure: OR( AND(Wildcard,Term), AND(Term,Phrase,Term), NEAR )
-            
+
             //Act
             IQueryComponent actual = parser.ParseQuery(query);
 

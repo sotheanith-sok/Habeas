@@ -15,8 +15,8 @@ namespace Search.Document
         /// </summary>
         public string FilePath { get; }
         public string FileName { get; }
-		public string Title { get; }
-		public string Author { get; }
+        public string Title { get; }
+        public string Author { get; }
 
         private MemoryMappedFile file;
 
@@ -49,7 +49,8 @@ namespace Search.Document
             return new TextFileDocument(documentId, absoluteFilePath);
         }
 
-        public void Dispose(){
+        public void Dispose()
+        {
             file?.Dispose();
         }
     }

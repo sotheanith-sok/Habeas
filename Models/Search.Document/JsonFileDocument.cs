@@ -13,7 +13,7 @@ namespace Search.Document
         public string title { get; set; }
         public string body { get; set; }
         public string url { get; set; }
-        public string author{ get; set; }
+        public string author { get; set; }
     }
 
     public class JsonFileDocument : IFileDocument, IDisposable
@@ -25,8 +25,8 @@ namespace Search.Document
         /// </summary>
         public string FilePath { get; }
         public string FileName { get; }
-        public string Title { get; set;}
-        public string Author {get; set;}
+        public string Title { get; set; }
+        public string Author { get; set; }
         private MemoryMappedFile file;
 
         public JsonFileDocument(int documentId, string absoluteFilePath)
@@ -53,7 +53,7 @@ namespace Search.Document
             this.file = MemoryMappedFile.CreateFromFile(FilePath);
             StreamReader fileStreamReader = new StreamReader(this.file.CreateViewStream());
             Document jobject = JsonConvert.DeserializeObject<Document>(fileStreamReader.ReadToEnd());
-            var content = (jobject.body!= null) ? jobject.body : "";
+            var content = (jobject.body != null) ? jobject.body : "";
             fileStreamReader.Dispose();
             this.file.Dispose();
             return new StringReader(content);
@@ -65,7 +65,8 @@ namespace Search.Document
             return new JsonFileDocument(documentId, absoluteFilePath);
         }
 
-        public void Dispose(){
+        public void Dispose()
+        {
             file?.Dispose();
         }
     }

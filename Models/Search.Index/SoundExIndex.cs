@@ -9,12 +9,13 @@ namespace Search.Index
     public class SoundExIndex
     {
 
-        public Dictionary<string, List<int>> SoundMap {get;}
+        public Dictionary<string, List<int>> SoundMap { get; }
 
         /// <summary>
         /// Constructs SoundExIndex with an empty soundMap
         /// </summary>
-        public SoundExIndex(){
+        public SoundExIndex()
+        {
             SoundMap = new Dictionary<string, List<int>>();
         }
 
@@ -24,16 +25,17 @@ namespace Search.Index
         /// <param name="corpus">the corpus of documents</param>
         public void BuildSoundexIndex(IDocumentCorpus corpus)
         {
-      
+
             foreach (IDocument d in corpus.GetDocuments())
             {
                 //Skip document with no author field
-                if (d.Author == null) {
+                if (d.Author == null)
+                {
                     continue;
                 }
                 AddDocIdByAuthor(d.Author, d.DocumentId);
-     
-            ((IDisposable)d).Dispose();
+
+                ((IDisposable)d).Dispose();
             }
         }
 
@@ -44,7 +46,7 @@ namespace Search.Index
         /// <param name="docID">document id to be added as value to the hashmap</param>
         public void AddDocIdByAuthor(string authorName, int docID)
         {
-            if(authorName == null) { return; }
+            if (authorName == null) { return; }
 
             //names can consists of more than one name
             string[] terms = authorName.Split(' ');
@@ -57,9 +59,12 @@ namespace Search.Index
                 string soundCode = ParseToSoundex(term);
 
                 //Add docID to soundMap
-                if (SoundMap.ContainsKey(soundCode)) {
+                if (SoundMap.ContainsKey(soundCode))
+                {
                     SoundMap[soundCode].Add(docID);
-                } else {
+                }
+                else
+                {
                     SoundMap.Add(soundCode, new List<int> { docID });
                 }
             }
@@ -77,17 +82,20 @@ namespace Search.Index
 
             //1. change string to soundcode
             soundex = Convert2SoundCode(soundex);
-            
+
             //2. remove zero
             soundex = soundex.Replace("0", string.Empty);
-            
+
             //3. remove duplicate of its substring
             soundex = RemoveDuplicateChar(soundex);     // Y24424 -> Y242
 
             //4. make the length of sound code be 4
-            if (soundex.Length < 4) {
+            if (soundex.Length < 4)
+            {
                 soundex = soundex.PadRight(4, '0');     // Y02 -> Y020
-            } else {
+            }
+            else
+            {
                 soundex = soundex.Substring(0, 4);      // Y0234 -> Y023
             }
 
@@ -105,15 +113,15 @@ namespace Search.Index
             string code = term[0].ToString();
 
             //change all following letters to to proper soundcodes
-            foreach(char c in term.Remove(0,1))     
+            foreach (char c in term.Remove(0, 1))
             {
-                if ("AEIOUWHY".Contains(c)) {      code += "0"; }
-                else if ("BFPV".Contains(c)) {     code += "1"; }
+                if ("AEIOUWHY".Contains(c)) { code += "0"; }
+                else if ("BFPV".Contains(c)) { code += "1"; }
                 else if ("CGJKQSXZ".Contains(c)) { code += "2"; }
-                else if ("DT".Contains(c)) {       code += "3"; }
-                else if ("L".Contains(c)) {        code += "4"; }
-                else if ("MN".Contains(c)) {       code += "5"; }
-                else {                             code += "6"; }
+                else if ("DT".Contains(c)) { code += "3"; }
+                else if ("L".Contains(c)) { code += "4"; }
+                else if ("MN".Contains(c)) { code += "5"; }
+                else { code += "6"; }
             }
 
             return code;
@@ -126,13 +134,15 @@ namespace Search.Index
         /// <returns>a string with distinct characters in its substring(2)</returns>
         private string RemoveDuplicateChar(string code)
         {
-            if (code.Length < 2) {
+            if (code.Length < 2)
+            {
                 return code;
             }
             string distinct = "";
-            string firstTwo = code.Substring(0,2);
-            foreach(char c in code.Substring(2)) {
-                if(!distinct.Contains(c)) { distinct += c; }
+            string firstTwo = code.Substring(0, 2);
+            foreach (char c in code.Substring(2))
+            {
+                if (!distinct.Contains(c)) { distinct += c; }
             }
             return firstTwo + distinct;
         }
@@ -142,28 +152,34 @@ namespace Search.Index
         /// </summary>
         /// <param name="nameQuery">author name to find documents</param>
         /// <returns>postings with document and empty positions</returns>
-        public IList<Posting> GetPostings(string nameQuery){
+        public IList<Posting> GetPostings(string nameQuery)
+        {
             IList<Posting> result = new List<Posting>();
-            
+
             //Check author name can contains multiple terms
             string[] terms = nameQuery.Split(' ');
             //remove the empry string in the string array
             terms = terms.Where(x => !string.IsNullOrEmpty(x)).ToArray();
-            
+
             List<IList<Posting>> list = new List<IList<Posting>>();
 
-            foreach(string term in terms) {
+            foreach (string term in terms)
+            {
                 string soundCode = ParseToSoundex(term);
-                
+
                 List<int> docIDs;
-                try {
+                try
+                {
                     docIDs = SoundMap[soundCode];
-                } catch(KeyNotFoundException){
+                }
+                catch (KeyNotFoundException)
+                {
                     continue;
                 }
 
                 IList<Posting> postings = new List<Posting>();
-                foreach (int id in docIDs) {
+                foreach (int id in docIDs)
+                {
                     postings.Add(new Posting(id, new List<int>()));
                 }
                 list.Add(postings);
@@ -178,7 +194,8 @@ namespace Search.Index
         /// which is stored in soundexIndex
         /// </summary>
         /// <returns>a sorted list of soundex</returns>
-        public List<string> GetSoundexVocab(){
+        public List<string> GetSoundexVocab()
+        {
             List<string> soundexVocab = SoundMap.Keys.ToList();
             soundexVocab.Sort();
             return soundexVocab;
