@@ -20,6 +20,7 @@ namespace Search.Index
         {
             new BinaryWriter(File.Open("Vocab.bin", FileMode.Create));
             new BinaryWriter(File.Open("Postings.bin", FileMode.Create));
+            new BinaryWriter(File.Open("vocabTable.bin", FileMode.Create));
             IReadOnlyList<string> vocabulary = index.GetVocabulary();
             long termStart;
             long postingStart;
@@ -64,15 +65,15 @@ namespace Search.Index
         /// <summary>
         /// Writes the vocab.bin file
         /// </summary>
-        public long WriteVocab(string vocabulary)
+        public long WriteVocab(string term)
         {
             long finalLong;
             using (BinaryWriter writer = new BinaryWriter(File.Open("Vocab.bin", FileMode.Append)))
             {
                 finalLong=writer.BaseStream.Length;
-                writer.Write(vocabulary);
+                writer.Write(term);
             }
-        return finalLong; 
+            return finalLong; 
         }
 
         /// <summary>
