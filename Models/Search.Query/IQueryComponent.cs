@@ -2,8 +2,10 @@
 using Search.Index;
 using Search.Text;
 
-namespace Search.Query {
-	public interface IQueryComponent {
-		IList<Posting> GetPostings(IIndex index, ITokenProcessor processor);
-	}
+namespace Search.Query
+{
+    public interface IQueryComponent
+    {
+        IList<Posting> GetPostings(IIndex index, ITokenProcessor processor);
+    }
 }

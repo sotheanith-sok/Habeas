@@ -19,13 +19,16 @@ namespace UnitTests.QueryTests
         [Fact]
         public void WildCardLiteralTest_CircumfixWildcards()
         {
-            WildcardLiteral wildcard = new WildcardLiteral("*ell*", kGram);        
+            WildcardLiteral wildcard = new WildcardLiteral("*ell*", kGram);
             IList<Posting> result = wildcard.GetPostings(index, processor);
-            
+
             IList<Posting> expected;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
                 expected = UnitTest.GeneratePostings("(4,[0,1]), (2,[0,2,3])");
-            } else {
+            }
+            else
+            {
                 expected = UnitTest.GeneratePostings("(0,[0,1]), (2,[0,2,3])");
             }
 
@@ -36,13 +39,16 @@ namespace UnitTests.QueryTests
         [Fact]
         public void WildCardLiteralTest_LeadingWildcard()
         {
-            WildcardLiteral wildcard = new WildcardLiteral("*ello", kGram);        
+            WildcardLiteral wildcard = new WildcardLiteral("*ello", kGram);
             IList<Posting> result = wildcard.GetPostings(index, processor);
-            
+
             IList<Posting> expected;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
                 expected = UnitTest.GeneratePostings("(4,[0,1]), (2,[0,2,3])");
-            } else {
+            }
+            else
+            {
                 expected = UnitTest.GeneratePostings("(0,[0,1]), (2,[0,2,3])");
             }
 
@@ -52,13 +58,16 @@ namespace UnitTests.QueryTests
         [Fact]
         public void WildCardLiteralTest_TrailingWildcard()
         {
-            WildcardLiteral wildcard = new WildcardLiteral("hell*", kGram);        
+            WildcardLiteral wildcard = new WildcardLiteral("hell*", kGram);
             IList<Posting> result = wildcard.GetPostings(index, processor);
-            
+
             IList<Posting> expected;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
                 expected = UnitTest.GeneratePostings("(4,[0,1]), (2,[0,2,3])");
-            } else {
+            }
+            else
+            {
                 expected = UnitTest.GeneratePostings("(0,[0,1]), (2,[0,2,3])");
             }
 
@@ -69,7 +78,7 @@ namespace UnitTests.QueryTests
         public void WildCardLiteralTest_NotExist_ReturnsEmpty()
         {
             //1. Not existing wildcard query
-            WildcardLiteral wildcard1 = new WildcardLiteral("zeb*", kGram);        
+            WildcardLiteral wildcard1 = new WildcardLiteral("zeb*", kGram);
             IList<Posting> result = wildcard1.GetPostings(index, processor);
             result.Should().BeEmpty("because no posting exist for the wildcard 'zeb*'");
 

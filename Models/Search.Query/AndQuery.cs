@@ -24,9 +24,9 @@ namespace Search.Query
             foreach (IQueryComponent qc in mComponents)
             {
                 //get a posting list and add it to the collection
-                postingLists.Add( qc.GetPostings(index, processor) );
+                postingLists.Add(qc.GetPostings(index, processor));
             }
-            
+
             return Merge.AndMerge(postingLists);
         }
 

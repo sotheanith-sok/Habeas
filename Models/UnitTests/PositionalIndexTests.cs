@@ -9,47 +9,55 @@ using FluentAssertions;
 
 namespace UnitTests
 {
-    public class PositionalIndexTests {
+    public class PositionalIndexTests
+    {
         string directory = "../../../Models/UnitTests/testCorpus4";
 
         [Fact]
-        public void PostionalIndexTest_OnePosition(){
+        public void PostionalIndexTest_OnePosition()
+        {
             //Arrange
             string term = "sun";
             IList<Posting> expected;
             System.Console.WriteLine("PositionalIndexTest_OnePosition: ");
             System.Console.Write($"Set expected postings of \'{term}\'");
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
                 System.Console.WriteLine(" for MacOSX");
-                expected = new List<Posting>{ new Posting(1, new List<int>{3}) };
+                expected = new List<Posting> { new Posting(1, new List<int> { 3 }) };
             }
-            else {
+            else
+            {
                 System.Console.WriteLine(" for Windows and other OSs");
-                expected = new List<Posting>{ new Posting(3, new List<int>{3}) };
+                expected = new List<Posting> { new Posting(3, new List<int> { 3 }) };
             }
 
             //Act
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
             PositionalInvertedIndex index = Indexer.IndexCorpus(corpus);
             var result = index.GetPostings(term);
-            
+
             //Assert
             result.Should().HaveSameCount(expected);
             result.Should().BeEquivalentTo(expected, config => config.WithStrictOrdering());
         }
 
         [Fact]
-        public void PostionalIndexTest_MultiplePositions(){
+        public void PostionalIndexTest_MultiplePositions()
+        {
             //Arrange
             string term = "hello";
             IList<Posting> expected;
             System.Console.WriteLine("PositionalIndexTest_MultiplePositions: ");
             System.Console.Write($"Set expected postings of \'{term}\'");
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
                 System.Console.WriteLine(" for MacOSX");
                 expected = new List<Posting>{ new Posting(2, new List<int>{0,2,3}),
                                               new Posting(4, new List<int>{0,1}) };
-            } else {
+            }
+            else
+            {
                 System.Console.WriteLine(" for Windows and other OSs");
                 expected = new List<Posting>{ new Posting(0, new List<int>{0,1}),
                                               new Posting(2, new List<int>{0,2,3}) };
@@ -59,7 +67,7 @@ namespace UnitTests
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
             PositionalInvertedIndex index = Indexer.IndexCorpus(corpus);
             var result = index.GetPostings(term);
-            
+
             //Assert
             result.Should().HaveSameCount(expected);
             result.Should().BeEquivalentTo(expected, config => config.WithStrictOrdering());
@@ -83,9 +91,10 @@ namespace UnitTests
         //     actual.Should().HaveSameCount(expectedVocab, "because the index used NormalTokenProcessor");
         //     actual.Should().BeEquivalentTo(expectedVocab);
         // }
-        
+
         [Fact]
-        public void VocabTest_WithStemmer(){
+        public void VocabTest_WithStemmer()
+        {
             //Arrange
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
             PositionalInvertedIndex index = Indexer.IndexCorpus(corpus);

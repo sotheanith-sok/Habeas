@@ -11,16 +11,17 @@ namespace UnitTests
     public class MergeTests
     {
 
-    // Tests for AndlMerge --------------------------------------------------------------
+        // Tests for AndlMerge --------------------------------------------------------------
         [Fact]
-        public void AndMergeTest_AllOverlap_ReturnsOneOfThePostingLists(){
+        public void AndMergeTest_AllOverlap_ReturnsOneOfThePostingLists()
+        {
             //Test with two
             IList<Posting> first = UnitTest.GeneratePostings("(1,[0,5]), (2,[10,99])");
             IList<Posting> second = UnitTest.GeneratePostings("(1,[2,9]), (2,[77])");
 
             IList<Posting> result = Merge.AndMerge(first, second);
             result.Should().HaveCount(first.Count, "because all overlaps");
-            
+
             //Test with list
             List<IList<Posting>> list = new List<IList<Posting>>{
                 UnitTest.GeneratePostings("(1,[0,5]), (2,[1])"),
@@ -33,7 +34,8 @@ namespace UnitTests
         }
 
         [Fact]
-        public void AndMergeTest_NoOverlap_ReturnsEmpty(){
+        public void AndMergeTest_NoOverlap_ReturnsEmpty()
+        {
             //Test with two
             IList<Posting> first = UnitTest.GeneratePostings("(1,[0,5]), (5,[10])");
             IList<Posting> second = UnitTest.GeneratePostings("(2,[2,9]), (7,[77])");
@@ -54,7 +56,8 @@ namespace UnitTests
         }
 
         [Fact]
-        public void AndMergeTest_SomeOverlap_ReturnsMatchingPostings(){
+        public void AndMergeTest_SomeOverlap_ReturnsMatchingPostings()
+        {
             //Test with two
             IList<Posting> first = UnitTest.GeneratePostings("(1,[0,5]), (2,[10,99])");
             IList<Posting> second = UnitTest.GeneratePostings("(1,[2,9]), (3,[77])");
@@ -73,13 +76,14 @@ namespace UnitTests
             result.Should().HaveCount(1, "because only 1 posting overlap");
         }
 
-    // Tests for OrMerge --------------------------------------------------------------
+        // Tests for OrMerge --------------------------------------------------------------
         [Fact]
-        public void OrMergeTest_AllOverlap_ReturnsOneOfThePostingLists(){
+        public void OrMergeTest_AllOverlap_ReturnsOneOfThePostingLists()
+        {
             //Test with two
             IList<Posting> first = UnitTest.GeneratePostings("(1,[0,5]), (2,[10,99])");
             IList<Posting> second = UnitTest.GeneratePostings("(1,[2,9]), (2,[77])");
-            
+
             IList<Posting> result = Merge.OrMerge(first, second);
             result.Should().HaveCount(first.Count, "because all overlaps");
 
@@ -95,7 +99,8 @@ namespace UnitTests
         }
 
         [Fact]
-        public void OrMergeTest_NoOverlap_ReturnsAllPostings(){
+        public void OrMergeTest_NoOverlap_ReturnsAllPostings()
+        {
             //Test with two
             IList<Posting> first = UnitTest.GeneratePostings("(1,[0,5]), (5,[10])");
             IList<Posting> second = UnitTest.GeneratePostings("(2,[2,9]), (7,[77])");
@@ -114,7 +119,8 @@ namespace UnitTests
         }
 
         [Fact]
-        public void OrMergeTest_SomeOverlap_ReturnsPostings(){
+        public void OrMergeTest_SomeOverlap_ReturnsPostings()
+        {
             //NOTE: OrMerge don't need to have the correct positions?
             //Test with two posting lists
             //Arrange
@@ -145,18 +151,18 @@ namespace UnitTests
             // result.Should().BeEquivalentTo(expected);
         }
 
-    // Tests for PostionalMerge --------------------------------------------------------------
+        // Tests for PostionalMerge --------------------------------------------------------------
         [Fact]
         public void PositionalMergeTest_WithTwoPostingLists_PhraseExist_ReturnsFirstPos()
         {
             //Arrange
             IList<Posting> first = UnitTest.GeneratePostings("(1,[0,5,10,30])"); //angels
             IList<Posting> second = UnitTest.GeneratePostings("(1,[1,11,31])");  //baseball
-            
+
             IList<Posting> expected = UnitTest.GeneratePostings("(1,[0,10,30])"); //angels //starting position of "angels baseball"
-            
+
             //Act
-            IList<Posting> result = Merge.PositionalMerge(first,second);
+            IList<Posting> result = Merge.PositionalMerge(first, second);
 
             //Assert
             result.Should().BeEquivalentTo(expected);
@@ -170,14 +176,14 @@ namespace UnitTests
             IList<Posting> second = UnitTest.GeneratePostings("(1,[10])"); //baseball -off
 
             //Act
-            var result = Merge.PositionalMerge(first,second);
+            var result = Merge.PositionalMerge(first, second);
 
             //Assert
             result.Should().BeOfType(typeof(List<Posting>));
             result.Should().BeEmpty("because there's no match set");
         }
 
-    //PositionalMerge with Recursion (List of posting lists as an input)
+        //PositionalMerge with Recursion (List of posting lists as an input)
         [Fact]
         public void PositionalMergeTest_WithList_PhraseExist_ReturnsFirstPos()
         {
@@ -190,13 +196,13 @@ namespace UnitTests
             };
 
             IList<Posting> expected = UnitTest.GeneratePostings("(1,[0]), (2,[10,100])"); //starting position of "kentucky fried chicken sims"
-            
+
             //Act
             IList<Posting> result = Merge.PositionalMerge(list);
 
             //Assert
             result.Should().BeEquivalentTo(expected, "because PositionalMerge should work with list of all posting lists");
-            
+
         }
 
         [Fact]
@@ -215,7 +221,7 @@ namespace UnitTests
 
             //Assert
             result.Should().BeEmpty("because there's no match set");
-            
+
         }
 
         [Fact]
@@ -234,7 +240,7 @@ namespace UnitTests
 
             //Assert
             result.Should().BeEmpty("because there's only some part of postings match not the whole");
-            
+
         }
 
     }

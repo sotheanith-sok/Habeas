@@ -30,9 +30,12 @@ namespace Search.Index
         /// <return>a posting list</return>
         public IList<Posting> GetPostings(string term)
         {
-            if (hashMap.ContainsKey(term)) {
+            if (hashMap.ContainsKey(term))
+            {
                 return hashMap[term];
-            } else {
+            }
+            else
+            {
                 return new List<Posting>();
             }
         }
@@ -45,11 +48,12 @@ namespace Search.Index
         /// <return>a or-merged posting list</return>
         public IList<Posting> GetPostings(List<string> terms)
         {
-			List<IList<Posting>> postingLists = new List<IList<Posting>>();
-			foreach(string term in terms) {
-				postingLists.Add( GetPostings(term) );
-			}
-			return Merge.OrMerge(postingLists);
+            List<IList<Posting>> postingLists = new List<IList<Posting>>();
+            foreach (string term in terms)
+            {
+                postingLists.Add(GetPostings(term));
+            }
+            return Merge.OrMerge(postingLists);
         }
 
         /// <summary>
@@ -71,20 +75,26 @@ namespace Search.Index
         public void AddTerm(string term, int docID, int position)
         {
             //Check if inverted index contains the term (key)
-            if (hashMap.ContainsKey(term)) {
+            if (hashMap.ContainsKey(term))
+            {
                 //Check if the document of the term is in the posting list
                 Posting lastPosting = hashMap[term].Last();
-                if(lastPosting.DocumentId == docID){
+                if (lastPosting.DocumentId == docID)
+                {
                     //Add a position to the posting
                     lastPosting.Positions.Add(position);
-                } else {
-                    //Create a posting with (docID & position) to the posting list
-                    hashMap[term].Add(new Posting(docID, new List<int>{position}));
                 }
-            } else {
+                else
+                {
+                    //Create a posting with (docID & position) to the posting list
+                    hashMap[term].Add(new Posting(docID, new List<int> { position }));
+                }
+            }
+            else
+            {
                 //Add term and a posting (docID & position) to the hashmap
                 List<Posting> postingList = new List<Posting>();
-                postingList.Add(new Posting(docID, new List<int>{position}));
+                postingList.Add(new Posting(docID, new List<int> { position }));
                 hashMap.Add(term, postingList);
             }
 
@@ -93,7 +103,7 @@ namespace Search.Index
 
         public Posting GetLastPostingItem(string term)
         {
-           return hashMap[term].Last();
+            return hashMap[term].Last();
         }
     }
 

@@ -32,10 +32,13 @@ namespace UnitTests.QueryTests
             PhraseLiteral phrase2 = new PhraseLiteral("hello worlds");
             result = phrase2.GetPostings(index, processor);
             //position of 'hello' in the doc that has "hello" and "world"
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) {
-                expected = new List<Posting>{ new Posting(4, new List<int>{1})};
-            } else {
-                expected = new List<Posting>{ new Posting(0, new List<int>{1})};
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                expected = new List<Posting> { new Posting(4, new List<int> { 1 }) };
+            }
+            else
+            {
+                expected = new List<Posting> { new Posting(0, new List<int> { 1 }) };
             }
             result.Should().HaveCount(1, "because 'worlds' should be processed and include result of 'world'");
             result.Should().BeEquivalentTo(expected, "because postings for 'hello worlds' should have the position of 'hello'");

@@ -76,9 +76,9 @@ namespace Search.Query
             //	of the literals found. Repeat the scan-and-build-AND-query phase for each segment of the
             // query separated by + signs. In the end, build a single OR query that composes all of the built
             // AND subqueries.
-            if(query == null) { return null; }
+            if (query == null) { return null; }
             query = query.TrimStart(' ').TrimEnd(' ');
-            if(query == "" || query == null) { return null; }
+            if (query == "" || query == null) { return null; }
 
             int start = 0;
             var allSubqueries = new List<IQueryComponent>();
@@ -219,11 +219,13 @@ namespace Search.Query
                 // Locate the next space to find the closing '"' character.
                 int nextSpace = subquery.IndexOf('"', startIndex);
                 // Assuming some loathsome Boetian forgets to end the quote
-                if (nextSpace < 0) {
+                if (nextSpace < 0)
+                {
                     // We'll just assume that they meant the rest of the subquery
                     lengthOut = subquery.Length - startIndex;
                 }
-                else {
+                else
+                {
                     //Otherwise, the position of the next '"' character is the end of the phrase
                     lengthOut = nextSpace - startIndex + 1;
                 }
@@ -243,9 +245,12 @@ namespace Search.Query
                 // Find closing bracket ']'
                 int closingIndex = subquery.IndexOf(']', startIndex);
                 // Limit near query parts
-                if(closingIndex < 0) {  //not have closing bracket
+                if (closingIndex < 0)
+                {  //not have closing bracket
                     lengthOut = subquery.Length - startIndex;
-                } else {                //have closing bracket
+                }
+                else
+                {                //have closing bracket
                     lengthOut = closingIndex - startIndex + 1;
                 }
                 // Extract the near query substring
@@ -256,7 +261,8 @@ namespace Search.Query
                 //Handle exceptions with Regex
                 // 1) no "near/"
                 //Regex rgx_near = new Regex(@"\s<near/>\d+\s");
-                if (near.Contains(" near/") == false) {
+                if (near.Contains(" near/") == false)
+                {
                     //create TermLiteral instead with the first term appears
                     string term1 = near.Substring(0, near.IndexOf(' '));
                     Console.WriteLine($"not a proper near query, searching for the first term \"{term1}\"");
@@ -280,7 +286,7 @@ namespace Search.Query
                 // create NearLiteral(term1, k, term2)
                 return new Literal(
                     new StringBounds(startIndex, lengthOut),
-                    new NearLiteral(first,k,second)
+                    new NearLiteral(first, k, second)
                 );
             }
             // Capture a Wildcard or Single query otherwise
@@ -288,10 +294,12 @@ namespace Search.Query
             {
                 // Locate the next space to find the end of this literal.
                 int nextSpace = subquery.IndexOf(' ', startIndex);
-                if (nextSpace < 0) { // No more literals in this subquery.
+                if (nextSpace < 0)
+                { // No more literals in this subquery.
                     lengthOut = subLength - startIndex;
                 }
-                else {
+                else
+                {
                     lengthOut = nextSpace - startIndex;
                 }
 
@@ -312,7 +320,7 @@ namespace Search.Query
                     new TermLiteral(subquery.Substring(startIndex, lengthOut))
                 );
             }
-            
+
         }
 
     }
