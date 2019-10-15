@@ -18,6 +18,8 @@ namespace Search.Index
         /// <param name="filePath">the absolute path to save the index files</param>
         public void WriteIndex(IIndex index, string filePath)
         {
+            new BinaryWriter(File.Open("Vocab.bin", FileMode.Create));
+            new BinaryWriter(File.Open("Postings.bin", FileMode.Create));
             IReadOnlyList<string> vocabulary = index.GetVocabulary();
             long termStart;
             long postingStart;
@@ -64,8 +66,13 @@ namespace Search.Index
         /// </summary>
         public long WriteVocab(string vocabulary)
         {
-
-            return ;
+            long finalLong;
+            using (BinaryWriter writer = new BinaryWriter(File.Open("Vocab.bin", FileMode.Append)))
+            {
+                finalLong=writer.BaseStream.Length;
+                writer.Write(vocabulary);
+            }
+        return finalLong; 
         }
 
         /// <summary>
