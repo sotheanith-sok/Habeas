@@ -9,9 +9,10 @@ using Search.Text;
 
 namespace UnitTests.QueryTests
 {
+    [Collection("FileIORelated")]
     public class OrQueryTests
     {
-        private static IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../Models/UnitTests/testCorpus2");
+        private static IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../Models/UnitTests/testCorpus0");
         private IIndex index = Indexer.IndexCorpus(corpus);
         private ITokenProcessor processor = new StemmingTokenProcesor();
 

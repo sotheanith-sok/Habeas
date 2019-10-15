@@ -217,8 +217,6 @@ namespace Search.Index
             finalString = (content.ReadToEnd());
             //dispose of the content
             content.Dispose();
-            //dispose of the selected document
-            ((IDisposable)selectedDocument).Dispose();
             //return the string
             return finalString;
         }

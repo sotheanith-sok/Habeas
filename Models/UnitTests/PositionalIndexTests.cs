@@ -9,9 +9,10 @@ using FluentAssertions;
 
 namespace UnitTests
 {
+    [Collection("FileIORelated")]
     public class PositionalIndexTests
     {
-        string directory = "../../../Models/UnitTests/testCorpus4";
+        string directory = "../../../Models/UnitTests/testCorpus0";
 
         [Fact]
         public void PostionalIndexTest_OnePosition()

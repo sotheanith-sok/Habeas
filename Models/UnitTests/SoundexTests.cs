@@ -5,6 +5,7 @@ using FluentAssertions;
 
 namespace UnitTests
 {
+    [Collection("FileIORelated")]
     public class SoundexTests
     {
         string directory = "../../../Models/UnitTests/testCorpus";
