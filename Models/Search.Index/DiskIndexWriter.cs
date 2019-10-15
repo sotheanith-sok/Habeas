@@ -19,12 +19,44 @@ namespace Search.Index
         public void WriteIndex(IIndex index, string filePath)
         {
             IReadOnlyList<string> vocabulary = index.GetVocabulary();
-            foreach (string s in vocabulary)
+            long termStart;
+            long postingStart;
+
+            foreach (string term in vocabulary)
             {
-                long vocabStart = WriteVocab(s);
-                long postingStart = WritePostings(s);
-                WriteVocabTable(s);
+                termStart = WriteVocab(term);
+                postingStart = WritePostings(index.GetPostings(term), filePath);
+                WriteVocabTable(termStart, postingStart);
             }
+        }
+
+        /// <summary>
+        /// Writes a posting list of a term to postings.bin
+        /// </summary>
+        /// <param name="postings">the posting list to write</param>
+        /// <returns>the starting byte position of the posting list in postings.bin</returns>
+        public long WritePostings(IList<Posting> postings, string folderPath) {
+            string fileName = "postings.bin";
+            long startByte;
+
+            using (BinaryWriter writer = new BinaryWriter(File.Open(fileName, FileMode.Append)))
+            {
+                startByte = writer.BaseStream.Length;
+                foreach(Posting p in postings)
+                {
+                    //Write docID
+                    writer.Write(p.DocumentId);
+                    writer.Write(' ');
+
+                    //Write positions
+                    foreach(int pos in p.Positions)
+                    {
+                        writer.Write(pos);
+                        writer.Write(' ');
+                    }
+                }
+            }
+            return startByte;
         }
 
         /// <summary>
@@ -34,6 +66,21 @@ namespace Search.Index
         {
 
             return ;
+        }
+
+        /// <summary>
+        /// Writes the starting byte of term and the starting byte of posting list to vocabTable.bin
+        /// </summary>
+        /// <param name="termStart">the byte position of a term in vocab.bin</param>
+        /// <param name="postingStart">the byte position of a posting list in postings.bin</param>
+        public void WriteVocabTable(long termStart, long postingStart)
+        {
+            string fileName = "vocabTable.bin";
+            using (BinaryWriter writer = new BinaryWriter(File.Open(fileName, FileMode.Append)))
+            {
+                writer.Write(termStart);
+                writer.Write(postingStart);
+            }
         }
     }
 }
