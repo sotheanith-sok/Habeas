@@ -1,0 +1,47 @@
+
+	.articles:hover
+	{
+		cursor: pointer;
+	}
+
+	select,
+	input 
+	{
+		margin: 0;
+		padding: 0;
+		border: 1px solid black;
+	}
+
+	select,
+	input, button, h1, h4, p, span, div 
+	{
+		user-select: none;
+		-moz-user-select: none;
+		-webkit-user-select: none;
+	}
+	select 
+	{
+		height: 29px;
+		border-radius: 20px 0 0 20px;
+		padding-left: 5px;
+		border-right: 0;
+		background-color: #192841;
+		color: white;
+	}
+
+	input 
+	{
+		height: 28px;
+		border-radius: 0 20px 20px 0;
+		padding-left: 5px;
+	}
+
+	select, input::after active 
+	{
+		margin: 0px;
+	}
+
+	#search 
+	{
+		color: white;
+	}
