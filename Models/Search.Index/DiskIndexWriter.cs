@@ -24,6 +24,7 @@ namespace Search.Index
             string vocabTableFilePath = dirPath + "vocabTable.bin";
             
             //Create the files (Overwrite any existed files)
+            Directory.CreateDirectory(dirPath);
             File.Create(vocabFilePath).Dispose();
             File.Create(postingFilePath).Dispose();
             File.Create(vocabTableFilePath).Dispose();
@@ -48,7 +49,7 @@ namespace Search.Index
             vocabWriter.Dispose();
             postingWriter.Dispose();
             vocabTableWriter.Dispose();
-            
+
         }
 
         /// <summary>
@@ -64,16 +65,20 @@ namespace Search.Index
             // {
                 startByte = writer.BaseStream.Length;
                 int previousDocID = 0;
+                int docGap;
                 foreach(Posting p in postings)
                 {
                     //Write docID with gap
-                    writer.Write(p.DocumentId - previousDocID);         //4byte integer per docID
+                    docGap = p.DocumentId - previousDocID;
+                    writer.Write(docGap);             //4byte integer per docID
 
                     //Write positions with gap
                     int previousPos = 0;
+                    int posGap;
                     foreach(int pos in p.Positions)
                     {
-                        writer.Write(pos - previousPos);              //4byte integer per position
+                        posGap = pos - previousPos;
+                        writer.Write(posGap);         //4byte integer per position
                         previousPos = pos;
                     }
                     previousDocID = p.DocumentId;
