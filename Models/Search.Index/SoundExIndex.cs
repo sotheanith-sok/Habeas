@@ -34,8 +34,6 @@ namespace Search.Index
                     continue;
                 }
                 AddDocIdByAuthor(d.Author, d.DocumentId);
-
-                ((IDisposable)d).Dispose();
             }
         }
 

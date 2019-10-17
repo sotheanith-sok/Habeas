@@ -9,9 +9,10 @@ using System.Runtime.InteropServices;
 
 namespace UnitTests.QueryTests
 {
+    [Collection("FileIORelated")]
     public class WildcardLiteralTests
     {
-        private static IDocumentCorpus c = DirectoryCorpus.LoadTextDirectory("../../../Models/UnitTests/testCorpus6");
+        private static IDocumentCorpus c = DirectoryCorpus.LoadTextDirectory("../../../Models/UnitTests/testCorpus0");
         private IIndex index = Indexer.IndexCorpus(c);
         private ITokenProcessor processor = new StemmingTokenProcesor();    //wildcard should use its parent processor anyway
         private KGram kGram = Indexer.kGram;
