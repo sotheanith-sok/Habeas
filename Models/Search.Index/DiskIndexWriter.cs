@@ -31,7 +31,7 @@ namespace Search.Index
         }
 
         /// <summary>
-        /// Writes the entire postings of all terms in an index to postings.bin
+        /// Writes the term frequency and postings of each term in an index to postings.bin
         /// </summary>
         /// <param name="index">the index to write</param>
         /// <param name="dirPath">the absolute path to a directory where 'postings.bin' be saved</param>
@@ -49,16 +49,21 @@ namespace Search.Index
                 foreach(string term in vocabulary)
                 {
                     startBytes.Add(writer.BaseStream.Length);       //add start byte positions of each posting list
+                    IList<Posting> postings = index.GetPostings(term);
 
                     int previousDocID = 0;
-                    foreach(Posting p in index.GetPostings(term))
+                    foreach(Posting p in postings)
                     {
                         //Write docID using gap
                         writer.Write(p.DocumentId - previousDocID); //4byte integer per docID
 
+                        //Write term frequency (# of positions)
+                        List<int> positions = p.Positions;
+                        writer.Write(positions.Count);              //4byte integer per term frequency
+
                         //Write positions using gap
                         int previousPos = 0;
-                        foreach(int pos in p.Positions)
+                        foreach(int pos in positions)
                         {
                             writer.Write(pos - previousPos);        //4byte integer per position
                             previousPos = pos;
