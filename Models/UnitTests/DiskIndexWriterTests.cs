@@ -7,9 +7,11 @@ using Search.Document;
 
 namespace UnitTests
 {
+    [Collection("FileIORelated")]
     public class DiskIndexWriterTests
     {
-        string dirPath = "../../../Models/UnitTests/testCorpus3/index/";
+        string corpusDir = "../../../Models/UnitTests/testCorpus0";
+        string dirPath = "../../../Models/UnitTests/testCorpus0/index/";
 
         [Fact]
         public void BinaryWriterTest()
@@ -20,8 +22,8 @@ namespace UnitTests
 
             File.Create(filePath).Dispose();
             BinaryWriter writer = new BinaryWriter(File.Open(filePath, FileMode.Append));
-            writer.Write(16);
-            writer.Write(40);
+            writer.Write(16);   // 10(hex)
+            writer.Write(40);   // 28(hex)
 
             long length = writer.BaseStream.Length;
             length.Should().Be( 2 * 4 );  // two 4-byte integers
@@ -41,7 +43,6 @@ namespace UnitTests
             IList<Posting> postings;
             long startByte;
             long actualLength;
-            long expectedLength;
 
             //Act
             postings = UnitTest.GeneratePostings("(10,[16,17]), (32,[20,26])");
@@ -90,7 +91,6 @@ namespace UnitTests
         public void WriteIndexTest()
         {
             //Arrange
-            string corpusDir = "../../../Models/UnitTests/testCorpus3";
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(corpusDir);
             PositionalInvertedIndex index = Indexer.IndexCorpus(corpus);
             
@@ -108,6 +108,7 @@ namespace UnitTests
             File.ReadAllBytes(corpusDir+"/index/postings.bin").Length.Should().Be(expectedPostingsLength);
             int expectedVocabTableLength = 13 * 2 * 8;
             File.ReadAllBytes(corpusDir+"/index/vocabTable.bin").Length.Should().Be(expectedVocabTableLength);
+
         }
 
     }
