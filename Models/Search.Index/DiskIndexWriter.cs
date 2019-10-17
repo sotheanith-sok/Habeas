@@ -22,15 +22,18 @@ namespace Search.Index
             string vocabFilePath = dirPath + "vocab.bin";
             string postingFilePath = dirPath + "postings.bin";
             string vocabTableFilePath = dirPath + "vocabTable.bin";
+            
             //Create the files (Overwrite any existed files)
             File.Create(vocabFilePath).Dispose();
             File.Create(postingFilePath).Dispose();
             File.Create(vocabTableFilePath).Dispose();
-            //Prep the binary writer with append file mode
+
+            //Open files in 'append' mode with the binary writers
             BinaryWriter vocabWriter = new BinaryWriter(File.Open(vocabFilePath, FileMode.Append));
             BinaryWriter postingWriter = new BinaryWriter(File.Open(postingFilePath, FileMode.Append));
             BinaryWriter vocabTableWriter = new BinaryWriter(File.Open(vocabTableFilePath, FileMode.Append));
             
+            //Write the index in three files term by term
             IReadOnlyList<string> vocabulary = index.GetVocabulary();
             long termStart;     //the byte position of where a term starts in 'vocab.bin' on disk
             long postingStart;  //the byte position of where the posting list starts in 'postings.bin' on disk
@@ -40,6 +43,12 @@ namespace Search.Index
                 postingStart = WritePostings(index.GetPostings(term), postingWriter);
                 WriteVocabTable(termStart, postingStart, vocabTableWriter);
             }
+
+            //Close the files
+            vocabWriter.Dispose();
+            postingWriter.Dispose();
+            vocabTableWriter.Dispose();
+            
         }
 
         /// <summary>
@@ -47,22 +56,27 @@ namespace Search.Index
         /// </summary>
         /// <param name="postings">the posting list to write</param>
         /// <returns>the starting byte position of the posting list in postings.bin</returns>
-        public long WritePostings(IList<Posting> postings, BinaryWriter writer) {
+        public long WritePostings(IList<Posting> postings, BinaryWriter writer)
+        {
             long startByte;
 
             // using (BinaryWriter writer = new BinaryWriter(File.Open(fileName, FileMode.Append)))
             // {
                 startByte = writer.BaseStream.Length;
+                int previousDocID = 0;
                 foreach(Posting p in postings)
                 {
-                    //TODO: Write docID with gap
-                    writer.Write(p.DocumentId);         //4byte integer per docID
+                    //Write docID with gap
+                    writer.Write(p.DocumentId - previousDocID);         //4byte integer per docID
 
-                    //TODO: Write positions with gap
+                    //Write positions with gap
+                    int previousPos = 0;
                     foreach(int pos in p.Positions)
                     {
-                        writer.Write(pos);              //4byte integer per position
+                        writer.Write(pos - previousPos);              //4byte integer per position
+                        previousPos = pos;
                     }
+                    previousDocID = p.DocumentId;
                 }
             // }
             return startByte;
