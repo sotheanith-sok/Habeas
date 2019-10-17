@@ -18,10 +18,12 @@ namespace Search.Index
         /// <param name="dirPath">the absolute path to the directory where the index files to be saved</param>
         public void WriteIndex(IIndex index, string dirPath)
         {
+            Console.WriteLine($"\nWriting the index ({index.GetVocabulary().Count} terms) in '{dirPath}'");
+
             string vocabFilePath = dirPath + "vocab.bin";
             string postingFilePath = dirPath + "postings.bin";
             string vocabTableFilePath = dirPath + "vocabTable.bin";
-            
+
             try
             {
                 //Create the files (Overwrite any existed files)
@@ -46,6 +48,10 @@ namespace Search.Index
                     postingStart = WritePostings(index.GetPostings(term), postingWriter);
                     WriteVocabTable(termStart, postingStart, vocabTableWriter);
                 }
+                Console.WriteLine("Finished writing the index");
+                Console.WriteLine($"vocab.bin       {vocabWriter.BaseStream.Length} bytes");
+                Console.WriteLine($"postings.bin    {postingWriter.BaseStream.Length} bytes");
+                Console.WriteLine($"vocabTable.bin  {vocabTableWriter.BaseStream.Length} bytes\n");
 
                 //Close the files
                 vocabWriter.Dispose();
