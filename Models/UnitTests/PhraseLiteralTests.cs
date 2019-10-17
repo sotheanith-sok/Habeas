@@ -9,9 +9,10 @@ using System.Runtime.InteropServices;
 
 namespace UnitTests.QueryTests
 {
+    [Collection("FileIORelated")]
     public class PhraseLiteralTests
     {
-        private static IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../Models/UnitTests/testCorpus3");
+        private static IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../Models/UnitTests/testCorpus0");
         private IIndex index = Indexer.IndexCorpus(corpus);
         private static ITokenProcessor processor = new StemmingTokenProcesor();
 

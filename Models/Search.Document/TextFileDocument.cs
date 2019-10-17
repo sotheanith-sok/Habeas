@@ -7,7 +7,7 @@ namespace Search.Document
     /// <summary>
     /// Represents a document that is saved as a simple text file in the local file system.
     /// </summary>
-    public class TextFileDocument : IFileDocument, IDisposable
+    public class TextFileDocument : IFileDocument
     {
         public int DocumentId { get; }
         /// <summary>
@@ -17,8 +17,6 @@ namespace Search.Document
         public string FileName { get; }
         public string Title { get; }
         public string Author { get; }
-
-        private MemoryMappedFile file;
 
         /// <summary>
         /// Constructs a TextFileDocument with the given document ID representing the file at the given 
@@ -37,8 +35,7 @@ namespace Search.Document
         /// </summary>
         public TextReader GetContent()
         {
-            this.file = MemoryMappedFile.CreateFromFile(FilePath);
-            return new StreamReader(this.file.CreateViewStream());
+            return new StreamReader(FileManager.Instance.GetFile(this.FilePath));
         }
 
         /// <summary>
@@ -47,11 +44,6 @@ namespace Search.Document
         public static TextFileDocument CreateTextFileDocument(string absoluteFilePath, int documentId)
         {
             return new TextFileDocument(documentId, absoluteFilePath);
-        }
-
-        public void Dispose()
-        {
-            file?.Dispose();
         }
     }
 }

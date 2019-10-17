@@ -7,8 +7,10 @@ using Search.Query;
 using Search.Document;
 using Search.Text;
 
+
 namespace UnitTests.QueryTests
 {
+    [Collection("FileIORelated")]
     public class AndQueryTests
     {
         private static IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../Models/UnitTests/testCorpus0");

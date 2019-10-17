@@ -16,7 +16,7 @@ namespace Search.Document
         public string author { get; set; }
     }
 
-    public class JsonFileDocument : IFileDocument, IDisposable
+    public class JsonFileDocument : IFileDocument
     {
 
         public int DocumentId { get; }
@@ -27,7 +27,6 @@ namespace Search.Document
         public string FileName { get; }
         public string Title { get; set; }
         public string Author { get; set; }
-        private MemoryMappedFile file;
 
         public JsonFileDocument(int documentId, string absoluteFilePath)
         {
@@ -35,13 +34,11 @@ namespace Search.Document
             FilePath = absoluteFilePath;
             FileName = Path.GetFileName(absoluteFilePath);
 
-            this.file = MemoryMappedFile.CreateFromFile(FilePath);
-            StreamReader fileStreamReader = new StreamReader(this.file.CreateViewStream());
+            StreamReader fileStreamReader = new StreamReader(FileManager.Instance.GetFile(this.FilePath));
             Document jobject = JsonConvert.DeserializeObject<Document>(fileStreamReader.ReadToEnd());
             Title = (jobject.title != null) ? jobject.title : "";
             Author = jobject.author;
             fileStreamReader.Dispose();
-            this.file.Dispose();
         }
 
         /// <summary>
@@ -50,12 +47,10 @@ namespace Search.Document
         /// <returns></returns>
         public TextReader GetContent()
         {
-            this.file = MemoryMappedFile.CreateFromFile(FilePath);
-            StreamReader fileStreamReader = new StreamReader(this.file.CreateViewStream());
+            StreamReader fileStreamReader = new StreamReader(FileManager.Instance.GetFile(this.FilePath));
             Document jobject = JsonConvert.DeserializeObject<Document>(fileStreamReader.ReadToEnd());
             var content = (jobject.body != null) ? jobject.body : "";
             fileStreamReader.Dispose();
-            this.file.Dispose();
             return new StringReader(content);
         }
 
@@ -65,9 +60,5 @@ namespace Search.Document
             return new JsonFileDocument(documentId, absoluteFilePath);
         }
 
-        public void Dispose()
-        {
-            file?.Dispose();
-        }
     }
 }

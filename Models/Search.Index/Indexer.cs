@@ -62,7 +62,6 @@ namespace Search.Index
                 }
                 soundEx.AddDocIdByAuthor(doc.Author, doc.DocumentId);
                 stream.Dispose();
-                ((IDisposable)doc).Dispose();
 
             }
             kGram = new KGram(unstemmedVocabulary);
