@@ -20,109 +20,111 @@ namespace Search.Index
         {
             Console.WriteLine($"\nWriting the index ({index.GetVocabulary().Count} terms) in '{dirPath}'");
 
-            string vocabFilePath = dirPath + "vocab.bin";
-            string postingFilePath = dirPath + "postings.bin";
-            string vocabTableFilePath = dirPath + "vocabTable.bin";
+            Directory.CreateDirectory(dirPath);
 
-            try
+            List<long> vocabStartBytes = WriteVocab(index, dirPath);
+            List<long> postingsStartBytes = WritePostings(index, dirPath);
+            WriteVocabTable(vocabStartBytes, postingsStartBytes, dirPath);
+
+            Console.WriteLine("Finished writing the index on disk\n");
+
+        }
+
+        /// <summary>
+        /// Writes the entire postings of all terms in an index to postings.bin
+        /// </summary>
+        /// <param name="index">the index to write</param>
+        /// <param name="dirPath">the absolute path to a directory where 'postings.bin' be saved</param>
+        /// <returns>the list of starting byte positions of each posting lists in postings.bin</returns>
+        public List<long> WritePostings(IIndex index, string dirPath)
+        {
+            string filePath = dirPath + "postings.bin";
+            File.Create(filePath).Dispose();
+            
+            List<long> startBytes = new List<long>();
+            IReadOnlyList<string> vocabulary = index.GetVocabulary();
+
+            using (BinaryWriter writer = new BinaryWriter(File.Open(filePath, FileMode.Append)))
             {
-                //Create the files (Overwrite any existed files)
-                Directory.CreateDirectory(dirPath);
-                File.Create(vocabFilePath).Dispose();
-                File.Create(postingFilePath).Dispose();
-                File.Create(vocabTableFilePath).Dispose();
-
-                //Open files in 'append' mode with the binary writers
-                BinaryWriter vocabWriter = new BinaryWriter(File.Open(vocabFilePath, FileMode.Append));
-                BinaryWriter postingWriter = new BinaryWriter(File.Open(postingFilePath, FileMode.Append));
-                BinaryWriter vocabTableWriter = new BinaryWriter(File.Open(vocabTableFilePath, FileMode.Append));
-                
-                //Write the index in three files term by term
-                IReadOnlyList<string> vocabulary = index.GetVocabulary();
-                long termStart;     //the byte position of where a term starts in 'vocab.bin'
-                long postingStart;  //the byte position of where the posting list of a term starts in 'postings.bin'
-                
-                foreach (string term in vocabulary)
+                foreach(string term in vocabulary)
                 {
-                    termStart = WriteVocab(term, vocabWriter);
-                    postingStart = WritePostings(index.GetPostings(term), postingWriter);
-                    WriteVocabTable(termStart, postingStart, vocabTableWriter);
-                }
-                Console.WriteLine("Finished writing the index");
-                Console.WriteLine($"vocab.bin       {vocabWriter.BaseStream.Length} bytes");
-                Console.WriteLine($"postings.bin    {postingWriter.BaseStream.Length} bytes");
-                Console.WriteLine($"vocabTable.bin  {vocabTableWriter.BaseStream.Length} bytes\n");
+                    startBytes.Add(writer.BaseStream.Length);       //add start byte positions of each posting list
 
-                //Close the files
-                vocabWriter.Dispose();
-                postingWriter.Dispose();
-                vocabTableWriter.Dispose();
+                    int previousDocID = 0;
+                    foreach(Posting p in index.GetPostings(term))
+                    {
+                        //Write docID using gap
+                        writer.Write(p.DocumentId - previousDocID); //4byte integer per docID
+
+                        //Write positions using gap
+                        int previousPos = 0;
+                        foreach(int pos in p.Positions)
+                        {
+                            writer.Write(pos - previousPos);        //4byte integer per position
+                            previousPos = pos;
+                        }
+
+                        previousDocID = p.DocumentId;
+                    }
+                }
+                Console.WriteLine($"postings.bin    {writer.BaseStream.Length} bytes");
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-            }
+            return startBytes;
 
         }
 
         /// <summary>
-        /// Writes a posting list of a term to postings.bin
+        /// Writes the entire terms in the vocabulary of an index to vocab.bin
         /// </summary>
-        /// <param name="postings">the posting list to write</param>
-        /// <param name="writer">a binary writer with append file mode</param>
-        /// <returns>the starting byte position of the posting list in postings.bin</returns>
-        public long WritePostings(IList<Posting> postings, BinaryWriter writer)
+        /// <param name="index">the index to write</param>
+        /// <param name="dirPath">the absolute path to a directory where 'vocab.bin' be saved</param>
+        /// <returns>the list of starting byte positions of each term in vocab.bin</returns>
+        public List<long> WriteVocab(IIndex index, string dirPath)
         {
-            long startByte = writer.BaseStream.Length;
+            string filePath = dirPath + "vocab.bin";
+            File.Create(filePath).Dispose();
+            
+            List<long> startBytes = new List<long>();
+            IReadOnlyList<string> vocabulary = index.GetVocabulary();
 
-            int previousDocID = 0;
-            foreach(Posting p in postings)
+            using (BinaryWriter writer = new BinaryWriter(File.Open(filePath, FileMode.Append)))
             {
-                //Write docID using gap
-                writer.Write(p.DocumentId - previousDocID); //4byte integer per docID
+                foreach(string term in vocabulary) {
+                    startBytes.Add(writer.BaseStream.Length);
+                    writer.Write(term);
+                }
+                Console.WriteLine($"vocab.bin       {writer.BaseStream.Length} bytes");
+            }
+            return startBytes; 
 
-                //Write positions using gap
-                int previousPos = 0;
-                foreach(int pos in p.Positions)
+        }
+
+        /// <summary>
+        /// Writes each starting byte positions of terms and the posting lists to vocabTable.bin
+        /// </summary>
+        /// <param name="termStartBytes">the list of byte positions of terms in vocab.bin</param>
+        /// <param name="postingsStartBytes">the list of byte positions of posting lists in postings.bin</param>
+        /// <returns>the list of starting byte positions of each term in vocab.bin</returns>
+        public void WriteVocabTable(List<long> termStartBytes, List<long> postingsStartBytes, string dirPath)
+        {
+            string filePath = dirPath + "vocabTable.bin";
+            File.Create(filePath).Dispose();
+            using (BinaryWriter writer = new BinaryWriter(File.Open(filePath, FileMode.Append)))
+            {
+                if(termStartBytes.Count != postingsStartBytes.Count)
                 {
-                    writer.Write(pos - previousPos);        //4byte integer per position
-                    previousPos = pos;
+                    Console.WriteLine("the size of termStartBytes and postingsStartBytes are not matching!");
                 }
 
-                previousDocID = p.DocumentId;
+                for(int i=0; i<termStartBytes.Count; i++) {
+                    writer.Write(termStartBytes[i]);        //each starting address with 8-byte integer (long)
+                    writer.Write(postingsStartBytes[i]);    //each starting address with 8-byte integer (long)
+                }
+
+                Console.WriteLine($"vocabTable.bin  {writer.BaseStream.Length} bytes");
             }
 
-            return startByte;
-
         }
-
-        /// <summary>
-        /// Writes a term to vocab.bin
-        /// </summary>
-        /// <param name="term">a term to write</param>
-        /// <param name="writer">a binary writer with append file mode</param>
-        /// /// <returns>the starting byte position of the term in vocab.bin</returns>
-        public long WriteVocab(string term, BinaryWriter writer)
-        {
-            long startByte = writer.BaseStream.Length;
-
-            writer.Write(term);
-
-            return startByte; 
-
-        }
-
-        /// <summary>
-        /// Writes each starting byte of a term and the posting list to vocabTable.bin
-        /// </summary>
-        /// <param name="termStart">the byte position of a term in vocab.bin</param>
-        /// <param name="postingStart">the byte position of a posting list in postings.bin</param>
-        /// /// <param name="writer">a binary writer with append file mode</param>
-        public void WriteVocabTable(long termStart, long postingStart, BinaryWriter writer)
-        {
-            writer.Write(termStart);        //each starting address with 8-byte integer (long)
-            writer.Write(postingStart);     //each starting address with 8-byte integer (long)
-
-        }
+        
     }
 }
