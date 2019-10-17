@@ -99,7 +99,15 @@ namespace UnitTests
             indexWriter.WriteIndex(index, corpusDir+"/index/");
 
             //Assert
-            //???
+            File.Exists(corpusDir+"/index/vocab.bin").Should().BeTrue();
+            File.Exists(corpusDir+"/index/postings.bin").Should().BeTrue();
+            File.Exists(corpusDir+"/index/vocabTable.bin").Should().BeTrue();
+            // int expectedVocabLength = 0; //??
+            // File.ReadAllBytes(corpusDir+"/index/vocab.bin").Length.Should().Be(expectedVocabLength);
+            int expectedPostingsLength = 75 * 4;
+            File.ReadAllBytes(corpusDir+"/index/postings.bin").Length.Should().Be(expectedPostingsLength);
+            int expectedVocabTableLength = 13 * 2 * 8;
+            File.ReadAllBytes(corpusDir+"/index/vocabTable.bin").Length.Should().Be(expectedVocabTableLength);
         }
 
     }
