@@ -21,6 +21,13 @@ namespace Search.Index
         IList<Posting> GetPostings(List<string> term);
 
         /// <summary>
+        /// Retrieves a list of Postings of documents that contain the given list of terms.
+        /// This function deals with queries which require information regardining a term's position.
+        /// </summary>
+        /// <param name="terms">a list of processed strings</param>
+        IList<Posting> GetPostings_Positional(List<string> term);
+
+        /// <summary>
         /// A (sorted) list of all terms in the index vocabulary.
         /// </summary>
         IReadOnlyList<string> GetVocabulary();
