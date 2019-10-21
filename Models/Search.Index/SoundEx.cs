@@ -6,7 +6,7 @@ using System;
 
 namespace Search.Index
 {
-    public class SoundEx :IIndex
+    public class SoundEx
     {
 
         public Dictionary<string, List<int>> SoundMap { get; }
@@ -198,10 +198,5 @@ namespace Search.Index
             soundexVocab.Sort();
             return soundexVocab;
         }
-
-        public IList<Posting> GetPostings(List<string> nameQuery){
-            return null;
-        }
-        public IReadOnlyList<string> GetVocabulary(){return null;}
     }
 }
