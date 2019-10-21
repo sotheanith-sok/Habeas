@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Search.Text;
 using System;
 using System.Linq;
+using System.Collections.ObjectModel;
 namespace Search.Index
 {
     /// <summary>
@@ -140,6 +141,24 @@ namespace Search.Index
                 return result;
             }
 
+        }
+
+        /// <summary>
+        /// Read internal kGram map
+        /// </summary>
+        /// <returns>Read only kGram map</returns>
+        public IReadOnlyDictionary<string, IReadOnlyList<string>> GetKGramMap()
+        {
+            return (IReadOnlyDictionary<string, IReadOnlyList<string>>)this.map.ToDictionary(pair => pair.Key, pair => pair.Value.AsReadOnly());
+        }
+
+        /// <summary>
+        /// Read internal mini kGram map
+        /// </summary>
+        /// <returns>Read only mini kGram map</returns>
+        public IReadOnlyDictionary<string, IReadOnlyList<string>> GetMiniKGramMap()
+        {
+            return (IReadOnlyDictionary<string, IReadOnlyList<string>>)this.miniMap.ToDictionary(pair => pair.Key, pair => pair.Value.AsReadOnly());
         }
 
     }
