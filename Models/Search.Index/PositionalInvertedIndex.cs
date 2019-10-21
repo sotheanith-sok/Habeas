@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Search.Query;
+using System;
 
 namespace Search.Index
 {
@@ -15,12 +16,24 @@ namespace Search.Index
         //Dictionary in C# is equivalent to HashMap in Java.
         private readonly Dictionary<string, List<Posting>> hashMap;
 
+        //HashMap used to store termFrequency of current Document
+        private readonly Dictionary<string, int> termFrequency;
+
+        //Variable to store the current Document being processed
+        private int currentDocument { get; set; }
+
+        private static List<double> calculatedDocWeights;
+
+
         /// <summary>
         /// Constructs a hash table.
         /// </summary>
         public PositionalInvertedIndex()
         {
             hashMap = new Dictionary<string, List<Posting>>();
+            termFrequency = new Dictionary<string, int>();
+            calculatedDocWeights = new List<double>();
+            currentDocument = 0;
         }
 
         /// <summary>
@@ -74,6 +87,9 @@ namespace Search.Index
         /// <param name="position">the position of the term within the document</param>
         public void AddTerm(string term, int docID, int position)
         {
+            //ChangeFrequency
+            UpdateTermFrequencyForDoc(term);
+
             //Check if inverted index contains the term (key)
             if (hashMap.ContainsKey(term))
             {
@@ -89,21 +105,54 @@ namespace Search.Index
                     //Create a posting with (docID & position) to the posting list
                     hashMap[term].Add(new Posting(docID, new List<int> { position }));
                 }
+
             }
             else
             {
+
                 //Add term and a posting (docID & position) to the hashmap
                 List<Posting> postingList = new List<Posting>();
                 postingList.Add(new Posting(docID, new List<int> { position }));
                 hashMap.Add(term, postingList);
+
             }
 
         }
 
+        public void UpdateTermFrequencyForDoc(string term)
+        {
 
+            if (termFrequency.ContainsKey(term))
+            {
+                termFrequency[term] += 1;
+            }
+            else
+            {
+                termFrequency.Add(term, 1);
+            }
+
+        }
+
+        public void CalculateDocWeight()
+        {
+            double temp = 0;
+            foreach (int value in termFrequency.Values)
+            {
+                temp = temp + Math.Pow((1 + Math.Log(value)), 2);
+            }
+            calculatedDocWeights.Add(Math.Sqrt(temp));
+            //clear frequency map for next iteration of document
+            termFrequency.Clear();
+        }
         public Posting GetLastPostingItem(string term)
         {
             return hashMap[term].Last();
+        }
+
+
+        public IList<double> GetAllDocWeights()
+        {
+            return calculatedDocWeights;
         }
     }
 
