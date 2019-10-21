@@ -26,3 +26,4 @@ namespace Search.Index
         IReadOnlyList<string> GetVocabulary();
     }
 }
+
