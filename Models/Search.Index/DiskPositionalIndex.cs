@@ -88,19 +88,17 @@ namespace Search.Index
         public IReadOnlyList<string> GetVocabulary()
         {
             List<string> finalList = new List<String>();
-            while ()
-            {
+            //while ()
+            //{
                 finalList.Add(VocabReader.ReadString());
-            }
+            //}
             return finalList;
         }
 
         public int getTermCount()
         {
-            //ToDo: make it work
-            //return mVocabTable.length / 2;
-            long doubleLength = VocabTableReader.BaseStream.Length;
-            return 5;        
+            return (int)(VocabTableReader.BaseStream.Length)/2;
+                    
         }
 
         public void Dispose()
