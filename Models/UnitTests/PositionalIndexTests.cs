@@ -144,7 +144,7 @@ namespace UnitTests
         // }
 
         [Fact]
-        public void TermFrequencyTest()
+        public void DocumentWeightTest()
         {
             //Arrange
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
