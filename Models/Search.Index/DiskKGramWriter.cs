@@ -2,6 +2,8 @@ using System.IO;
 using Search.Document;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Text;
+using System;
 namespace Search.Index
 {
     /// <summary>
@@ -37,7 +39,7 @@ namespace Search.Index
                 foreach (ReadOnlyCollection<string> candidates in kGram.GetKGramMap().Values)
                 {
                     candidatesPositions.Add(b.BaseStream.Position);
-                    b.Write(string.Join(" ", candidates));
+                    b.Write(Encoding.UTF8.GetBytes(string.Join(" ", candidates)));
                 }
             }
             return candidatesPositions;
@@ -58,7 +60,7 @@ namespace Search.Index
                 foreach (string kgram in kGram.GetKGramMap().Keys)
                 {
                     kGramPositions.Add(b.BaseStream.Position);
-                    b.Write(kgram);
+                    b.Write(Encoding.UTF8.GetBytes(kgram));
                 }
             }
             return kGramPositions;
@@ -98,7 +100,7 @@ namespace Search.Index
                 foreach (ReadOnlyCollection<string> candidates in kGram.GetMiniKGramMap().Values)
                 {
                     miniCandidatesPositions.Add(b.BaseStream.Position);
-                    b.Write(string.Join(" ", candidates));
+                    b.Write(Encoding.UTF8.GetBytes(string.Join(" ", candidates)));
                 }
             }
             return miniCandidatesPositions;
@@ -119,7 +121,7 @@ namespace Search.Index
                 foreach (string kgram in kGram.GetMiniKGramMap().Keys)
                 {
                     miniKGramPositions.Add(b.BaseStream.Position);
-                    b.Write(kgram);
+                    b.Write(Encoding.UTF8.GetBytes(kgram));
                 }
             }
             return miniKGramPositions;
