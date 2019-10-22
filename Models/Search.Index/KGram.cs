@@ -3,6 +3,7 @@ using Search.Text;
 using System;
 using System.Linq;
 using System.Collections.ObjectModel;
+using System.IO;
 namespace Search.Index
 {
     /// <summary>
@@ -19,16 +20,20 @@ namespace Search.Index
         //size of each k-gram terms.
         public int size { get; }
 
+        //Path to kGrame
+        private string path;
+
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="vocabularies">List of unique vocabularies.false Non stem.</param>
         /// <param name="size">Size of each k-gram term</param>
-        public KGram(HashSet<string> vocabularies, int size = 3)
+        public KGram(HashSet<string> vocabularies, string path, int size = 3)
         {
             this.map = new Dictionary<string, List<string>>();
             this.size = size;
             this.miniMap = new Dictionary<string, List<string>>();
+            this.path = path;
             buildKGram(vocabularies);
         }
 
@@ -86,6 +91,12 @@ namespace Search.Index
             //Print Results
             Console.WriteLine("K-Gram: " + this.map.Keys.Count);
             Console.WriteLine("Mini K-Gram: " + this.miniMap.Keys.Count);
+
+            //WriteKGramToDisk
+            Console.WriteLine("Write K-Gram to disk...");
+            Console.WriteLine("Path:" + Path.GetFullPath(this.path));
+            DiskKGramWriter kGramWriter = new DiskKGramWriter();
+            kGramWriter.WriteKGram(this, this.path);
 
         }
 
@@ -147,18 +158,18 @@ namespace Search.Index
         /// Read internal kGram map
         /// </summary>
         /// <returns>Read only kGram map</returns>
-        public IReadOnlyDictionary<string, IReadOnlyList<string>> GetKGramMap()
+        public IReadOnlyDictionary<string, ReadOnlyCollection<string>> GetKGramMap()
         {
-            return (IReadOnlyDictionary<string, IReadOnlyList<string>>)this.map.ToDictionary(pair => pair.Key, pair => pair.Value.AsReadOnly());
+            return (IReadOnlyDictionary<string, ReadOnlyCollection<string>>)this.map.ToDictionary(pair => pair.Key, pair => pair.Value.AsReadOnly());
         }
 
         /// <summary>
         /// Read internal mini kGram map
         /// </summary>
         /// <returns>Read only mini kGram map</returns>
-        public IReadOnlyDictionary<string, IReadOnlyList<string>> GetMiniKGramMap()
+        public IReadOnlyDictionary<string, ReadOnlyCollection<string>> GetMiniKGramMap()
         {
-            return (IReadOnlyDictionary<string, IReadOnlyList<string>>)this.miniMap.ToDictionary(pair => pair.Key, pair => pair.Value.AsReadOnly());
+            return (IReadOnlyDictionary<string, ReadOnlyCollection<string>>)this.miniMap.ToDictionary(pair => pair.Key, pair => pair.Value.AsReadOnly());
         }
 
     }
