@@ -19,8 +19,7 @@ namespace Search.Index
         //HashMap used to store termFrequency of current Document
         private readonly Dictionary<string, int> termFrequency;
 
-        //Variable to store the current Document being processed
-        private int currentDocument { get; set; }
+       
 
         private static List<double> calculatedDocWeights;
 
@@ -33,7 +32,6 @@ namespace Search.Index
             hashMap = new Dictionary<string, List<Posting>>();
             termFrequency = new Dictionary<string, int>();
             calculatedDocWeights = new List<double>();
-            currentDocument = 0;
         }
 
         /// <summary>
