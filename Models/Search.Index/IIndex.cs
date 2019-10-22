@@ -25,7 +25,7 @@ namespace Search.Index
         /// This function deals with queries which require information regardining a term's position.
         /// </summary>
         /// <param name="terms">a list of processed strings</param>
-        IList<Posting> GetPostings_Positional(List<string> term);
+        IList<Posting> GetPostingsPositional(List<string> term);
 
         /// <summary>
         /// A (sorted) list of all terms in the index vocabulary.

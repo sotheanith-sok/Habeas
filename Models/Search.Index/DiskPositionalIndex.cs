@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Search.Query;
+using System;
+using System.IO;
 
 namespace Search.Index
 {
@@ -11,16 +13,14 @@ namespace Search.Index
     /// </summary>
     public class DiskPositionalIndex : IIndex
     {
-        //Hashmap is used to store the index. O(1)
-        //Dictionary in C# is equivalent to HashMap in Java.
-        private readonly Dictionary<string, List<Posting>> hashMap;
 
         /// <summary>
         /// Constructs a hash table.
         /// </summary>
-        public DiskPositionalIndex()
+        public DiskPositionalIndex(string FolderPath)
         {
-            hashMap = new Dictionary<string, List<Posting>>();
+            //FolderPath is a string leading to the folder with the different bin files
+        BinaryReader reader;
         }
 
         /// <summary>
@@ -30,14 +30,10 @@ namespace Search.Index
         /// <return>a posting list</return>
         public IList<Posting> GetPostings(string term)
         {
-            if (hashMap.ContainsKey(term))
-            {
-                return hashMap[term];
-            }
-            else
-            {
+           
+            
                 return new List<Posting>();
-            }
+            
         }
 
         /// <summary>
@@ -48,12 +44,8 @@ namespace Search.Index
         /// <return>a or-merged posting list</return>
         public IList<Posting> GetPostings(List<string> terms)
         {
-            List<IList<Posting>> postingLists = new List<IList<Posting>>();
-            foreach (string term in terms)
-            {
-                postingLists.Add(GetPostings(term));
-            }
-            return Merge.OrMerge(postingLists);
+            
+            return new List<Posting>();
         }
 
         /// <summary>
@@ -62,14 +54,10 @@ namespace Search.Index
         /// </summary>
         /// <param name="terms">a list of processed strings</param>
         /// <return>a or-merged posting list</return>
-        public IList<Posting> GetPostings_Positional(List<string> terms)
+        public IList<Posting> GetPostingsPositional(List<string> terms)
         {
-            List<IList<Posting>> postingLists = new List<IList<Posting>>();
-            foreach (string term in terms)
-            {
-                postingLists.Add(GetPostings(term));
-            }
-            return Merge.OrMerge(postingLists);
+           
+            return new List<Posting>();
         }
 
         /// <summary>
@@ -77,9 +65,7 @@ namespace Search.Index
         /// </summary>
         public IReadOnlyList<string> GetVocabulary()
         {
-            List<string> vocabulary = hashMap.Keys.ToList();
-            vocabulary.Sort();
-            return vocabulary;
+            return new List<string>();
         }
 
         /// <summary>
@@ -90,36 +76,14 @@ namespace Search.Index
         /// <param name="position">the position of the term within the document</param>
         public void AddTerm(string term, int docID, int position)
         {
-            //Check if inverted index contains the term (key)
-            if (hashMap.ContainsKey(term))
-            {
-                //Check if the document of the term is in the posting list
-                Posting lastPosting = hashMap[term].Last();
-                if (lastPosting.DocumentId == docID)
-                {
-                    //Add a position to the posting
-                    lastPosting.Positions.Add(position);
-                }
-                else
-                {
-                    //Create a posting with (docID & position) to the posting list
-                    hashMap[term].Add(new Posting(docID, new List<int> { position }));
-                }
-            }
-            else
-            {
-                //Add term and a posting (docID & position) to the hashmap
-                List<Posting> postingList = new List<Posting>();
-                postingList.Add(new Posting(docID, new List<int> { position }));
-                hashMap.Add(term, postingList);
-            }
+          
 
         }
 
 
         public Posting GetLastPostingItem(string term)
         {
-            return hashMap[term].Last();
+            return new Posting(0, new List<int>());
         }
     }
 

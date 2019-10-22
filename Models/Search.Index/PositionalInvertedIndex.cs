@@ -57,6 +57,22 @@ namespace Search.Index
         }
 
         /// <summary>
+        /// Gets Postings of a given list of terms from index.
+        /// This or-merge the all the results from the multiple terms
+        /// </summary>
+        /// <param name="terms">a list of processed strings</param>
+        /// <return>a or-merged posting list</return>
+        public IList<Posting> GetPostingsPositional(List<string> terms)
+        {
+            List<IList<Posting>> postingLists = new List<IList<Posting>>();
+            foreach (string term in terms)
+            {
+                postingLists.Add(GetPostings(term));
+            }
+            return Merge.OrMerge(postingLists);
+        }
+
+        /// <summary>
         /// Gets a sorted list of all vocabularies from index.
         /// </summary>
         public IReadOnlyList<string> GetVocabulary()
