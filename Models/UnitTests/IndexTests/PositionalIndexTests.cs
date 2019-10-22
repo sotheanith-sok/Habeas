@@ -12,7 +12,7 @@ namespace UnitTests
     [Collection("FileIORelated")]
     public class PositionalIndexTests
     {
-        string directory = "../../../Models/UnitTests/testCorpus0";
+        string directory = "../../../Models/UnitTests/testCorpus/testCorpusBasic";
 
         [Fact]
         public void PostionalIndexTest_OnePosition()

@@ -11,7 +11,7 @@ namespace UnitTests.QueryTests
     [Collection("FileIORelated")]
     public class NearLiteralTests
     {
-        private static IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../Models/UnitTests/testCorpus0");
+        private static IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../Models/UnitTests/testCorpus/testCorpusBasic");
         private IIndex index = Indexer.IndexCorpus(corpus);
         private ITokenProcessor processor = new StemmingTokenProcesor();
 

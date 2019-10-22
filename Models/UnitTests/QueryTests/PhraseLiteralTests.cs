@@ -12,7 +12,7 @@ namespace UnitTests.QueryTests
     [Collection("FileIORelated")]
     public class PhraseLiteralTests
     {
-        private static IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../Models/UnitTests/testCorpus0");
+        private static IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory("../../../Models/UnitTests/testCorpus/testCorpusBasic");
         private IIndex index = Indexer.IndexCorpus(corpus);
         private static ITokenProcessor processor = new StemmingTokenProcesor();
 

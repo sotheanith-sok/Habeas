@@ -8,7 +8,7 @@ namespace UnitTests
     [Collection("FileIORelated")]
     public class SoundexTests
     {
-        string directory = "../../../Models/UnitTests/testCorpus";
+        string directory = "../../../Models/UnitTests/testCorpus/testCorpusWithAuthor";
 
         [Fact]
         public void SoundexIndexTest()

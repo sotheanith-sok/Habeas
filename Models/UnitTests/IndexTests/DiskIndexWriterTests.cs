@@ -10,8 +10,8 @@ namespace UnitTests
     [Collection("FileIORelated")]
     public class DiskIndexWriterTests
     {
-        string corpusDir = "../../../Models/UnitTests/testCorpus0";
-        string dirPath = "../../../Models/UnitTests/testCorpus0/index/";
+        string corpusDir = "../../../Models/UnitTests/testCorpus/testCorpusBasic";
+        string dirPath = "../../../Models/UnitTests/testCorpus/testCorpusBasic/index/";
 
         [Fact]
         public void BinaryWriterTest()
