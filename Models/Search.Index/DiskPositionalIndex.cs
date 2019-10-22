@@ -98,7 +98,6 @@ namespace Search.Index
         public int getTermCount()
         {
             return (int)(VocabTableReader.BaseStream.Length)/2;
-                    
         }
 
         public void Dispose()
