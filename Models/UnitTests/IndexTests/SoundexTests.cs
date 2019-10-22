@@ -3,7 +3,7 @@ using Search.Document;
 using Search.Index;
 using FluentAssertions;
 
-namespace UnitTests
+namespace UnitTests.IndexTests
 {
     [Collection("FileIORelated")]
     public class SoundexTests

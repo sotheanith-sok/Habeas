@@ -2,10 +2,9 @@ using System.IO;
 using Xunit;
 using FluentAssertions;
 using Search.Index;
-using System.Collections.Generic;
 using Search.Document;
 
-namespace UnitTests
+namespace UnitTests.OnDiskIndexTests
 {
     [Collection("FileIORelated")]
     public class DiskIndexWriterTests

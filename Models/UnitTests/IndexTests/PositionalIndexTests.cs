@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System;
 using FluentAssertions;
 
-namespace UnitTests
+namespace UnitTests.IndexTests
 {
     [Collection("FileIORelated")]
     public class PositionalIndexTests
