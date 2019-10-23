@@ -31,7 +31,7 @@ namespace Search.Index
             vocabReader = new BinaryReader(File.Open(VocabPath, FileMode.Open));
             postingReader = new BinaryReader(File.Open(PostingPath, FileMode.Open));
             vocabTableReader = new BinaryReader(File.Open(VocabTablePath, FileMode.Open));
-            docWeightsReader= new BinaryReader(File.Open(DocWeightPath, FileMode.Open));
+            docWeightsReader = new BinaryReader(File.Open(DocWeightPath, FileMode.Open));
 
         }
 
@@ -92,22 +92,28 @@ namespace Search.Index
         {
             List<string> finalList = new List<String>();
             int termCount = GetTermCount();
-            for(int i=0; i < termCount; i++){
+            for (int i = 0; i < termCount; i++)
+            {
                 finalList.Add(vocabReader.ReadString());
             }
             return finalList;
         }
 
 
-        public IList<int> GetDocumentWeights()
+        public double GetDocumentWeight(int docId)
         {
-            List<int> docWeights = new List<int> ();
+            int startByte= docId*8;
             
+            //0. Jump to the starting byte
+            docWeightsReader.BaseStream.Seek(startByte, SeekOrigin.Begin);
+            double docWeight = BitConverter.Int64BitsToDouble(docWeightsReader.ReadInt64());
+            
+            return docWeight;
         }
         public int GetTermCount()
         {
             //TODO: test
-            return (int)(vocabTableReader.BaseStream.Length)/2;
+            return (int)(vocabTableReader.BaseStream.Length) / 2;
         }
 
 
@@ -124,7 +130,7 @@ namespace Search.Index
 
             //0. Jump to the starting byte
             postingReader.BaseStream.Seek(startByte, SeekOrigin.Begin);
-            
+
             IList<Posting> postings = new List<Posting>();
 
             //TODO: read with gap
@@ -132,7 +138,7 @@ namespace Search.Index
             int docFrequency = postingReader.ReadInt32();
 
             int prevDocID = 0;
-            for(int i=0; i < docFrequency; i++)         //for each posting
+            for (int i = 0; i < docFrequency; i++)         //for each posting
             {
                 //2. Read documentID using gap
                 int docID = prevDocID + postingReader.ReadInt32();
@@ -144,7 +150,7 @@ namespace Search.Index
 
                 //4. Read positions using gap
                 int prevPos = 0;
-                for(int j=0; j < termFrequency; j++)    //for each position
+                for (int j = 0; j < termFrequency; j++)    //for each position
                 {
                     int pos = prevPos + postingReader.ReadInt32();
                     positions.Add(pos);
@@ -157,7 +163,7 @@ namespace Search.Index
             }
 
             UnitTest.PrintPostingResult(postings);
-            
+
             return postings;
         }
 

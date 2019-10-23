@@ -2,18 +2,19 @@ using System.Collections.Generic;
 using FluentAssertions;
 using Search.Index;
 using Xunit;
+using System;
 
 namespace UnitTests.DiskIndexTests
 {
     [Collection("FileIORelated")]
     public class DiskPositionalIndexTests
     {
-        private static string dirPath = "../../../Models/UnitTests/testCorpus/testCorpusBasic/index/";
-        
+        private static string dirPath = "../../../Models/UnitTests/testCorpus0/index/";
+
         // [Fact]
         [Theory]
         // [InlineData(0, "(3,[6])")]  //'a' starts at 0    //NOTE: error at BinaryReader accessing again
-        [InlineData(53*4, "(3,[1])")]  //'love' starts at (53 * 4byte)
+        [InlineData(53 * 4, "(3,[1])")]  //'love' starts at (53 * 4byte)
         // [InlineData(4*4, "(1,[3]), (4,[7])")]  //'full' starts at (4*4)
         public void ReadPostingsTest(int startByte, string expectedPostings)
         {
@@ -28,7 +29,7 @@ namespace UnitTests.DiskIndexTests
 
         [Theory]
         // [InlineData(4*4, "(1,[3]), (4,[7])")]   //'full'
-        [InlineData(11*4, "(0,[0,1]), (2,[0,2,3])")]   //'hello'
+        [InlineData(11 * 4, "(0,[0,1]), (2,[0,2,3])")]   //'hello'
         public void ReadPostingsTestWithGap(int startByte, string expectedPostings)
         {
             //Arrange
@@ -37,6 +38,19 @@ namespace UnitTests.DiskIndexTests
             //Act
             IList<Posting> actual = diskIndex.ReadPostings(startByte);
             actual.Should().BeEquivalentTo(expected);
+
+
+        }
+
+        [Fact]
+        public void ReadDocumentWeights()
+        {
+            DiskPositionalIndex diskIndex = new DiskPositionalIndex(dirPath);
+            double docWeight = Math.Round(diskIndex.GetDocumentWeight(0), 9);
+            double docWeight2 = Math.Round(diskIndex.GetDocumentWeight(1), 9);
+            docWeight.Should().Be(2.620447934);
+            docWeight2.Should().Be(3.377006594);
+
 
 
         }
