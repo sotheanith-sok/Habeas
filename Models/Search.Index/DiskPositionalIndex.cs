@@ -32,20 +32,19 @@ namespace Search.Index
         }
 
         /// <summary>
-        /// Gets Postings of a given term from index.
+        /// Gets Postings only with docIDs from a given term from on-disk index.
         /// </summary>
         /// <param name="term">a processed string</param>
         /// <return>a posting list</return>
         public IList<Posting> GetPostings(string term)
         {
 
-
             return new List<Posting>();
 
         }
 
         /// <summary>
-        /// Gets Postings of a given list of terms from index.
+        /// Gets Postings only with docIDs from a given list of terms from on-disk index.
         /// This or-merge the all the results from the multiple terms
         /// </summary>
         /// <param name="terms">a list of processed strings</param>
@@ -102,11 +101,12 @@ namespace Search.Index
 
 
         /// <summary>
-        /// Read postings for a term from postings.bin
+        /// Read postings without positions for a term from postings.bin
         /// </summary>
         /// <param name="startByte">the starting byte of a posting list within postings.bin</param>
+        /// <param name="wantPositions">Do you want positions? or not?</param>
         /// <returns>a posting list</returns>
-        public IList<Posting> ReadPostings(long startByte)
+        public IList<Posting> ReadPostings(long startByte, bool wantPositions)
         {
             // Read and construct a posting list from postings.bin
             // < df, (docID tf p1 p2 p3), (doc2 tf p1 p2), ... >
@@ -117,7 +117,6 @@ namespace Search.Index
             
             IList<Posting> postings = new List<Posting>();
 
-            //TODO: read with gap
             //1. Read document frequency
             int docFrequency = postingReader.ReadInt32();
 
@@ -132,14 +131,22 @@ namespace Search.Index
                 //3. Read term frequency
                 int termFrequency = postingReader.ReadInt32();
 
-                //4. Read positions using gap
-                int prevPos = 0;
-                for(int j=0; j < termFrequency; j++)    //for each position
+                if(wantPositions)
                 {
-                    int pos = prevPos + postingReader.ReadInt32();
-                    positions.Add(pos);
-                    prevPos = pos;  //update prevPos
+                    //4. Read positions using gap
+                    int prevPos = 0;
+                    for(int j=0; j < termFrequency; j++)    //for each position
+                    {
+                        int pos = prevPos + postingReader.ReadInt32();
+                        positions.Add(pos);
+                        prevPos = pos;  //update prevPos
+                    }
                 }
+                else {
+                    //Skip the positions
+                    postingReader.BaseStream.Seek(termFrequency*sizeof(int), SeekOrigin.Current);
+                }
+                
                 //Insert a posting to the posting list
                 postings.Add(new Posting(docID, positions));
 
@@ -147,9 +154,10 @@ namespace Search.Index
             }
 
             UnitTest.PrintPostingResult(postings);
-            
+
             return postings;
         }
+
 
         public void Dispose()
         {

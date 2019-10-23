@@ -12,32 +12,33 @@ namespace UnitTests.DiskIndexTests
         
         // [Fact]
         [Theory]
-        // [InlineData(0, "(3,[6])")]  //'a' starts at 0    //NOTE: error at BinaryReader accessing again
-        [InlineData(53*4, "(3,[1])")]  //'love' starts at (53 * 4byte)
-        // [InlineData(4*4, "(1,[3]), (4,[7])")]  //'full' starts at (4*4)
+        // [InlineData(0, "(3,[6])")]  //'a' starts at 0    
+        // [InlineData(53*4, "(3,[1])")]  //'love' starts at (53 * 4byte)
+        //NOTE: error at BinaryReader accessing again
+        // [InlineData(4*4, "(1,[3]), (4,[7])")]   //'full'
+        [InlineData(11*4, "(0,[0,1]), (2,[0,2,3])")]   //'hello'
+        public void ReadPostingsTestWithPositions(int startByte, string expectedPostings)
+        {
+            //Arrange
+            DiskPositionalIndex diskIndex = new DiskPositionalIndex(dirPath);
+            IList<Posting> expected = UnitTest.GeneratePostings(expectedPostings);
+            //Act
+            IList<Posting> actual = diskIndex.ReadPostings(startByte, true);
+            //Assert
+            actual.Should().BeEquivalentTo(expected);
+        }
+
+        [Theory]
+        [InlineData(11*4, "(0,[]), (2,[])")]   //'hello'
         public void ReadPostingsTest(int startByte, string expectedPostings)
         {
             //Arrange
             DiskPositionalIndex diskIndex = new DiskPositionalIndex(dirPath);
             IList<Posting> expected = UnitTest.GeneratePostings(expectedPostings);
             //Act
-            IList<Posting> actual = diskIndex.ReadPostings(startByte);
+            IList<Posting> actual = diskIndex.ReadPostings(startByte, false);
             //Assert
             actual.Should().BeEquivalentTo(expected);
-        }
-
-        [Theory]
-        // [InlineData(4*4, "(1,[3]), (4,[7])")]   //'full'
-        [InlineData(11*4, "(0,[0,1]), (2,[0,2,3])")]   //'hello'
-        public void ReadPostingsTestWithGap(int startByte, string expectedPostings)
-        {
-            //Arrange
-            DiskPositionalIndex diskIndex = new DiskPositionalIndex(dirPath);
-            IList<Posting> expected = UnitTest.GeneratePostings(expectedPostings);
-            //Act
-            IList<Posting> actual = diskIndex.ReadPostings(startByte);
-            actual.Should().BeEquivalentTo(expected);
-
 
         }
 

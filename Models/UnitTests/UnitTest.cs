@@ -42,12 +42,16 @@ namespace UnitTests
                 }
 
                 //untanggle the string of positions
-                string trimedPositions = str_p.Substring(str_p.IndexOf('[')).TrimStart('[').TrimEnd(']');
-                List<string> str_positions = trimedPositions.Split(',').ToList();
                 List<int> positions = new List<int>();
-                foreach (string str_posit in str_positions)
+                string trimedPositions = str_p.Substring(str_p.IndexOf('[')).TrimStart('[').TrimEnd(']');
+                if(trimedPositions!="")
                 {
-                    positions.Add(Int32.Parse(str_posit));
+                    List<string> str_positions = trimedPositions.Split(',').ToList();
+                
+                    foreach (string str_posit in str_positions)
+                    {
+                        positions.Add(Int32.Parse(str_posit));
+                    }
                 }
 
                 //make a posting with docId and positions
@@ -63,7 +67,7 @@ namespace UnitTests
                 foreach(Posting posting in postingList)
                 {
                     newPostingList.Push(posting);  //Warning: temporary solution
-                    
+
                     // if(posting.DocumentId < newPostingList.First.Value.DocumentId) {
                     //     newPostingList.AddFirst(posting);
                     // } else if (posting.DocumentId > newPostingList.Last.Value.DocumentId) {
