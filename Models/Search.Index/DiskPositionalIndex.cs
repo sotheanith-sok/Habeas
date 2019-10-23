@@ -13,8 +13,7 @@ namespace Search.Index
         private string dirPath;
         private BinaryReader vocabReader;
         private BinaryReader postingReader;
-        // private long[] vocabTable;
-        private long[] vocabTable;
+        private long[] vocabTable;  // [t1Start, p1Start, t2Start, p2Start, ...]
         private BinaryReader docWeightsReader;
 
         /// <summary>
@@ -43,9 +42,8 @@ namespace Search.Index
         /// <return>a posting list</return>
         public IList<Posting> GetPostings(string term)
         {
-            //TODO: implement this
-
-            throw new NotImplementedException();
+            long postingStart = BinarySearchVocabulary(term);
+            return ReadPostings(postingStart, false);
         }
 
         /// <summary>
@@ -69,9 +67,8 @@ namespace Search.Index
         /// <return>a posting list</return>
         public IList<Posting> GetPositionalPostings(string term)
         {
-            //TODO: implement this
-
-            throw new NotImplementedException();
+            long postingStart = BinarySearchVocabulary(term);
+            return ReadPostings(postingStart, true);
         }
 
         /// <summary>
@@ -109,7 +106,7 @@ namespace Search.Index
         /// </summary>
         /// <param name="term">the term to find</param>
         /// <returns>the byte position of the postings</returns>
-        public long BinarySearchVocabulary(string term) //TODO: to private
+        private long BinarySearchVocabulary(string term)
         {
             // Do a binary search over the vocabulary,
             // using the vocabTable and the vocabReader(vocab.bin).
@@ -147,7 +144,7 @@ namespace Search.Index
         /// </summary>
         /// <param name="dirPath">the absolute path to the folder where binary index files are saved</param>
         /// <returns>the long array of vocabTable</returns>
-        public static long[] ReadVocabTable(string dirPath) //TODO: to private
+        private static long[] ReadVocabTable(string dirPath)
         {
             try {
                 var vocabTable = new List<long>();
@@ -175,37 +172,17 @@ namespace Search.Index
         /// <returns>the size of the vocabulary</returns>
         public int GetTermCount()
         {
-            //TODO: test
-            return vocabTable.Length;
-            // return (int)(vocabTableReader.BaseStream.Length) / 2;
+            return vocabTable.Length / 2;
         }
 
         
-        /// <summary>
-        /// Gets the document weight from docWeights.bin
-        /// </summary>
-        /// <param name="docId">the docId of the document to get weight of</param>
-        /// <returns>the document weight</returns>
-        public double GetDocumentWeight(int docId)
-        {
-            int startByte = docId * 8;
-            
-            //Jump to the starting byte
-            docWeightsReader.BaseStream.Seek(startByte, SeekOrigin.Begin);
-            //Read a document weight and convert it
-            double docWeight = BitConverter.Int64BitsToDouble(docWeightsReader.ReadInt64());
-            
-            return docWeight;
-        }
-
-
         /// <summary>
         /// Read postings without positions for a term from postings.bin
         /// </summary>
         /// <param name="startByte">the starting byte of a posting list within postings.bin</param>
         /// <param name="wantPositions">Do you want positions? or not?</param>
         /// <returns>a posting list</returns>
-        public IList<Posting> ReadPostings(long startByte, bool wantPositions)   //TODO: to private
+        private IList<Posting> ReadPostings(long startByte, bool wantPositions)
         {
             // Read and construct a posting list from postings.bin
             // < df, (docID tf p1 p2 p3), (doc2 tf p1 p2), ... >
@@ -253,6 +230,24 @@ namespace Search.Index
             }
 
             return postings;
+        }
+
+
+        /// <summary>
+        /// Gets the document weight from docWeights.bin
+        /// </summary>
+        /// <param name="docId">the docId of the document to get weight of</param>
+        /// <returns>the document weight</returns>
+        public double GetDocumentWeight(int docId)  //TODO: to private?
+        {
+            int startByte = docId * 8;
+            
+            //Jump to the starting byte
+            docWeightsReader.BaseStream.Seek(startByte, SeekOrigin.Begin);
+            //Read a document weight and convert it
+            double docWeight = BitConverter.Int64BitsToDouble(docWeightsReader.ReadInt64());
+            
+            return docWeight;
         }
 
 
