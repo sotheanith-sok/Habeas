@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System;
 using System.IO;
-using UnitTests;
+using Search.Query;
 
 namespace Search.Index
 {
@@ -11,78 +11,83 @@ namespace Search.Index
     public class DiskPositionalIndex : IIndex, IDisposable
     {
 
-        BinaryReader vocabReader;
-        BinaryReader postingReader;
-        BinaryReader vocabTableReader;
-
-        BinaryReader docWeightsReader;
+        private BinaryReader vocabReader;
+        private BinaryReader postingReader;
+        private BinaryReader vocabTableReader;
+        private BinaryReader docWeightsReader;
 
         /// <summary>
-        /// 
+        /// Constructs DiskPositionalIndex and opens the BinaryReaders
         /// </summary>
-        public DiskPositionalIndex(string FolderPath)
+        /// <param name="dirPath">the absolute path to the directory where binary files are saved</param>
+        public DiskPositionalIndex(string dirPath)
         {
 
-            String VocabPath = FolderPath + "vocab.bin";
-            String PostingPath = FolderPath + "postings.bin";
-            String VocabTablePath = FolderPath + "vocabTable.bin";
-            String DocWeightPath = FolderPath + "docWeights.bin";
+            string vocabPath = dirPath + "vocab.bin";
+            string postingPath = dirPath + "postings.bin";
+            string vocabTablePath = dirPath + "vocabTable.bin";
+            string docWeightPath = dirPath + "docWeights.bin";
 
-            vocabReader = new BinaryReader(File.Open(VocabPath, FileMode.Open));
-            postingReader = new BinaryReader(File.Open(PostingPath, FileMode.Open));
-            vocabTableReader = new BinaryReader(File.Open(VocabTablePath, FileMode.Open));
-            docWeightsReader = new BinaryReader(File.Open(DocWeightPath, FileMode.Open));
+            //TODO: handle exceptions
+            vocabReader = new BinaryReader(File.Open(vocabPath, FileMode.Open));
+            postingReader = new BinaryReader(File.Open(postingPath, FileMode.Open));
+            vocabTableReader = new BinaryReader(File.Open(vocabTablePath, FileMode.Open));
+            docWeightsReader = new BinaryReader(File.Open(docWeightPath, FileMode.Open));
 
         }
 
         /// <summary>
-        /// Gets Postings of a given term from index.
+        /// Gets Postings only with docIDs from a given term from on-disk index.
         /// </summary>
         /// <param name="term">a processed string</param>
         /// <return>a posting list</return>
         public IList<Posting> GetPostings(string term)
         {
+            //TODO: implement this
 
-
-            return new List<Posting>();
-
+            throw new NotImplementedException();
         }
 
         /// <summary>
-        /// Gets Postings of a given list of terms from index.
-        /// This or-merge the all the results from the multiple terms
+        /// Gets Postings only with docIDs from a given list of terms from on-disk index.
         /// </summary>
         /// <param name="terms">a list of processed strings</param>
         /// <return>a or-merged posting list</return>
         public IList<Posting> GetPostings(List<string> terms)
         {
-
-            return new List<Posting>();
+            List<IList<Posting>> postingLists = new List<IList<Posting>>();
+            foreach (string term in terms)
+            {
+                postingLists.Add(GetPostings(term));
+            }
+            return Merge.OrMerge(postingLists);
         }
 
         /// <summary>
-        /// Gets Postings of a given term from index.
+        /// Gets Postings with positions from a given term from on-disk index.
         /// </summary>
         /// <param name="term">a processed string</param>
         /// <return>a posting list</return>
-        public IList<Posting> GetPostingsPositional(string term)
+        public IList<Posting> GetPositionalPostings(string term)
         {
+            //TODO: implement this
 
-
-            return new List<Posting>();
-
+            throw new NotImplementedException();
         }
 
         /// <summary>
-        /// Gets Postings of a given list of terms from index.
-        /// This or-merge the all the results from the multiple terms
+        /// Gets Postings with positions from a given list of terms from on-disk index.
         /// </summary>
         /// <param name="terms">a list of processed strings</param>
         /// <return>a or-merged posting list</return>
-        public IList<Posting> GetPostingsPositional(List<string> terms)
+        public IList<Posting> GetPositionalPostings(List<string> terms)
         {
-
-            return new List<Posting>();
+            List<IList<Posting>> postingLists = new List<IList<Posting>>();
+            foreach (string term in terms)
+            {
+                postingLists.Add(GetPositionalPostings(term));
+            }
+            return Merge.OrMerge(postingLists);
         }
 
         /// <summary>
@@ -90,7 +95,7 @@ namespace Search.Index
         /// </summary>
         public IReadOnlyList<string> GetVocabulary()
         {
-            List<string> finalList = new List<String>();
+            List<string> finalList = new List<string>();
             int termCount = GetTermCount();
             for (int i = 0; i < termCount; i++)
             {
@@ -99,30 +104,41 @@ namespace Search.Index
             return finalList;
         }
 
-
-        public double GetDocumentWeight(int docId)
-        {
-            int startByte= docId*8;
-            
-            //0. Jump to the starting byte
-            docWeightsReader.BaseStream.Seek(startByte, SeekOrigin.Begin);
-            double docWeight = BitConverter.Int64BitsToDouble(docWeightsReader.ReadInt64());
-            
-            return docWeight;
-        }
+        /// <summary>
+        /// Gets the term count from vocab.bin
+        /// </summary>
+        /// <returns>the size of the vocabulary</returns>
         public int GetTermCount()
         {
             //TODO: test
             return (int)(vocabTableReader.BaseStream.Length) / 2;
         }
 
+        /// <summary>
+        /// Gets the document weight from docWeights.bin
+        /// </summary>
+        /// <param name="docId">the docId of the document to get weight of</param>
+        /// <returns>the document weight</returns>
+        public double GetDocumentWeight(int docId)
+        {
+            int startByte = docId * 8;
+            
+            //Jump to the starting byte
+            docWeightsReader.BaseStream.Seek(startByte, SeekOrigin.Begin);
+            //Read a document weight and convert it
+            double docWeight = BitConverter.Int64BitsToDouble(docWeightsReader.ReadInt64());
+            
+            return docWeight;
+        }
+
 
         /// <summary>
-        /// Read postings for a term from postings.bin
+        /// Read postings without positions for a term from postings.bin
         /// </summary>
         /// <param name="startByte">the starting byte of a posting list within postings.bin</param>
+        /// <param name="wantPositions">Do you want positions? or not?</param>
         /// <returns>a posting list</returns>
-        public IList<Posting> ReadPostings(long startByte)
+        public IList<Posting> ReadPostings(long startByte, bool wantPositions)
         {
             // Read and construct a posting list from postings.bin
             // < df, (docID tf p1 p2 p3), (doc2 tf p1 p2), ... >
@@ -133,7 +149,6 @@ namespace Search.Index
 
             IList<Posting> postings = new List<Posting>();
 
-            //TODO: read with gap
             //1. Read document frequency
             int docFrequency = postingReader.ReadInt32();
 
@@ -148,30 +163,42 @@ namespace Search.Index
                 //3. Read term frequency
                 int termFrequency = postingReader.ReadInt32();
 
-                //4. Read positions using gap
-                int prevPos = 0;
-                for (int j = 0; j < termFrequency; j++)    //for each position
+                if(wantPositions)
                 {
-                    int pos = prevPos + postingReader.ReadInt32();
-                    positions.Add(pos);
-                    prevPos = pos;  //update prevPos
+                    //4. Read positions using gap
+                    int prevPos = 0;
+                    for(int j=0; j < termFrequency; j++)    //for each position
+                    {
+                        int pos = prevPos + postingReader.ReadInt32();
+                        positions.Add(pos);
+                        prevPos = pos;  //update prevPos
+                    }
                 }
+                else {
+                    //Skip the positions
+                    postingReader.BaseStream.Seek(termFrequency*sizeof(int), SeekOrigin.Current);
+                }
+                
                 //Insert a posting to the posting list
                 postings.Add(new Posting(docID, positions));
 
                 prevDocID = docID;  //update prevDocID
             }
 
-            UnitTest.PrintPostingResult(postings);
-
             return postings;
         }
 
+        /// <summary>
+        /// Dispose all binary readers
+        /// </summary>
         public void Dispose()
         {
             vocabReader?.Dispose();
             postingReader?.Dispose();
             vocabTableReader?.Dispose();
+            docWeightsReader?.Dispose();
+            
+            Console.WriteLine("Disposed all binary");
         }
     }
 
