@@ -74,7 +74,7 @@ namespace Search.Index
         /// <param name="path">where should KGramTable bin be written to</param>
         private void WriteKGramTableBin(List<long> kGramPositions, List<long> candidatesPositions, string path)
         {
-            path = Path.GetFullPath(path + "kGramTable.bin");
+            path = Path.Join(path, "kGramTable.bin");
             using (BinaryWriter b = new BinaryWriter(File.Create(path)))
             {
                 for (int i = 0; i < kGramPositions.Count; i++)
@@ -135,7 +135,7 @@ namespace Search.Index
         /// <param name="path">where should KGramTable bin be written to</param>
         private void WriteMiniKGramTableBin(List<long> miniKGramPositions, List<long> miniCandidatesPositions, string path)
         {
-            path = Path.GetFullPath(path + "miniKGramTable.bin");
+            path = Path.Join(path, "miniKGramTable.bin");
             using (BinaryWriter b = new BinaryWriter(File.Create(path)))
             {
                 for (int i = 0; i < miniKGramPositions.Count; i++)

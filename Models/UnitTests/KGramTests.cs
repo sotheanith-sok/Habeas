@@ -5,9 +5,9 @@ using Search.Text;
 using Search.Index;
 namespace UnitTests
 {
+    [Collection("FileIORelated")]
     public class KGramTests
     {
-
         /// <summary>
         /// Test k-gram retrieval
         /// </summary>

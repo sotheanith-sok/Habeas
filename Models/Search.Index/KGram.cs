@@ -107,6 +107,7 @@ namespace Search.Index
         /// <returns>A list of vocabularies</returns>
         public List<string> getVocabularies(string kGram)
         {
+            new DiskKGramReader().getCandidates(kGram, this.path);
             //If requested k-gram's length is less than this k-gram size, use mini kgram to find the right k-gram 
             if (kGram.Length < this.size)
             {
@@ -126,6 +127,7 @@ namespace Search.Index
                 return (this.map.ContainsKey(kGram)) ? this.map[kGram] : new List<string>();
 
             }
+
         }
 
 
