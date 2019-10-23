@@ -6,7 +6,7 @@ using Search.Query;
 namespace Search.Index
 {
     /// <summary>
-    /// 
+    /// Reads the On-disk positional inverted index that was constructed by DiskIndexWriter
     /// </summary>
     public class DiskPositionalIndex : IIndex, IDisposable
     {
@@ -165,6 +165,7 @@ namespace Search.Index
             }
             return null;
         }
+
 
         /// <summary>
         /// Gets the term count of the vocabulary(vocab.bin)
