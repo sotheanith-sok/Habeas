@@ -56,20 +56,24 @@ namespace UnitTests
             }
 
             //SellaTODO: Sort by docId for macOS
-            // if(RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) {
-            //     LinkedList<Posting> newPostingList = new LinkedList<Posting>();
-            //     foreach(Posting posting in postingList)
-            //     {
-            //         if(posting.DocumentId < newPostingList.First.Value.DocumentId) {
-            //             newPostingList.AddFirst(posting);
-            //         } else if (posting.DocumentId > newPostingList.Last.Value.DocumentId) {
-            //             newPostingList.AddLast(posting);
-            //         } else {
-            //             //???
-            //         }
-            //     }
-            //     // postingList = newPostingList.ToList();
-            // }
+            //Warning: this only works for testCorpus size less than 5;
+            if(RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) {
+                // LinkedList<Posting> newPostingList = new LinkedList<Posting>();
+                Stack<Posting> newPostingList = new Stack<Posting>();
+                foreach(Posting posting in postingList)
+                {
+                    newPostingList.Push(posting);  //Warning: temporary solution
+                    
+                    // if(posting.DocumentId < newPostingList.First.Value.DocumentId) {
+                    //     newPostingList.AddFirst(posting);
+                    // } else if (posting.DocumentId > newPostingList.Last.Value.DocumentId) {
+                    //     newPostingList.AddLast(posting);
+                    // } else {
+                    //     //???
+                    // }
+                }
+                postingList = newPostingList.ToList();
+            }
 
             // Console.WriteLine($"Generated: {postingList.Count} postings.");
             return postingList;

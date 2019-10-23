@@ -30,8 +30,12 @@ vocab count: 13
 How postings.bin should be written
 df, docID tf p1 p2 p3, doc2 tf p1 p2, ... (docIDs and positions are written as gap)
 
-1   3 1 6
-2   1 1 3   1 1 7
-2   0 2 0 1   2 3 0 2 1
-5   0 1 4   1 1 2   1 1 5   1 1 5   1 1 6
+a       -> 1   3 1 6
+full    -> 2   1 1 3   3 1 7
+hello   -> 2   0 2 0 1   2 3 0 2 1
+is      -> 5   0 1 4   1 1 2   1 1 5   1 1 5   1 1 6
+it      -> 5   0 1 3   1 1 6   1 1 4   1 1 4   1 1 0
+love    -> 1   3 1 1
+mr.snowman -> 2   2 1 1   1 1 0
+mystery -> 3   1 1 5   2 1 7   1 1 9
 ...
