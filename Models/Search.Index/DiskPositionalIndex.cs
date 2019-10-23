@@ -1,8 +1,7 @@
 using System.Collections.Generic;
-using System.Linq;
-using Search.Query;
 using System;
 using System.IO;
+using UnitTests;
 
 namespace Search.Index
 {
@@ -12,9 +11,9 @@ namespace Search.Index
     public class DiskPositionalIndex : IIndex, IDisposable
     {
 
-        BinaryReader VocabReader;
-        BinaryReader PostingReader;
-        BinaryReader VocabTableReader;
+        BinaryReader vocabReader;
+        BinaryReader postingReader;
+        BinaryReader vocabTableReader;
 
         /// <summary>
         /// 
@@ -26,9 +25,9 @@ namespace Search.Index
             String PostingPath = FolderPath + "postings.bin";
             String VocabTablePath = FolderPath + "vocabTable.bin";
 
-            VocabReader = new BinaryReader(File.Open(VocabPath, FileMode.Open));
-            PostingReader = new BinaryReader(File.Open(PostingPath, FileMode.Open));
-            VocabTableReader = new BinaryReader(File.Open(VocabTablePath, FileMode.Open));
+            vocabReader = new BinaryReader(File.Open(VocabPath, FileMode.Open));
+            postingReader = new BinaryReader(File.Open(PostingPath, FileMode.Open));
+            vocabTableReader = new BinaryReader(File.Open(VocabTablePath, FileMode.Open));
 
         }
 
@@ -90,7 +89,7 @@ namespace Search.Index
             List<string> finalList = new List<String>();
             int termCount = getTermCount();
             for(int i=0; i < termCount; i++){
-                finalList.Add(VocabReader.ReadString());
+                finalList.Add(vocabReader.ReadString());
             }
             return finalList;
         }
@@ -98,14 +97,65 @@ namespace Search.Index
         public int getTermCount()
         {
             //TODO: test
-            return (int)(VocabTableReader.BaseStream.Length)/2;
+            return (int)(vocabTableReader.BaseStream.Length)/2;
+        }
+
+
+        /// <summary>
+        /// Read postings for a term from postings.bin
+        /// </summary>
+        /// <param name="startByte">the starting byte of a posting list within postings.bin</param>
+        /// <returns>a posting list</returns>
+        public IList<Posting> ReadPostings(long startByte)
+        {
+            // Read and construct a posting list from postings.bin
+            // < df, (docID tf p1 p2 p3), (doc2 tf p1 p2), ... >
+            // docIDs and positions are written as gap)
+
+            //0. Jump to the starting byte
+            postingReader.BaseStream.Seek(startByte, SeekOrigin.Begin);
+            
+            IList<Posting> postings = new List<Posting>();
+
+            //TODO: read with gap
+            //1. Read document frequency
+            int docFrequency = postingReader.ReadInt32();
+
+            int prevDocID = 0;
+            for(int i=0; i < docFrequency; i++)         //for each posting
+            {
+                //2. Read documentID using gap
+                int docID = prevDocID + postingReader.ReadInt32();
+
+                List<int> positions = new List<int>();
+
+                //3. Read term frequency
+                int termFrequency = postingReader.ReadInt32();
+
+                //4. Read positions using gap
+                int prevPos = 0;
+                for(int j=0; j < termFrequency; j++)    //for each position
+                {
+                    int pos = prevPos + postingReader.ReadInt32();
+                    positions.Add(pos);
+                    prevPos = pos;  //update prevPos
+                }
+                //Insert a posting to the posting list
+                postings.Add(new Posting(docID, positions));
+
+                prevDocID = docID;  //update prevDocID
+            }
+
+            UnitTest.PrintPostingResult(postings);
+            
+            return postings;
         }
 
         public void Dispose()
         {
-            VocabReader?.Dispose();
-            PostingReader?.Dispose();
-            VocabTableReader?.Dispose();
+            vocabReader?.Dispose();
+            postingReader?.Dispose();
+            vocabTableReader?.Dispose();
         }
     }
 
