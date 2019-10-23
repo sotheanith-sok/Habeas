@@ -15,6 +15,8 @@ namespace Search.Index
         BinaryReader postingReader;
         BinaryReader vocabTableReader;
 
+        BinaryReader docWeightsReader;
+
         /// <summary>
         /// 
         /// </summary>
@@ -24,10 +26,12 @@ namespace Search.Index
             String VocabPath = FolderPath + "vocab.bin";
             String PostingPath = FolderPath + "postings.bin";
             String VocabTablePath = FolderPath + "vocabTable.bin";
+            String DocWeightPath = FolderPath + "docWeights.bin";
 
             vocabReader = new BinaryReader(File.Open(VocabPath, FileMode.Open));
             postingReader = new BinaryReader(File.Open(PostingPath, FileMode.Open));
             vocabTableReader = new BinaryReader(File.Open(VocabTablePath, FileMode.Open));
+            docWeightsReader= new BinaryReader(File.Open(DocWeightPath, FileMode.Open));
 
         }
 
@@ -87,14 +91,20 @@ namespace Search.Index
         public IReadOnlyList<string> GetVocabulary()
         {
             List<string> finalList = new List<String>();
-            int termCount = getTermCount();
+            int termCount = GetTermCount();
             for(int i=0; i < termCount; i++){
                 finalList.Add(vocabReader.ReadString());
             }
             return finalList;
         }
 
-        public int getTermCount()
+
+        public IList<int> GetDocumentWeights()
+        {
+            List<int> docWeights = new List<int> ();
+            
+        }
+        public int GetTermCount()
         {
             //TODO: test
             return (int)(vocabTableReader.BaseStream.Length)/2;
