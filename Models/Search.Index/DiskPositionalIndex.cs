@@ -10,30 +10,30 @@ namespace Search.Index
     /// </summary>
     public class DiskPositionalIndex : IIndex, IDisposable
     {
-
+        private string dirPath;
         private BinaryReader vocabReader;
         private BinaryReader postingReader;
-        private BinaryReader vocabTableReader;
+        // private long[] vocabTable;
+        private long[] vocabTable;
         private BinaryReader docWeightsReader;
 
         /// <summary>
-        /// Constructs DiskPositionalIndex and opens the BinaryReaders
+        /// Opens an on-disk positional inverted index that was constructed in the given path
         /// </summary>
-        /// <param name="dirPath">the absolute path to the directory where binary files are saved</param>
+        /// <param name="dirPath">the absolute path to the folder where binary files are saved</param>
         public DiskPositionalIndex(string dirPath)
         {
-
-            string vocabPath = dirPath + "vocab.bin";
-            string postingPath = dirPath + "postings.bin";
-            string vocabTablePath = dirPath + "vocabTable.bin";
-            string docWeightPath = dirPath + "docWeights.bin";
-
-            //TODO: handle exceptions
-            vocabReader = new BinaryReader(File.Open(vocabPath, FileMode.Open));
-            postingReader = new BinaryReader(File.Open(postingPath, FileMode.Open));
-            vocabTableReader = new BinaryReader(File.Open(vocabTablePath, FileMode.Open));
-            docWeightsReader = new BinaryReader(File.Open(docWeightPath, FileMode.Open));
-
+            try {
+                this.dirPath = dirPath;
+                vocabReader = new BinaryReader(File.OpenRead(dirPath + "vocab.bin"));
+                postingReader = new BinaryReader(File.OpenRead(dirPath + "postings.bin"));
+                vocabTable = ReadVocabTable(dirPath);
+                docWeightsReader = new BinaryReader(File.OpenRead(dirPath + "docWeights.bin"));
+                Console.WriteLine("Opened 3 binary files.");
+            }
+            catch (FileNotFoundException ex) {
+                Console.WriteLine(ex.ToString());
+            }
         }
 
         /// <summary>
@@ -55,9 +55,8 @@ namespace Search.Index
         /// <return>a or-merged posting list</return>
         public IList<Posting> GetPostings(List<string> terms)
         {
-            List<IList<Posting>> postingLists = new List<IList<Posting>>();
-            foreach (string term in terms)
-            {
+            var postingLists = new List<IList<Posting>>();
+            foreach (string term in terms) {
                 postingLists.Add(GetPostings(term));
             }
             return Merge.OrMerge(postingLists);
@@ -82,9 +81,8 @@ namespace Search.Index
         /// <return>a or-merged posting list</return>
         public IList<Posting> GetPositionalPostings(List<string> terms)
         {
-            List<IList<Posting>> postingLists = new List<IList<Posting>>();
-            foreach (string term in terms)
-            {
+            var postingLists = new List<IList<Posting>>();
+            foreach (string term in terms) {
                 postingLists.Add(GetPositionalPostings(term));
             }
             return Merge.OrMerge(postingLists);
@@ -105,15 +103,84 @@ namespace Search.Index
         }
 
         /// <summary>
-        /// Gets the term count from vocab.bin
+        /// Locates the byte position of the postings for the given term.
+        /// For example, binarySearchVocabulary("angel") will return the byte position
+        /// to seek to in postings.bin to find the postings for "angel".
+        /// </summary>
+        /// <param name="term">the term to find</param>
+        /// <returns>the byte position of the postings</returns>
+        public long BinarySearchVocabulary(string term) //TODO: to private
+        {
+            // Do a binary search over the vocabulary,
+            // using the vocabTable and the vocabReader(vocab.bin).
+            int i = 0;
+            int j = vocabTable.Length / 2 - 1;
+            while (i <= j)
+            {
+                try {
+                    int m = (i + j) / 2;
+                    long termStartByte = vocabTable[m * 2];
+                    vocabReader.BaseStream.Seek(termStartByte, SeekOrigin.Begin);
+                    string termFromFile = vocabReader.ReadString();
+
+                    int compareValue = term.CompareTo(termFromFile);
+                    if(compareValue == 0) {
+                        // found it!
+                        return vocabTable[m * 2 + 1];
+                    }
+                    else if (compareValue < 0) {
+                        j = m - 1;
+                    }
+                    else {
+                        i = m + 1;
+                    }
+                }
+                catch (IOException ex) {
+                    Console.WriteLine(ex.ToString());
+                }
+            }
+            return -1;
+        }
+
+        /// <summary>
+        /// Reads the file vocabTable.bin into memory
+        /// </summary>
+        /// <param name="dirPath">the absolute path to the folder where binary index files are saved</param>
+        /// <returns>the long array of vocabTable</returns>
+        public static long[] ReadVocabTable(string dirPath) //TODO: to private
+        {
+            try {
+                var vocabTable = new List<long>();
+                var reader = new BinaryReader(File.OpenRead(dirPath + "vocabTable.bin"));
+                while(reader.BaseStream.Position != reader.BaseStream.Length)
+                {
+                    vocabTable.Add(reader.ReadInt64()); //termStart
+                    vocabTable.Add(reader.ReadInt64()); //postingStart
+                }
+                reader.Close();
+                return vocabTable.ToArray();
+            }
+            catch (FileNotFoundException ex) {
+                Console.WriteLine(ex.ToString());
+            }
+            catch (IOException ex) {
+                Console.WriteLine(ex.ToString());
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Gets the term count of the vocabulary(vocab.bin)
         /// </summary>
         /// <returns>the size of the vocabulary</returns>
         public int GetTermCount()
         {
             //TODO: test
-            return (int)(vocabTableReader.BaseStream.Length) / 2;
+            return vocabTable.Length;
+            // return (int)(vocabTableReader.BaseStream.Length) / 2;
         }
 
+        
         /// <summary>
         /// Gets the document weight from docWeights.bin
         /// </summary>
@@ -138,7 +205,7 @@ namespace Search.Index
         /// <param name="startByte">the starting byte of a posting list within postings.bin</param>
         /// <param name="wantPositions">Do you want positions? or not?</param>
         /// <returns>a posting list</returns>
-        public IList<Posting> ReadPostings(long startByte, bool wantPositions)
+        public IList<Posting> ReadPostings(long startByte, bool wantPositions)   //TODO: to private
         {
             // Read and construct a posting list from postings.bin
             // < df, (docID tf p1 p2 p3), (doc2 tf p1 p2), ... >
@@ -188,6 +255,7 @@ namespace Search.Index
             return postings;
         }
 
+
         /// <summary>
         /// Dispose all binary readers
         /// </summary>
@@ -195,10 +263,9 @@ namespace Search.Index
         {
             vocabReader?.Dispose();
             postingReader?.Dispose();
-            vocabTableReader?.Dispose();
             docWeightsReader?.Dispose();
-            
-            Console.WriteLine("Disposed all binary");
+
+            Console.WriteLine("Disposed all binary files.");
         }
     }
 

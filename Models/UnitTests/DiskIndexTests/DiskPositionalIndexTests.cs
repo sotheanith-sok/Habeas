@@ -3,6 +3,7 @@ using FluentAssertions;
 using Search.Index;
 using Xunit;
 using System;
+using System.Globalization;
 
 namespace UnitTests.DiskIndexTests
 {
@@ -12,8 +13,24 @@ namespace UnitTests.DiskIndexTests
         private static string dirPath = "../../../Models/UnitTests/testCorpus/testCorpusBasic/index/";
         
         [Theory]
+        [InlineData("hello", "2C")]
+        [InlineData("mr.snowman", "E4")]
+        public void BinarySearchVocabularyTest(string term, string expectedHex)
+        {
+            //Arrange
+            DiskPositionalIndex diskIndex = new DiskPositionalIndex(dirPath);
+            //Act
+            long actual = diskIndex.BinarySearchVocabulary(term);
+            long expected = long.Parse(expectedHex, NumberStyles.HexNumber);
+            //Assert
+            actual.Should().Be(expected);
+            
+            diskIndex.Dispose();
+        }
+
+        [Theory]
         [InlineData(4*4, "(1,[]), (4,[])")]          //'full'   //test docId gap
-        public void ReadPostingsTest(int startByte, string expectedPostings)
+        public void ReadPostingsTest_NoPosition(int startByte, string expectedPostings)
         {
             //Arrange
             DiskPositionalIndex diskIndex = new DiskPositionalIndex(dirPath);
@@ -29,7 +46,7 @@ namespace UnitTests.DiskIndexTests
         [Theory]
         [InlineData(4*4,  "(1,[3]), (4,[7])")]         //'full'   //test docId gap
         [InlineData(11*4, "(0,[0,1]), (2,[0,2,3])")]   //'hello'  //test position gap
-        public void ReadPostingsTestWithPositions(int startByte, string expectedPostings)
+        public void ReadPostingsTest_Positions(int startByte, string expectedPostings)
         {
             //Arrange
             DiskPositionalIndex diskIndex = new DiskPositionalIndex(dirPath);
