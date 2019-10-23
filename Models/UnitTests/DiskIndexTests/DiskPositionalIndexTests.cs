@@ -10,26 +10,8 @@ namespace UnitTests.DiskIndexTests
     {
         private static string dirPath = "../../../Models/UnitTests/testCorpus/testCorpusBasic/index/";
         
-        // [Fact]
         [Theory]
-        // [InlineData(0, "(3,[6])")]  //'a' starts at 0    
-        // [InlineData(53*4, "(3,[1])")]  //'love' starts at (53 * 4byte)
-        //NOTE: error at BinaryReader accessing again
-        // [InlineData(4*4, "(1,[3]), (4,[7])")]   //'full'
-        [InlineData(11*4, "(0,[0,1]), (2,[0,2,3])")]   //'hello'
-        public void ReadPostingsTestWithPositions(int startByte, string expectedPostings)
-        {
-            //Arrange
-            DiskPositionalIndex diskIndex = new DiskPositionalIndex(dirPath);
-            IList<Posting> expected = UnitTest.GeneratePostings(expectedPostings);
-            //Act
-            IList<Posting> actual = diskIndex.ReadPostings(startByte, true);
-            //Assert
-            actual.Should().BeEquivalentTo(expected);
-        }
-
-        [Theory]
-        [InlineData(11*4, "(0,[]), (2,[])")]   //'hello'
+        [InlineData(4*4, "(1,[]), (4,[])")]          //'full'   //test docId gap
         public void ReadPostingsTest(int startByte, string expectedPostings)
         {
             //Arrange
@@ -40,7 +22,25 @@ namespace UnitTests.DiskIndexTests
             //Assert
             actual.Should().BeEquivalentTo(expected);
 
+            diskIndex.Dispose();
         }
+
+        [Theory]
+        [InlineData(4*4,  "(1,[3]), (4,[7])")]          //'full'   //test docId gap
+        [InlineData(11*4, "(0,[0,1]), (2,[0,2,3])")]   //'hello'  //test position gap
+        public void ReadPostingsTestWithPositions(int startByte, string expectedPostings)
+        {
+            //Arrange
+            DiskPositionalIndex diskIndex = new DiskPositionalIndex(dirPath);
+            IList<Posting> expected = UnitTest.GeneratePostings(expectedPostings);
+            //Act
+            IList<Posting> actual = diskIndex.ReadPostings(startByte, true);
+            //Assert
+            actual.Should().BeEquivalentTo(expected);
+
+            diskIndex.Dispose();
+        }
+
 
 
     }

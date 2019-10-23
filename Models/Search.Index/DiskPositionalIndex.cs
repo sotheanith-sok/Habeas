@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System;
 using System.IO;
-using UnitTests;
+using Search.Query;
 
 namespace Search.Index
 {
@@ -16,15 +16,17 @@ namespace Search.Index
         BinaryReader vocabTableReader;
 
         /// <summary>
-        /// 
+        /// Constructs DiskPositionalIndex and opens the BinaryReaders
         /// </summary>
-        public DiskPositionalIndex(string FolderPath)
+        /// <param name="dirPath">the absolute path to the directory where binary files are saved</param>
+        public DiskPositionalIndex(string dirPath)
         {
 
-            String VocabPath = FolderPath + "vocab.bin";
-            String PostingPath = FolderPath + "postings.bin";
-            String VocabTablePath = FolderPath + "vocabTable.bin";
+            String VocabPath = dirPath + "vocab.bin";
+            String PostingPath = dirPath + "postings.bin";
+            String VocabTablePath = dirPath + "vocabTable.bin";
 
+            //TODO: handle exceptions
             vocabReader = new BinaryReader(File.Open(VocabPath, FileMode.Open));
             postingReader = new BinaryReader(File.Open(PostingPath, FileMode.Open));
             vocabTableReader = new BinaryReader(File.Open(VocabTablePath, FileMode.Open));
@@ -38,46 +40,51 @@ namespace Search.Index
         /// <return>a posting list</return>
         public IList<Posting> GetPostings(string term)
         {
+            //TODO: implement this
 
-            return new List<Posting>();
-
+            throw new NotImplementedException();
         }
 
         /// <summary>
         /// Gets Postings only with docIDs from a given list of terms from on-disk index.
-        /// This or-merge the all the results from the multiple terms
         /// </summary>
         /// <param name="terms">a list of processed strings</param>
         /// <return>a or-merged posting list</return>
         public IList<Posting> GetPostings(List<string> terms)
         {
-
-            return new List<Posting>();
+            List<IList<Posting>> postingLists = new List<IList<Posting>>();
+            foreach (string term in terms)
+            {
+                postingLists.Add(GetPostings(term));
+            }
+            return Merge.OrMerge(postingLists);
         }
 
         /// <summary>
-        /// Gets Postings of a given term from index.
+        /// Gets Postings with positions from a given term from on-disk index.
         /// </summary>
         /// <param name="term">a processed string</param>
         /// <return>a posting list</return>
-        public IList<Posting> GetPostingsPositional(string term)
+        public IList<Posting> GetPositionalPostings(string term)
         {
+            //TODO: implement this
 
-
-            return new List<Posting>();
-
+            throw new NotImplementedException();
         }
 
         /// <summary>
-        /// Gets Postings of a given list of terms from index.
-        /// This or-merge the all the results from the multiple terms
+        /// Gets Postings with positions from a given list of terms from on-disk index.
         /// </summary>
         /// <param name="terms">a list of processed strings</param>
         /// <return>a or-merged posting list</return>
-        public IList<Posting> GetPostingsPositional(List<string> terms)
+        public IList<Posting> GetPositionalPostings(List<string> terms)
         {
-
-            return new List<Posting>();
+            List<IList<Posting>> postingLists = new List<IList<Posting>>();
+            foreach (string term in terms)
+            {
+                postingLists.Add(GetPositionalPostings(term));
+            }
+            return Merge.OrMerge(postingLists);
         }
 
         /// <summary>
@@ -152,8 +159,6 @@ namespace Search.Index
 
                 prevDocID = docID;  //update prevDocID
             }
-
-            UnitTest.PrintPostingResult(postings);
 
             return postings;
         }
