@@ -16,12 +16,12 @@ namespace Search.Index
         /// </summary>
         /// <param name="kGram">KGram object</param>
         /// <param name="path">where should kGram be written to</param>
-        public void WriteKGram(KGram kGram, string path)
+        public void WriteKGram(SortedDictionary<string, List<string>> kGram, SortedDictionary<string, List<string>> miniKGram, string path)
         {
             //Generate full path
             path = Path.GetFullPath(path);
             this.WriteKGramTableBin(WriteKGramBin(kGram, path), WriteCandidatesBin(kGram, path), path);
-            this.WriteMiniKGramTableBin(WriteMiniKGramBin(kGram, path), WriteMiniCandidatesBin(kGram, path), path);
+            this.WriteMiniKGramTableBin(WriteMiniKGramBin(miniKGram, path), WriteMiniCandidatesBin(miniKGram, path), path);
         }
 
         /// <summary>
@@ -30,13 +30,14 @@ namespace Search.Index
         /// <param name="kGram">KGram object</param>
         /// <param name="path">where should candidates bin be written to</param>
         /// <returns>Starting positions of each candidates</returns>
-        private List<long> WriteCandidatesBin(KGram kGram, string path)
+        private List<long> WriteCandidatesBin(SortedDictionary<string, List<string>> kGram, string path)
         {
+            Console.WriteLine("Writing KGram candidates bin...");
             List<long> candidatesPositions = new List<long>();
             path = Path.Join(path, "candidates.bin");
             using (BinaryWriter b = new BinaryWriter(File.Create(path)))
             {
-                foreach (ReadOnlyCollection<string> candidates in kGram.GetKGramMap().Values)
+                foreach (List<string> candidates in kGram.Values)
                 {
                     candidatesPositions.Add(b.BaseStream.Position);
                     b.Write(Encoding.UTF8.GetBytes(string.Join(" ", candidates)));
@@ -51,13 +52,14 @@ namespace Search.Index
         /// <param name="kGram">KGram object</param>
         /// <param name="path">where should KGram bin be written to</param>
         /// <returns></returns>
-        private List<long> WriteKGramBin(KGram kGram, string path)
+        private List<long> WriteKGramBin(SortedDictionary<string, List<string>> kGram, string path)
         {
+            Console.WriteLine("Writing KGram bin...");
             List<long> kGramPositions = new List<long>();
             path = Path.Join(path, "kGram.bin");
             using (BinaryWriter b = new BinaryWriter(File.Create(path)))
             {
-                foreach (string kgram in kGram.GetKGramMap().Keys)
+                foreach (string kgram in kGram.Keys)
                 {
                     kGramPositions.Add(b.BaseStream.Position);
                     b.Write(Encoding.UTF8.GetBytes(kgram));
@@ -74,6 +76,7 @@ namespace Search.Index
         /// <param name="path">where should KGramTable bin be written to</param>
         private void WriteKGramTableBin(List<long> kGramPositions, List<long> candidatesPositions, string path)
         {
+            Console.WriteLine("Writing KGram table bin...");
             path = Path.Join(path, "kGramTable.bin");
             using (BinaryWriter b = new BinaryWriter(File.Create(path)))
             {
@@ -86,18 +89,19 @@ namespace Search.Index
         }
 
         /// <summary>
-        /// Write mini kgram candidates to bin file
+        /// Write mini KGram candidates to bin file
         /// </summary>
-        /// <param name="kGram">KGram object</param>
+        /// <param name="miniKGram">KGram object</param>
         /// <param name="path">where should candidates bin be written to</param>
         /// <returns>Starting positions of each candidates</returns>
-        private List<long> WriteMiniCandidatesBin(KGram kGram, string path)
+        private List<long> WriteMiniCandidatesBin(SortedDictionary<string, List<string>> miniKGram, string path)
         {
+            Console.WriteLine("Writing mini KGram candidates bin...");
             List<long> miniCandidatesPositions = new List<long>();
             path = Path.Join(path, "miniCandidates.bin");
             using (BinaryWriter b = new BinaryWriter(File.Create(path)))
             {
-                foreach (ReadOnlyCollection<string> candidates in kGram.GetMiniKGramMap().Values)
+                foreach (List<string> candidates in miniKGram.Values)
                 {
                     miniCandidatesPositions.Add(b.BaseStream.Position);
                     b.Write(Encoding.UTF8.GetBytes(string.Join(" ", candidates)));
@@ -107,18 +111,19 @@ namespace Search.Index
         }
 
         /// <summary>
-        /// Write mini kGram to bin file
+        /// Write mini KGram to bin file
         /// </summary>
-        /// <param name="kGram">KGram object</param>
+        /// <param name="miniKGram">KGram object</param>
         /// <param name="path">where should KGram bin be written to</param>
         /// <returns></returns>
-        private List<long> WriteMiniKGramBin(KGram kGram, string path)
+        private List<long> WriteMiniKGramBin(SortedDictionary<string, List<string>> miniKGram, string path)
         {
+            Console.WriteLine("Writing mini KGram bin...");
             List<long> miniKGramPositions = new List<long>();
             path = Path.Join(path, "miniKGram.bin");
             using (BinaryWriter b = new BinaryWriter(File.Create(path)))
             {
-                foreach (string kgram in kGram.GetMiniKGramMap().Keys)
+                foreach (string kgram in miniKGram.Keys)
                 {
                     miniKGramPositions.Add(b.BaseStream.Position);
                     b.Write(Encoding.UTF8.GetBytes(kgram));
@@ -128,13 +133,14 @@ namespace Search.Index
         }
 
         /// <summary>
-        /// Write relationship between mini kgram bin and kgram candidates bin
+        /// Write relationship between mini KGram bin and KGram candidates bin
         /// </summary>
         /// <param name="miniKGramPositions">Starting positions of all kGram</param>
         /// <param name="miniCandidatesPositions">Starting position of all candidates</param>
         /// <param name="path">where should KGramTable bin be written to</param>
         private void WriteMiniKGramTableBin(List<long> miniKGramPositions, List<long> miniCandidatesPositions, string path)
         {
+            Console.WriteLine("Writing mini KGram table bin");
             path = Path.Join(path, "miniKGramTable.bin");
             using (BinaryWriter b = new BinaryWriter(File.Create(path)))
             {

@@ -6,8 +6,17 @@ using System;
 using System.Linq;
 namespace Search.Index
 {
+    /// <summary>
+    /// Class reponsible to reading KGram from disk
+    /// </summary>
     public class DiskKGramReader
     {
+        /// <summary>
+        /// Get possible candidates for a given KGram
+        /// </summary>
+        /// <param name="kGram">given kGram</param>
+        /// <param name="path">Path to where the KGram files located</param>
+        /// <returns></returns>
         public List<string> GetCandidates(string kGram, string path)
         {
             path = Path.GetFullPath(path);
@@ -15,6 +24,28 @@ namespace Search.Index
             return SearchValuesBin(SearchKeysBin(entries, kGram, path, "kGram.bin"), path, "candidates.bin");
         }
 
+        /// <summary>
+        /// Get possible KGrams from a given mini KGram
+        /// </summary>
+        /// <param name="kGram">mini KGram</param>
+        /// <param name="path">Path to where the KGram files located</param>
+        /// <returns></returns>
+        public List<string> GetPossibleKGram(string kGram, string path)
+        {
+
+            path = Path.GetFullPath(path);
+            List<Entry> entries = GenerateEntries(path, "miniKGramTable.bin");
+            return SearchValuesBin(SearchKeysBin(entries, kGram, path, "miniKGram.bin"), path, "miniCandidates.bin");
+        }
+
+        /// <summary>
+        /// Search through entires of table bin for a given entry
+        /// </summary>
+        /// <param name="entries">Internal representation of table bin</param>
+        /// <param name="kGram">KGram to be search for</param>
+        /// <param name="path">Path to where the KGram files located</param>
+        /// <param name="filename">name keys bin tie to values in table bin</param>
+        /// <returns>An entry for a given KGram</returns>
         private Entry SearchKeysBin(List<Entry> entries, string kGram, string path, string filename)
         {
             string kGramBin = Path.Join(path, filename);
@@ -40,11 +71,11 @@ namespace Search.Index
             {
                 if (midPoint > 0 && string.Compare(key, kGram) == 1)
                 {
-                    return SearchKeysBin(entries.GetRange(0, midPoint), kGram, path, filename);
+                    return SearchKeysBin(entries.ToList().GetRange(0, midPoint), kGram, path, filename);
                 }
                 else if (midPoint < entries.Count - 1 && string.Compare(key, kGram) == -1)
                 {
-                    return SearchKeysBin(entries.GetRange(midPoint + 1, entries.Count - midPoint - 1), kGram, path, filename);
+                    return SearchKeysBin(entries.ToList().GetRange(midPoint + 1, entries.Count - midPoint - 1), kGram, path, filename);
                 }
 
             }
@@ -52,6 +83,13 @@ namespace Search.Index
         }
 
 
+        /// <summary>
+        /// Search values bin for a given entry
+        /// </summary>
+        /// <param name="entry">Entry to be search fro</param>
+        /// <param name="path">Path to where the KGram files located</param>
+        /// <param name="filename">name of values bin tie to table bin</param>
+        /// <returns></returns>
         private List<string> SearchValuesBin(Entry entry, string path, string filename)
         {
             if (entry == null)
@@ -71,14 +109,14 @@ namespace Search.Index
             }
         }
 
-        public List<string> GetPossibleKGram(string kGram, string path)
-        {
-            path = Path.GetFullPath(path);
-            List<Entry> entries = GenerateEntries(path, "miniKGramTable.bin");
-            return SearchValuesBin(SearchKeysBin(entries, kGram, path, "miniKGram.bin"), path, "miniCandidates.bin");
-        }
 
 
+        /// <summary>
+        /// Generate entries based on a given table bin
+        /// </summary>
+        /// <param name="path">Path to where the KGram files located</param>
+        /// <param name="filename">Name of table bin</param>
+        /// <returns></returns>
         private List<Entry> GenerateEntries(string path, string filename)
         {
             string tableBin = Path.Join(path, filename);
@@ -119,18 +157,35 @@ namespace Search.Index
                 return entries;
             }
         }
+
+        /// <summary>
+        /// A representation of bytes entry in table bin.
+        /// </summary>
         private class Entry
         {
+            /// <summary>
+            /// Key start byte location
+            /// </summary>
+            /// <value></value>
             public long keyStart { get; set; }
+
+            /// <summary>
+            /// Key bytes length
+            /// </summary>
+            /// <value></value>
             public int keyLength { get; set; }
 
+            /// <summary>
+            /// Value start byte location
+            /// </summary>
+            /// <value></value>
             public long valueStart { get; set; }
-            public int valueLength { get; set; }
-            public override string ToString()
-            {
-                return keyStart.ToString("X");
-            }
 
+            /// <summary>
+            /// Value length byte
+            /// </summary>
+            /// <value></value>
+            public int valueLength { get; set; }
         }
     }
 }

@@ -64,7 +64,7 @@ namespace Search.Index
                 stream.Dispose();
 
             }
-            kGram = new KGram(unstemmedVocabulary,"./");
+            kGram = new KGram("./").buildKGram(unstemmedVocabulary);
 
             elapsedTime.Stop();
             Console.WriteLine("Elapsed " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
