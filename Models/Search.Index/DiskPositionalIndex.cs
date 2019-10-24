@@ -239,7 +239,7 @@ namespace Search.Index
         /// </summary>
         /// <param name="docId">the docId of the document to get weight of</param>
         /// <returns>the document weight</returns>
-        public double GetDocumentWeight(int docId)  //TODO: to private?
+        private double GetDocumentWeight(int docId) 
         {
             int startByte = docId * 8;
             
