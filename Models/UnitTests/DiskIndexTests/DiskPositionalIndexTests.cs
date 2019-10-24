@@ -96,17 +96,18 @@ namespace UnitTests.DiskIndexTests
         //     diskIndex.Dispose();
         // }
 
-        [Fact]
-        public void ReadDocumentWeights()
-        {
-            DiskPositionalIndex diskIndex = new DiskPositionalIndex(dirPath);
-            double docWeight = Math.Round(diskIndex.GetDocumentWeight(0), 9);
-            double docWeight2 = Math.Round(diskIndex.GetDocumentWeight(1), 9);
-            docWeight.Should().Be(2.620447934);
-            docWeight2.Should().Be(3.377006594);
+        // //The method GetDocumentWeight() became private
+        // [Fact]
+        // public void GetDocumentWeightTest()
+        // {
+        //     DiskPositionalIndex diskIndex = new DiskPositionalIndex(dirPath);
+        //     double docWeight = Math.Round(diskIndex.GetDocumentWeight(0), 9);
+        //     double docWeight2 = Math.Round(diskIndex.GetDocumentWeight(1), 9);
+        //     docWeight.Should().Be(2.620447934);
+        //     docWeight2.Should().Be(3.377006594);
 
-            diskIndex.Dispose();
-        }
+        //     diskIndex.Dispose();
+        // }
 
 
 
