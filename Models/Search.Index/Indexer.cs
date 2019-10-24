@@ -10,7 +10,7 @@ namespace Search.Index
     public class Indexer
     {
 
-        public static KGram kGram = null;
+        public static string kGramPath = "./";
         public static SoundExIndex soundEx = null;
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace Search.Index
                 stream.Dispose();
 
             }
-            kGram = new KGram("./").buildKGram(unstemmedVocabulary);
+            new KGram(Indexer.kGramPath).buildKGram(unstemmedVocabulary);
 
             elapsedTime.Stop();
             Console.WriteLine("Elapsed " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
