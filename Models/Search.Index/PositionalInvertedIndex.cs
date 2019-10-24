@@ -77,6 +77,16 @@ namespace Search.Index
             return vocabulary;
         }
 
+         /// <summary>
+       /// 
+       /// </summary>
+       /// <param name="term"></param>
+       /// <returns></returns>
+        public Posting GetLastPostingItem(string term)
+        {
+            return hashMap[term].Last();
+        }
+
         /// <summary>
         /// Adds a term into the index with its docId and position.
         /// </summary>
@@ -117,6 +127,10 @@ namespace Search.Index
 
         }
 
+        /// <summary>
+        /// Increases the instance of a term in a document in our Term Frequence HashMap
+        /// </summary>
+        /// <param name="term">Takes in the term that we want to update</param>
         public void UpdateTermFrequencyForDoc(string term)
         {
 
@@ -131,6 +145,9 @@ namespace Search.Index
 
         }
 
+        /// <summary>
+        /// Applies the mathematical rule that we are using to calculate the document weight
+        /// </summary>
         public void CalculateDocWeight()
         {
             double temp = 0;
@@ -142,12 +159,12 @@ namespace Search.Index
             //clear frequency map for next iteration of document
             termFrequency.Clear();
         }
-        public Posting GetLastPostingItem(string term)
-        {
-            return hashMap[term].Last();
-        }
-
-
+       
+      
+        /// <summary>
+        /// Gets all the document weights saved in memory
+        /// </summary>
+        /// <returns></returns>
         public IList<double> GetAllDocWeights()
         {
             return calculatedDocWeights;
