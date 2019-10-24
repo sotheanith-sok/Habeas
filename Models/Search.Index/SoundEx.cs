@@ -6,7 +6,7 @@ using System;
 
 namespace Search.Index
 {
-    public class SoundExIndex
+    public class SoundEx
     {
 
         public Dictionary<string, List<int>> SoundMap { get; }
@@ -14,7 +14,7 @@ namespace Search.Index
         /// <summary>
         /// Constructs SoundExIndex with an empty soundMap
         /// </summary>
-        public SoundExIndex()
+        public SoundEx()
         {
             SoundMap = new Dictionary<string, List<int>>();
         }
@@ -198,6 +198,5 @@ namespace Search.Index
             soundexVocab.Sort();
             return soundexVocab;
         }
-
     }
 }

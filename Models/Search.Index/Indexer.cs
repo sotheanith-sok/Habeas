@@ -11,7 +11,8 @@ namespace Search.Index
     {
 
         public static string kGramPath = "./";
-        public static SoundExIndex soundEx = null;
+        public static SoundEx soundEx = null;
+        
 
         /// <summary>
         /// Constructs an index from a corpus of documents
@@ -22,7 +23,7 @@ namespace Search.Index
             //Time how long it takes to index the corpus
             Stopwatch elapsedTime = new Stopwatch();
             elapsedTime.Start();
-            soundEx = new SoundExIndex();
+            soundEx = new SoundEx();
             // Constuct a positional-inverted-index once 
             PositionalInvertedIndex index = new PositionalInvertedIndex();
             Console.WriteLine($"Indexing {corpus.CorpusSize} documents in the corpus...");

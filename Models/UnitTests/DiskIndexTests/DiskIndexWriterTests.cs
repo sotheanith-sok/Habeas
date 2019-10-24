@@ -2,16 +2,15 @@ using System.IO;
 using Xunit;
 using FluentAssertions;
 using Search.Index;
-using System.Collections.Generic;
 using Search.Document;
 
-namespace UnitTests
+namespace UnitTests.OnDiskIndexTests
 {
     [Collection("FileIORelated")]
     public class DiskIndexWriterTests
     {
-        string corpusDir = "../../../Models/UnitTests/testCorpus0";
-        string dirPath = "../../../Models/UnitTests/testCorpus0/index/";
+        string corpusDir = "../../../Models/UnitTests/testCorpus/testCorpusBasic";
+        string dirPath = "../../../Models/UnitTests/testCorpus/testCorpusBasic/index/";
 
         [Fact]
         public void BinaryWriterTest()
@@ -104,7 +103,7 @@ namespace UnitTests
             File.Exists(corpusDir+"/index/vocabTable.bin").Should().BeTrue();
             // int expectedVocabLength = 0; //??
             // File.ReadAllBytes(corpusDir+"/index/vocab.bin").Length.Should().Be(expectedVocabLength);
-            int expectedPostingsLength = (34 + 75) * 4;   // (# of docIDs + # of termFrequencies + # of positions) * byteSize
+            int expectedPostingsLength = (13 + 34 + 75) * 4;   // (# of documentFrequencies + # of docIDs + # of termFrequencies + # of positions) * byteSize
             File.ReadAllBytes(corpusDir+"/index/postings.bin").Length.Should().Be(expectedPostingsLength);
             int expectedVocabTableLength = 13 * 2 * 8;
             File.ReadAllBytes(corpusDir+"/index/vocabTable.bin").Length.Should().Be(expectedVocabTableLength);

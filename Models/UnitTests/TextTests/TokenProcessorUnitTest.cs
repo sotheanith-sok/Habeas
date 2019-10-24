@@ -1,9 +1,8 @@
-using System;
 using Xunit;
 using Search.Text;
 using System.Collections.Generic;
 
-namespace UnitTests
+namespace UnitTests.TextTests
 {
     public class TokenProcessorsUnitTest
     {
