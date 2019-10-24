@@ -3,6 +3,7 @@ using System.IO;
 using Search.Document;
 using System.Text;
 using System;
+using System.Linq;
 namespace Search.Index
 {
     public class DiskKGramReader
@@ -10,43 +11,38 @@ namespace Search.Index
         public List<string> getCandidates(string kGram, string path)
         {
             path = Path.GetFullPath(path);
-            string kGramBin = Path.Join(path, "kGram.bin");
+
             string kGramTableBin = Path.Join(path, "kGramTable.bin");
             string candidatesBin = Path.Join(path, "candidates.bin");
 
-            using (BinaryReader candidatesBinReader = new BinaryReader(File.Open(candidatesBin, FileMode.Open)))
-            using (BinaryReader kGramBinReader = new BinaryReader(File.Open(kGramBin, FileMode.Open)))
-            using (BinaryReader kGramTableBinReader = new BinaryReader(File.Open(kGramTableBin, FileMode.Open)))
+
+            using (BinaryReader binaryReader = new BinaryReader(File.Open(kGramTableBin, FileMode.Open)))
             {
-                long previousKey = 0;
-                long previousValue = 0;
-                long currentKey = -1;
-                long currentValue = -1;
-
-                while (kGramTableBinReader.BaseStream.Position != kGramTableBinReader.BaseStream.Length)
-                {
-                    Console.WriteLine("Position: " + kGramTableBinReader.BaseStream.Position);
-                    Console.WriteLine("Length: " + kGramTableBinReader.BaseStream.Length);
-                    if (currentKey == -1)
-                    {
-                        currentKey = kGramTableBinReader.ReadInt64();
-                        currentValue = kGramTableBinReader.ReadInt64();
-                    }
-                    else
-                    {
-                        previousKey = currentKey;
-                        previousValue = currentValue;
-                        currentKey = kGramTableBinReader.ReadInt64();
-                        currentValue = kGramTableBinReader.ReadInt64();
-                    }
-                    Console.WriteLine(previousKey + ":" + currentKey);
-                }
-
+                binarySearchCandidates(binaryReader.ReadBytes((int)(binaryReader.BaseStream.Length)), kGram);
             }
-
             return new List<string>();
         }
 
+
+        private float binarySearchCandidates(byte[] v, string kGram, string path)
+        {
+
+            if (v.Length > 16)
+            {
+                int chunck = v.Length / 16;
+                chunck = chunck / 2;
+
+                byte[] currentChunck = v.Skip(chunck * 16).Take(8).ToArray();
+
+
+
+
+
+
+                binarySearchCandidates(v.Take((chunck) * 16).ToArray(), kGram, path);
+                binarySearchCandidates(v.Skip((chunck + 1) * 16).ToArray(), kGram, path);
+            }
+        }
         public List<string> getPossibleKGram(string kGram, string path)
         {
             path = Path.GetFullPath(path);

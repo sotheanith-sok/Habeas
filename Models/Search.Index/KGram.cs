@@ -12,10 +12,10 @@ namespace Search.Index
     public class KGram
     {
         //Map uses to store data internally
-        private Dictionary<string, List<string>> map;
+        private SortedDictionary<string, List<string>> map;
 
         //Map uses to manp k-gram less than size to k-gram
-        private Dictionary<string, List<string>> miniMap;
+        private SortedDictionary<string, List<string>> miniMap;
 
         //size of each k-gram terms.
         public int size { get; }
@@ -30,9 +30,9 @@ namespace Search.Index
         /// <param name="size">Size of each k-gram term</param>
         public KGram(HashSet<string> vocabularies, string path, int size = 3)
         {
-            this.map = new Dictionary<string, List<string>>();
+            this.map = new SortedDictionary<string, List<string>>();
             this.size = size;
-            this.miniMap = new Dictionary<string, List<string>>();
+            this.miniMap = new SortedDictionary<string, List<string>>();
             this.path = path;
             buildKGram(vocabularies);
         }
