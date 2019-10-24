@@ -3,12 +3,12 @@ using Search.Document;
 using Search.Index;
 using FluentAssertions;
 
-namespace UnitTests
+namespace UnitTests.IndexTests
 {
     [Collection("FileIORelated")]
     public class SoundexTests
     {
-        string directory = "../../../Models/UnitTests/testCorpus";
+        string directory = "../../../Models/UnitTests/testCorpus/testCorpusWithAuthor";
 
         [Fact]
         public void SoundexIndexTest()
