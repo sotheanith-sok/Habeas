@@ -35,12 +35,13 @@ namespace Search.Index
         }
 
         /// <summary>
-        /// Gets Postings of a given term from index.
+        /// Gets Postings of a given term from in-memory index.
         /// </summary>
         /// <param name="term">a processed string</param>
         /// <return>a posting list</return>
         public IList<Posting> GetPostings(string term)
         {
+            //TODO: change to retrieve postings without regard to position for ranked retrieval?
             if (hashMap.ContainsKey(term))
             {
                 return hashMap[term];
@@ -52,19 +53,41 @@ namespace Search.Index
         }
 
         /// <summary>
-        /// Gets Postings of a given list of terms from index.
+        /// Gets Postings of a given list of terms from in-memory index.
         /// This or-merge the all the results from the multiple terms
         /// </summary>
         /// <param name="terms">a list of processed strings</param>
         /// <return>a or-merged posting list</return>
         public IList<Posting> GetPostings(List<string> terms)
         {
+            //TODO: change to retrieve postings without regard to position for ranked retrieval?
             List<IList<Posting>> postingLists = new List<IList<Posting>>();
             foreach (string term in terms)
             {
                 postingLists.Add(GetPostings(term));
             }
             return Merge.OrMerge(postingLists);
+        }
+
+
+        /// <summary>
+        /// Gets Postings of a given term from in-memory index.
+        /// </summary>
+        /// <param name="terms">a list of processed strings</param>
+        public IList<Posting> GetPositionalPostings(string term)
+        {
+            return GetPostings(term);
+        }
+
+        /// <summary>
+        /// Gets Postings of a given list of terms from in-memory index.
+        /// This or-merge the all the results from the multiple terms
+        /// </summary>
+        /// <param name="terms">a list of processed strings</param>
+        /// <return>a or-merged posting list</return>
+        public IList<Posting> GetPositionalPostings(List<string> terms)
+        {
+            return GetPostings(terms);
         }
 
         /// <summary>

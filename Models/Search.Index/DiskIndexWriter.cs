@@ -52,17 +52,21 @@ namespace Search.Index
                     startBytes.Add(writer.BaseStream.Length);       //add start byte positions of each posting list
                     IList<Posting> postings = index.GetPostings(term);
 
+                    //1. Write document frequency (# of postings)
+                    writer.Write(postings.Count);
+
                     int previousDocID = 0;
                     foreach (Posting p in postings)
                     {
-                        //Write docID using gap
+                        //2. Write docID using gap
                         writer.Write(p.DocumentId - previousDocID); //4byte integer per docID
 
-                        //Write term frequency (# of positions)
                         List<int> positions = p.Positions;
+
+                        //3. Write term frequency (# of positions)
                         writer.Write(positions.Count);              //4byte integer per term frequency
 
-                        //Write positions using gap
+                        //4. Write positions using gap
                         int previousPos = 0;
                         foreach (int pos in positions)
                         {

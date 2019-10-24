@@ -2,9 +2,8 @@ using Xunit;
 using FluentAssertions;
 using Search.Query;
 using System.Collections.Generic;
-using Search.Index;
 
-namespace UnitTests
+namespace UnitTests.QueryTests
 {
     /// <summary>
     /// Tests if BooleanQueryParser create appropriate query components from a query string

@@ -7,31 +7,21 @@ using System.Runtime.InteropServices;
 using System;
 using FluentAssertions;
 
-namespace UnitTests
+namespace UnitTests.IndexTests
 {
     [Collection("FileIORelated")]
     public class PositionalIndexTests
     {
-        string directory = "../../../Models/UnitTests/testCorpus0";
+        string directory = "../../../Models/UnitTests/testCorpus/testCorpusBasic";
 
         [Fact]
         public void PostionalIndexTest_OnePosition()
         {
             //Arrange
             string term = "sun";
-            IList<Posting> expected;
-            System.Console.WriteLine("PositionalIndexTest_OnePosition: ");
-            System.Console.Write($"Set expected postings of \'{term}\'");
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                System.Console.WriteLine(" for MacOSX");
-                expected = new List<Posting> { new Posting(1, new List<int> { 3 }) };
-            }
-            else
-            {
-                System.Console.WriteLine(" for Windows and other OSs");
-                expected = new List<Posting> { new Posting(3, new List<int> { 3 }) };
-            }
+            // System.Console.WriteLine("PositionalIndexTest_OnePosition: ");
+            // System.Console.Write($"Set expected postings of \'{term}\'");
+            IList<Posting> expected = UnitTest.GeneratePostings("(3,[3])");
 
             //Act
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
@@ -48,9 +38,10 @@ namespace UnitTests
         {
             //Arrange
             string term = "hello";
+            // System.Console.WriteLine("PositionalIndexTest_MultiplePositions: ");
+            // System.Console.Write($"Set expected postings of \'{term}\'");
             IList<Posting> expected;
-            System.Console.WriteLine("PositionalIndexTest_MultiplePositions: ");
-            System.Console.Write($"Set expected postings of \'{term}\'");
+            // expected = UnitTest.GeneratePostings("(0,[0,1]), (2,[0,2,3])");  //this not work for macOS yet
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 System.Console.WriteLine(" for MacOSX");
