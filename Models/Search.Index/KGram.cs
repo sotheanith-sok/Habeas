@@ -107,15 +107,15 @@ namespace Search.Index
         /// <returns>A list of vocabularies</returns>
         public List<string> getVocabularies(string kGram)
         {
-            new DiskKGramReader().getCandidates(kGram, this.path);
+            DiskKGramReader diskKGramReader = new DiskKGramReader();
             //If requested k-gram's length is less than this k-gram size, use mini kgram to find the right k-gram 
             if (kGram.Length < this.size)
             {
                 HashSet<string> candidates = new HashSet<string>();
-                List<string> possibleKGram = (this.miniMap.ContainsKey(kGram)) ? this.miniMap[kGram] : new List<string>();
+                List<string> possibleKGram = diskKGramReader.GetPossibleKGram(kGram, this.path);
                 foreach (string k in possibleKGram)
                 {
-                    foreach (string v in this.map[k])
+                    foreach (string v in diskKGramReader.GetCandidates(k, this.path))
                     {
                         candidates.Add(v);
                     }
@@ -124,8 +124,7 @@ namespace Search.Index
             }
             else
             {
-                return (this.map.ContainsKey(kGram)) ? this.map[kGram] : new List<string>();
-
+                return diskKGramReader.GetCandidates(kGram, this.path);
             }
 
         }
