@@ -42,7 +42,7 @@ namespace Search.Index
                 
                 diskIndexWriter.WriteIndex(inMemoryIndex, path);
                 //TODO: hide index better
-                index = new DiskPositionalIndex(path+"/index/");
+                index = new DiskPositionalIndex(path+"\\index\\");
             }
         }
 
