@@ -49,7 +49,7 @@ namespace Search.Index
                 foreach(string term in vocabulary)
                 {
                     startBytes.Add(writer.BaseStream.Length);       //add start byte positions of each posting list
-                    IList<Posting> postings = index.GetPostings(term);
+                    IList<Posting> postings = index.GetPositionalPostings(term);
 
                     //1. Write document frequency (# of postings)
                     writer.Write(postings.Count);
