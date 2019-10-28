@@ -20,11 +20,13 @@ namespace Search.Index
         {
             Console.WriteLine($"\nWriting the index ({index.GetVocabulary().Count} terms) in '{dirPath}'");
 
-            Directory.CreateDirectory(dirPath);
+            String dirIndexPath = dirPath+"\\index\\";
 
-            List<long> vocabStartBytes = WriteVocab(index, dirPath);
-            List<long> postingsStartBytes = WritePostings(index, dirPath);
-            WriteVocabTable(vocabStartBytes, postingsStartBytes, dirPath);
+            Directory.CreateDirectory(dirIndexPath);
+
+            List<long> vocabStartBytes = WriteVocab(index, dirIndexPath);
+            List<long> postingsStartBytes = WritePostings(index, dirIndexPath);
+            WriteVocabTable(vocabStartBytes, postingsStartBytes, dirIndexPath);
 
             Console.WriteLine("Finished writing the index on disk\n");
 

@@ -22,15 +22,26 @@ namespace Search.Index
         /// <param name="dirPath">the absolute path to the folder where binary files are saved</param>
         public DiskPositionalIndex(string dirPath)
         {
-            try {
+            try
+            {
                 this.dirPath = dirPath;
+                Console.WriteLine("Hello- " + dirPath);
+                if (!Directory.Exists(dirPath))
+                {
+                    Console.WriteLine("Directory does not exist");
+                }
                 vocabReader = new BinaryReader(File.OpenRead(dirPath + "vocab.bin"));
+                Console.WriteLine("Opening Posting Reader");
                 postingReader = new BinaryReader(File.OpenRead(dirPath + "postings.bin"));
+                Console.WriteLine("Reading VocabTable");
                 vocabTable = ReadVocabTable(dirPath);
+                Console.WriteLine("Opening docWeightReader");
                 docWeightsReader = new BinaryReader(File.OpenRead(dirPath + "docWeights.bin"));
                 Console.WriteLine("Opened 3 binary files.");
             }
-            catch (FileNotFoundException ex) {
+            catch (FileNotFoundException ex)
+            {
+                Console.WriteLine("we have an error");
                 Console.WriteLine(ex.ToString());
             }
         }
@@ -54,7 +65,8 @@ namespace Search.Index
         public IList<Posting> GetPostings(List<string> terms)
         {
             var postingLists = new List<IList<Posting>>();
-            foreach (string term in terms) {
+            foreach (string term in terms)
+            {
                 postingLists.Add(GetPostings(term));
             }
             return Merge.OrMerge(postingLists);
@@ -79,7 +91,8 @@ namespace Search.Index
         public IList<Posting> GetPositionalPostings(List<string> terms)
         {
             var postingLists = new List<IList<Posting>>();
-            foreach (string term in terms) {
+            foreach (string term in terms)
+            {
                 postingLists.Add(GetPositionalPostings(term));
             }
             return Merge.OrMerge(postingLists);
@@ -114,25 +127,30 @@ namespace Search.Index
             int j = vocabTable.Length / 2 - 1;
             while (i <= j)
             {
-                try {
+                try
+                {
                     int m = (i + j) / 2;
                     long termStartByte = vocabTable[m * 2];
                     vocabReader.BaseStream.Seek(termStartByte, SeekOrigin.Begin);
                     string termFromFile = vocabReader.ReadString();
 
                     int compareValue = term.CompareTo(termFromFile);
-                    if(compareValue == 0) {
+                    if (compareValue == 0)
+                    {
                         // found it!
                         return vocabTable[m * 2 + 1];
                     }
-                    else if (compareValue < 0) {
+                    else if (compareValue < 0)
+                    {
                         j = m - 1;
                     }
-                    else {
+                    else
+                    {
                         i = m + 1;
                     }
                 }
-                catch (IOException ex) {
+                catch (IOException ex)
+                {
                     Console.WriteLine(ex.ToString());
                 }
             }
@@ -146,10 +164,11 @@ namespace Search.Index
         /// <returns>the long array of vocabTable</returns>
         private static long[] ReadVocabTable(string dirPath)
         {
-            try {
+            try
+            {
                 var vocabTable = new List<long>();
                 var reader = new BinaryReader(File.OpenRead(dirPath + "vocabTable.bin"));
-                while(reader.BaseStream.Position != reader.BaseStream.Length)
+                while (reader.BaseStream.Position != reader.BaseStream.Length)
                 {
                     vocabTable.Add(reader.ReadInt64()); //termStart
                     vocabTable.Add(reader.ReadInt64()); //postingStart
@@ -157,10 +176,12 @@ namespace Search.Index
                 reader.Close();
                 return vocabTable.ToArray();
             }
-            catch (FileNotFoundException ex) {
+            catch (FileNotFoundException ex)
+            {
                 Console.WriteLine(ex.ToString());
             }
-            catch (IOException ex) {
+            catch (IOException ex)
+            {
                 Console.WriteLine(ex.ToString());
             }
             return null;
@@ -176,7 +197,7 @@ namespace Search.Index
             return vocabTable.Length / 2;
         }
 
-        
+
         /// <summary>
         /// Read postings without positions for a term from postings.bin
         /// </summary>
@@ -208,22 +229,23 @@ namespace Search.Index
                 //3. Read term frequency
                 int termFrequency = postingReader.ReadInt32();
 
-                if(wantPositions)
+                if (wantPositions)
                 {
                     //4. Read positions using gap
                     int prevPos = 0;
-                    for(int j=0; j < termFrequency; j++)    //for each position
+                    for (int j = 0; j < termFrequency; j++)    //for each position
                     {
                         int pos = prevPos + postingReader.ReadInt32();
                         positions.Add(pos);
                         prevPos = pos;  //update prevPos
                     }
                 }
-                else {
+                else
+                {
                     //Skip the positions
-                    postingReader.BaseStream.Seek(termFrequency*sizeof(int), SeekOrigin.Current);
+                    postingReader.BaseStream.Seek(termFrequency * sizeof(int), SeekOrigin.Current);
                 }
-                
+
                 //Insert a posting to the posting list
                 postings.Add(new Posting(docID, positions));
 
@@ -239,15 +261,15 @@ namespace Search.Index
         /// </summary>
         /// <param name="docId">the docId of the document to get weight of</param>
         /// <returns>the document weight</returns>
-        private double GetDocumentWeight(int docId) 
+        private double GetDocumentWeight(int docId)
         {
             int startByte = docId * 8;
-            
+
             //Jump to the starting byte
             docWeightsReader.BaseStream.Seek(startByte, SeekOrigin.Begin);
             //Read a document weight and convert it
             double docWeight = BitConverter.Int64BitsToDouble(docWeightsReader.ReadInt64());
-            
+
             return docWeight;
         }
 
