@@ -253,6 +253,28 @@ namespace Search.Index
 
 
         /// <summary>
+        /// Retrives all the the document weights from the DocWeights.bin file.
+        /// </summary>
+        /// <returns>A list of the document weights </returns>
+        public  IList<double> GetAllDocWeights()
+        {
+            
+            IList<double> allDocWeights = new List<double>();
+            docWeightsReader.BaseStream.Seek(0,SeekOrigin.Begin);
+
+            while(docWeightsReader.BaseStream.Position != docWeightsReader.BaseStream.Length)
+            {
+                double docWeight = BitConverter.Int64BitsToDouble(docWeightsReader.ReadInt64());
+                allDocWeights.Add(docWeight);
+
+            }
+
+            return allDocWeights;
+
+           
+
+        }
+        /// <summary>
         /// Dispose all binary readers
         /// </summary>
         public void Dispose()
