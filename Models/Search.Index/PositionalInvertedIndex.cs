@@ -19,7 +19,7 @@ namespace Search.Index
         //HashMap used to store termFrequency of current Document
         private readonly Dictionary<string, int> termFrequency;
 
-       
+
 
         private static List<double> calculatedDocWeights;
 
@@ -100,11 +100,11 @@ namespace Search.Index
             return vocabulary;
         }
 
-         /// <summary>
-       /// 
-       /// </summary>
-       /// <param name="term"></param>
-       /// <returns></returns>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="term"></param>
+        /// <returns></returns>
         public Posting GetLastPostingItem(string term)
         {
             return hashMap[term].Last();
@@ -182,8 +182,8 @@ namespace Search.Index
             //clear frequency map for next iteration of document
             termFrequency.Clear();
         }
-       
-      
+
+
         /// <summary>
         /// Gets all the document weights saved in memory
         /// </summary>
