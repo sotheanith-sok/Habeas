@@ -11,7 +11,6 @@ namespace Search.Index
     /// </summary>
     public class DiskKGramReader
     {
-
         /// <summary>
         /// Get possible candidates for a given KGram
         /// </summary>
