@@ -20,16 +20,19 @@ namespace Search.Index
         /// <param name="path">the selected directory path</param>
         public void GetIndex(string path)
         {
-            string binFiles = path+"\\index\\";
-           //if bin files exist, done
-           if(Directory.Exists(binFiles)){
-               Console.WriteLine("no need to remake the index");
-               return;
-           }
-           //else
-           else{
-               GenerateIndex(path);
-           }
+            string binFiles = path + "\\index\\";
+            //if bin files exist, done
+            if (Directory.Exists(binFiles))
+            {
+                index = new DiskPositionalIndex(binFiles);
+                corpus = DirectoryCorpus.LoadTextDirectory(path);
+                return;
+            }
+            //else
+            else
+            {
+                GenerateIndex(path);
+            }
         }
 
         /// <summary>
@@ -57,10 +60,10 @@ namespace Search.Index
                 //make an index for the corpus
                 PositionalInvertedIndex inMemoryIndex = Indexer.IndexCorpus(corpus);
                 DiskIndexWriter diskIndexWriter = new DiskIndexWriter();
-                
+
                 diskIndexWriter.WriteIndex(inMemoryIndex, path);
                 //TODO: hide index better
-                index = new DiskPositionalIndex(path+"\\index\\");
+                index = new DiskPositionalIndex(path + "\\index\\");
             }
         }
 

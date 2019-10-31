@@ -35,8 +35,8 @@ namespace Search.Index
                 postingReader = new BinaryReader(File.OpenRead(dirPath + "postings.bin"));
                 Console.WriteLine("Reading VocabTable");
                 vocabTable = ReadVocabTable(dirPath);
-                Console.WriteLine("Opening docWeightReader");
-                docWeightsReader = new BinaryReader(File.OpenRead(dirPath + "docWeights.bin"));
+                // Console.WriteLine("Opening docWeightReader");
+                // docWeightsReader = new BinaryReader(File.OpenRead(dirPath + "docWeights.bin"));
                 Console.WriteLine("Opened 3 binary files.");
             }
             catch (FileNotFoundException ex)
