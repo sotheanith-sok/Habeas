@@ -16,7 +16,7 @@ namespace UnitTests.QueryTests
         private static IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
         private IIndex index = Indexer.IndexCorpus(corpus);
         private ITokenProcessor processor = new StemmingTokenProcesor();    //wildcard should use its parent processor anyway
-        private KGram kGram = Indexer.kGram;
+        private KGram kGram = new KGram(Indexer.kGramPath);
 
         [Fact]
         public void WildCardLiteralTest_CircumfixWildcards()

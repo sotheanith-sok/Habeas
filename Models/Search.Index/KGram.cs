@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using Search.Text;
 using System;
 using System.Linq;
+using System.Collections.ObjectModel;
+using System.IO;
 namespace Search.Index
 {
     /// <summary>
@@ -9,37 +11,41 @@ namespace Search.Index
     /// </summary>
     public class KGram
     {
-        //Map uses to store data internally
-        private Dictionary<string, List<string>> map;
-
-        //Map uses to manp k-gram less than size to k-gram
-        private Dictionary<string, List<string>> miniMap;
-
         //size of each k-gram terms.
         public int size { get; }
+
+        //Path to kGrame
+        private string path;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="vocabularies">List of unique vocabularies.false Non stem.</param>
         /// <param name="size">Size of each k-gram term</param>
-        public KGram(HashSet<string> vocabularies, int size = 3)
+        public KGram(string path, int size = 3)
         {
-            this.map = new Dictionary<string, List<string>>();
             this.size = size;
-            this.miniMap = new Dictionary<string, List<string>>();
-            buildKGram(vocabularies);
+            this.path = path;
         }
 
         /// <summary>
-        /// Construct the k-grams map
+        /// Build KGram onto disk
         /// </summary>
         /// <param name="vocabularies">List of unique vocabularies</param>
-        private void buildKGram(HashSet<string> vocabularies)
+        public KGram buildKGram(HashSet<string> vocabularies)
         {
-            Console.WriteLine("Generating K-Gram...");
+            Console.WriteLine("Start KGram generating process...");
+            Console.WriteLine("Vocbularies' size: " + vocabularies.Count);
+            Console.WriteLine("KGram size: " + this.size);
 
+            //Map uses to store data internally
+            SortedDictionary<string, List<string>> map = new SortedDictionary<string, List<string>>();
+
+            //Map uses to manp k-gram less than size to k-gram
+            SortedDictionary<string, List<string>> miniMap = new SortedDictionary<string, List<string>>();
             //K-gram vocabularies and add them to dictionary
+
+            Console.WriteLine("Building full size KGrams....");
             foreach (string vocab in vocabularies)
             {
                 //Split the vocabulary
@@ -48,19 +54,20 @@ namespace Search.Index
                 //Add k-grams to dictionary
                 foreach (string kGram in kGrams)
                 {
-                    if (this.map.ContainsKey(kGram))
+                    if (map.ContainsKey(kGram))
                     {
-                        this.map[kGram].Add(vocab);
+                        map[kGram].Add(vocab);
                     }
                     else
                     {
-                        this.map.Add(kGram, new List<string> { vocab });
+                        map.Add(kGram, new List<string> { vocab });
                     }
                 }
             }
 
             //Build lesser k-gram to handle wildcard query lesser than size
-            foreach (string kGram in this.map.Keys)
+            Console.WriteLine("Building lesser size KGrams....");
+            foreach (string kGram in map.Keys)
             {
                 for (int k = 0; k < this.size; k++)
                 {
@@ -69,13 +76,13 @@ namespace Search.Index
                     {
                         if (!string.IsNullOrWhiteSpace(miniKGram) && miniKGram != "$")
                         {
-                            if (this.miniMap.ContainsKey(miniKGram))
+                            if (miniMap.ContainsKey(miniKGram))
                             {
-                                this.miniMap[miniKGram].Add(kGram);
+                                miniMap[miniKGram].Add(kGram);
                             }
                             else
                             {
-                                this.miniMap.Add(miniKGram, new List<string> { kGram });
+                                miniMap.Add(miniKGram, new List<string> { kGram });
                             }
                         }
                     }
@@ -83,26 +90,34 @@ namespace Search.Index
             }
 
             //Print Results
-            Console.WriteLine("K-Gram: " + this.map.Keys.Count);
-            Console.WriteLine("Mini K-Gram: " + this.miniMap.Keys.Count);
+            Console.WriteLine("KGram's size: " + map.Keys.Count);
+            Console.WriteLine("Lesser KGram's size: " + miniMap.Keys.Count);
 
+            //WriteKGramToDisk
+            Console.WriteLine("Write K-Gram to disk...");
+            Console.WriteLine("Path:" + Path.GetFullPath(this.path));
+            DiskKGramWriter kGramWriter = new DiskKGramWriter();
+            kGramWriter.WriteKGram(map, miniMap, this.path);
+            Console.WriteLine("Complete KGram generating process");
+            return this;
         }
 
         /// <summary>
-        /// Get a list of vocabularies for a given k-gram
+        /// Get a list of vocabularies for a given kGram
         /// </summary>
         /// <param name="kGram">K-gram to search for</param>
         /// <returns>A list of vocabularies</returns>
         public List<string> getVocabularies(string kGram)
         {
+            DiskKGramReader diskKGramReader = new DiskKGramReader();
             //If requested k-gram's length is less than this k-gram size, use mini kgram to find the right k-gram 
             if (kGram.Length < this.size)
             {
                 HashSet<string> candidates = new HashSet<string>();
-                List<string> possibleKGram = (this.miniMap.ContainsKey(kGram)) ? this.miniMap[kGram] : new List<string>();
+                List<string> possibleKGram = diskKGramReader.GetPossibleKGram(kGram, this.path);
                 foreach (string k in possibleKGram)
                 {
-                    foreach (string v in this.map[k])
+                    foreach (string v in diskKGramReader.GetCandidates(k, this.path))
                     {
                         candidates.Add(v);
                     }
@@ -111,14 +126,14 @@ namespace Search.Index
             }
             else
             {
-                return (this.map.ContainsKey(kGram)) ? this.map[kGram] : new List<string>();
-
+                return diskKGramReader.GetCandidates(kGram, this.path);
             }
+
         }
 
 
         /// <summary>
-        /// Split k-gram
+        /// Split kGram
         /// </summary>
         /// <param name="term">term to be split</param>
         /// <returns> list of kgram</returns>
@@ -141,6 +156,7 @@ namespace Search.Index
             }
 
         }
+
 
     }
 }
