@@ -15,6 +15,24 @@ namespace Search.Index
         private static IDocumentCorpus corpus;
 
         /// <summary>
+        /// Gets a corpus
+        /// </summary>
+        /// <param name="path">the selected directory path</param>
+        public void GetIndex(string path)
+        {
+            string binFiles = path+"\\index\\";
+           //if bin files exist, done
+           if(Directory.Exists(binFiles)){
+               Console.WriteLine("no need to remake the index");
+               return;
+           }
+           //else
+           else{
+               GenerateIndex(path);
+           }
+        }
+
+        /// <summary>
         /// Indexes the corpus
         /// </summary>
         /// <param name="path">the selected directory path</param>
