@@ -349,6 +349,10 @@ namespace Search.Index
 
             double tempDocWeight;
             double finalRank;
+            int documentID;
+
+
+            MaxPriorityQueue priorityQueue = new MaxPriorityQueue();
             foreach (KeyValuePair<int, double> candidate in Accumulator)
             {
                 //get document weight by id from docWeights.bin file
@@ -358,7 +362,18 @@ namespace Search.Index
                 finalRank = candidate.Value / tempDocWeight;
 
                 //TO-DO implement binary heap priority queue
+                //get docID
+                documentID = candidate.Key;
+
+                //add to list to perform priority queue on 
+                priorityQueue.MAXHEAPINSERT(finalRank, documentID);
             }
+
+
+            priorityQueue.RetrieveTopTen();
+
+
+
         }
 
         public void Dispose()

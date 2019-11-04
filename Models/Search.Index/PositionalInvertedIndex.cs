@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Search.Query;
 using System;
+using System.IO;
 
 namespace Search.Index
 {
