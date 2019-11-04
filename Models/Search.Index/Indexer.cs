@@ -13,6 +13,9 @@ namespace Search.Index
         public static string path = "./";
 
 
+
+
+
         /// <summary>
         /// Constructs an index from a corpus of documents
         /// </summary>
@@ -60,6 +63,11 @@ namespace Search.Index
                         unstemmedVocabulary.Add(term);
                     }
                 }
+
+                //calculate L_{d} for the document and store it index so that we can write it to disk later
+                index.CalculateDocWeight();
+
+                //Add author to SoundEx Index
                 new SoundEx(Indexer.path).AddDocIdByAuthor(doc.Author, doc.DocumentId, soundEx);
                 stream.Dispose();
 
