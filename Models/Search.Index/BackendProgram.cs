@@ -48,7 +48,7 @@ namespace Search.Index
         public List<string> soundexTerm(string name)
         {
             //get a list of postings given the name
-            IList<Posting> postings = Indexer.soundEx.GetPostings(name);
+            IList<Posting> postings = new SoundEx(Indexer.path).GetPostings(name);
             //list of strings to return
             List<String> results = new List<string>();
             //if the query returns any results

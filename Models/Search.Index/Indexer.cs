@@ -10,9 +10,8 @@ namespace Search.Index
     public class Indexer
     {
 
-        public static string kGramPath = "./";
-        public static SoundEx soundEx = null;
-        
+        public static string path = "./";
+
 
         /// <summary>
         /// Constructs an index from a corpus of documents
@@ -23,7 +22,6 @@ namespace Search.Index
             //Time how long it takes to index the corpus
             Stopwatch elapsedTime = new Stopwatch();
             elapsedTime.Start();
-            soundEx = new SoundEx();
             // Constuct a positional-inverted-index once 
             PositionalInvertedIndex index = new PositionalInvertedIndex();
             Console.WriteLine($"Indexing {corpus.CorpusSize} documents in the corpus...");
@@ -32,6 +30,7 @@ namespace Search.Index
 
             HashSet<string> unstemmedVocabulary = new HashSet<string>();
 
+            SortedDictionary<string, List<int>> soundEx = new SortedDictionary<string, List<int>>();
             // Index the document
             foreach (IDocument doc in corpus.GetDocuments())
             {
@@ -61,11 +60,11 @@ namespace Search.Index
                         unstemmedVocabulary.Add(term);
                     }
                 }
-                soundEx.AddDocIdByAuthor(doc.Author, doc.DocumentId);
+                new SoundEx(Indexer.path).AddDocIdByAuthor(doc.Author, doc.DocumentId, soundEx);
                 stream.Dispose();
 
             }
-            new KGram(Indexer.kGramPath).buildKGram(unstemmedVocabulary);
+            new KGram(Indexer.path).buildKGram(unstemmedVocabulary);
 
             elapsedTime.Stop();
             Console.WriteLine("Elapsed " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
