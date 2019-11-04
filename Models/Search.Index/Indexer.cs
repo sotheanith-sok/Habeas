@@ -73,6 +73,10 @@ namespace Search.Index
                 stream.Dispose();
 
             }
+
+          
+
+
             new KGram(Indexer.kGramPath).buildKGram(unstemmedVocabulary);
 
             elapsedTime.Stop();

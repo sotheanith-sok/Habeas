@@ -20,7 +20,6 @@ namespace Search.Index
         private readonly Dictionary<string, int> termFrequency;
 
 
-
         private static List<double> calculatedDocWeights;
 
 
@@ -192,6 +191,9 @@ namespace Search.Index
         {
             return calculatedDocWeights;
         }
+
+
+       
     }
 
 }

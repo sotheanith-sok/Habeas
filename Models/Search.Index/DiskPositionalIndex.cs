@@ -16,6 +16,10 @@ namespace Search.Index
         private long[] vocabTable;  // [t1Start, p1Start, t2Start, p2Start, ...]
         private BinaryReader docWeightsReader;
 
+        private Dictionary<int, double> Accumulator; //stores the document id with its corresponding rank  [docId -> A_{docID}]
+
+        private List<int> HighestRankDocs; // stores the top 10 ranking documents using heap list
+
         /// <summary>
         /// Opens an on-disk positional inverted index that was constructed in the given path
         /// </summary>
@@ -288,6 +292,75 @@ namespace Search.Index
         /// <summary>
         /// Dispose all binary readers
         /// </summary>
+
+
+
+        public void RankedDocuments(List<string> query, int corpusSize)
+        {
+
+            double query2TermWeight;
+            double doc2TermWeight;
+            double docAccumulator;
+
+            //caculate accumulated Value for each relevant document A_{d}
+            foreach (string term in query)
+            {
+                long startByte = BinarySearchVocabulary(term);
+
+                //0. Jump to the starting byte
+                postingReader.BaseStream.Seek(startByte, SeekOrigin.Begin);
+
+
+
+                //1. Read document frequency
+                int docFrequency = postingReader.ReadInt32();
+
+                query2TermWeight = Math.Log(1 + corpusSize / docFrequency);
+
+                int prevDocID = 0;
+                for (int i = 0; i < docFrequency; i++)         //for each posting
+                {
+                    //2. Read documentID using gap
+                    int docID = prevDocID + postingReader.ReadInt32();
+
+                    //3. Read term frequency
+                    int termFrequency = postingReader.ReadInt32();
+
+                    doc2TermWeight = 1 + Math.Log(termFrequency);
+                    docAccumulator = query2TermWeight * doc2TermWeight;
+
+                    if (Accumulator.ContainsKey(docID))
+                    {
+                        Accumulator[docID] += docAccumulator;
+                    }
+                    else
+                    {
+                        Accumulator.Add(docID, docAccumulator);
+                    }
+
+                    //Skip the positions
+                    postingReader.BaseStream.Seek(termFrequency * sizeof(int), SeekOrigin.Current);
+
+                    prevDocID = docID;  //update prevDocID
+                }
+            }
+
+            //For every document in the Accumulator divid by L_{d}
+
+            double tempDocWeight;
+            double finalRank;
+            foreach (KeyValuePair<int, double> candidate in Accumulator)
+            {
+                //get document weight by id from docWeights.bin file
+                tempDocWeight = GetDocumentWeight(candidate.Key);
+
+                // divide Accumulated Value A_{d} by L_{d} 
+                finalRank = candidate.Value / tempDocWeight;
+
+                //TO-DO implement binary heap priority queue
+            }
+        }
+
         public void Dispose()
         {
             vocabReader?.Dispose();
