@@ -2,6 +2,8 @@ using Xunit;
 using Search.Document;
 using Search.Index;
 using FluentAssertions;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace UnitTests.IndexTests
 {
@@ -14,10 +16,9 @@ namespace UnitTests.IndexTests
         public void SoundexIndexTest()
         {
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
-            SoundEx soundIndex = new SoundEx();
+            SoundEx soundIndex = new SoundEx("./");
             soundIndex.BuildSoundexIndex(corpus);
-            var actual = soundIndex.SoundMap;
-            actual.Keys.Count.Should().Be(5);
+            soundIndex.GetCount().Should().Be(5);
         }
 
         [Theory]
@@ -27,7 +28,7 @@ namespace UnitTests.IndexTests
         [InlineData("sok", "S200")]
         public void ParseToSoundexTest(string name, string expected)
         {
-            var actual = new SoundEx().ParseToSoundex(name);
+            var actual = new SoundEx("./").ParseToSoundex(name);
             actual.Should().Be(expected);
         }
 
@@ -35,29 +36,37 @@ namespace UnitTests.IndexTests
         public void AddDocIDByAuthorTest()
         {
             //Arrange
-            SoundEx authorIndex = new SoundEx();
+            SoundEx authorIndex = new SoundEx("./");
+
+            SortedDictionary<string, List<int>> dictionary = new SortedDictionary<string, List<int>>();
+
             //Act
-            authorIndex.AddDocIdByAuthor("sella", 1);
-            authorIndex.AddDocIdByAuthor("selly", 2);
-            authorIndex.AddDocIdByAuthor("yashua", 3);
-            authorIndex.AddDocIdByAuthor("yoshi", 4);
-            authorIndex.AddDocIdByAuthor("yesh", 5);
+            authorIndex.AddDocIdByAuthor("sella", 1, dictionary);
+            authorIndex.AddDocIdByAuthor("selly", 2, dictionary);
+            authorIndex.AddDocIdByAuthor("yashua", 3, dictionary);
+            authorIndex.AddDocIdByAuthor("yoshi", 4, dictionary);
+            authorIndex.AddDocIdByAuthor("yesh", 5, dictionary);
+
+            authorIndex.BuildSoundexIndex(dictionary.ToDictionary(k => k.Key, k => k.Value));
             //Assert
             authorIndex.GetSoundexVocab().Should().HaveCount(2);
-            authorIndex.SoundMap["S440"].Should().HaveCount(2);
-            authorIndex.SoundMap["Y200"].Should().HaveCount(3);
+            authorIndex.Get("S440").Should().HaveCount(2);
+            authorIndex.Get("Y200").Should().HaveCount(3);
         }
 
         [Fact]
         public void AddDocIDByAuthorTest_InputExceptionWithSpace()
         {
             //Arrange
-            SoundEx authorIndex = new SoundEx();
+            SoundEx authorIndex = new SoundEx("./");
+
+            SortedDictionary<string, List<int>> dictionary = new SortedDictionary<string, List<int>>();
             //Act
-            authorIndex.AddDocIdByAuthor(" sella", 1);
-            authorIndex.AddDocIdByAuthor("sella  ", 2);
-            authorIndex.AddDocIdByAuthor("yashua  ovando", 2);
-            authorIndex.AddDocIdByAuthor(" yashua     ovando     ", 3);
+            authorIndex.AddDocIdByAuthor(" sella", 1, dictionary);
+            authorIndex.AddDocIdByAuthor("sella  ", 2, dictionary);
+            authorIndex.AddDocIdByAuthor("yashua  ovando", 2, dictionary);
+            authorIndex.AddDocIdByAuthor(" yashua     ovando     ", 3, dictionary);
+            authorIndex.BuildSoundexIndex(dictionary.ToDictionary(k =>k.Key, k => k.Value));
             //Assert
             authorIndex.GetSoundexVocab().Should().HaveCount(3);
         }
@@ -67,7 +76,7 @@ namespace UnitTests.IndexTests
         {
             //Arrange
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
-            SoundEx authorIndex = new SoundEx();
+            SoundEx authorIndex = new SoundEx("./");
             authorIndex.BuildSoundexIndex(corpus);
             //Act
             var actual = authorIndex.GetPostings("yash");
@@ -80,7 +89,7 @@ namespace UnitTests.IndexTests
         {
             //Arrange
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
-            SoundEx authorIndex = new SoundEx();
+            SoundEx authorIndex = new SoundEx("./");
             authorIndex.BuildSoundexIndex(corpus);
             //Act
             var actual = authorIndex.GetPostings("yashua ovando");
@@ -93,7 +102,7 @@ namespace UnitTests.IndexTests
         {
             //Arrange
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
-            SoundEx authorIndex = new SoundEx();
+            SoundEx authorIndex = new SoundEx("./");
             authorIndex.BuildSoundexIndex(corpus);
             //Act
             var result1 = authorIndex.GetPostings("bloclic");
@@ -107,7 +116,7 @@ namespace UnitTests.IndexTests
         {
             //Arrange
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
-            SoundEx authorIndex = new SoundEx();
+            SoundEx authorIndex = new SoundEx("./");
             authorIndex.BuildSoundexIndex(corpus);
             //Act
             var actual = authorIndex.GetPostings("hella");
