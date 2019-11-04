@@ -14,6 +14,9 @@ namespace Search.Index
         public static SoundEx soundEx = null;
         
 
+
+
+
         /// <summary>
         /// Constructs an index from a corpus of documents
         /// </summary>
@@ -61,6 +64,11 @@ namespace Search.Index
                         unstemmedVocabulary.Add(term);
                     }
                 }
+
+                //calculate L_{d} for the document and store it index so that we can write it to disk later
+                index.CalculateDocWeight();
+
+                //Add author to SoundEx Index
                 soundEx.AddDocIdByAuthor(doc.Author, doc.DocumentId);
                 stream.Dispose();
 

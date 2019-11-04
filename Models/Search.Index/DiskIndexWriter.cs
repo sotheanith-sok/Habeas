@@ -24,6 +24,7 @@ namespace Search.Index
 
             List<long> vocabStartBytes = WriteVocab(index, dirPath);
             List<long> postingsStartBytes = WritePostings(index, dirPath);
+            List<long> docWeightsStartBytes = WriteDocWeights(index, dirPath);
             WriteVocabTable(vocabStartBytes, postingsStartBytes, dirPath);
 
             Console.WriteLine("Finished writing the index on disk\n");
@@ -40,13 +41,13 @@ namespace Search.Index
         {
             string filePath = dirPath + "postings.bin";
             File.Create(filePath).Dispose();
-            
+
             List<long> startBytes = new List<long>();
             IReadOnlyList<string> vocabulary = index.GetVocabulary();
 
             using (BinaryWriter writer = new BinaryWriter(File.Open(filePath, FileMode.Append)))
             {
-                foreach(string term in vocabulary)
+                foreach (string term in vocabulary)
                 {
                     startBytes.Add(writer.BaseStream.Length);       //add start byte positions of each posting list
                     IList<Posting> postings = index.GetPostings(term);
@@ -55,7 +56,7 @@ namespace Search.Index
                     writer.Write(postings.Count);
 
                     int previousDocID = 0;
-                    foreach(Posting p in postings)
+                    foreach (Posting p in postings)
                     {
                         //2. Write docID using gap
                         writer.Write(p.DocumentId - previousDocID); //4byte integer per docID
@@ -67,7 +68,7 @@ namespace Search.Index
 
                         //4. Write positions using gap
                         int previousPos = 0;
-                        foreach(int pos in positions)
+                        foreach (int pos in positions)
                         {
                             writer.Write(pos - previousPos);        //4byte integer per position
                             previousPos = pos;
@@ -92,19 +93,20 @@ namespace Search.Index
         {
             string filePath = dirPath + "vocab.bin";
             File.Create(filePath).Dispose();
-            
+
             List<long> startBytes = new List<long>();
             IReadOnlyList<string> vocabulary = index.GetVocabulary();
 
             using (BinaryWriter writer = new BinaryWriter(File.Open(filePath, FileMode.Append)))
             {
-                foreach(string term in vocabulary) {
+                foreach (string term in vocabulary)
+                {
                     startBytes.Add(writer.BaseStream.Length);
                     writer.Write(term);
                 }
                 Console.WriteLine($"vocab.bin       {writer.BaseStream.Length} bytes");
             }
-            return startBytes; 
+            return startBytes;
 
         }
 
@@ -120,12 +122,13 @@ namespace Search.Index
             File.Create(filePath).Dispose();
             using (BinaryWriter writer = new BinaryWriter(File.Open(filePath, FileMode.Append)))
             {
-                if(termStartBytes.Count != postingsStartBytes.Count)
+                if (termStartBytes.Count != postingsStartBytes.Count)
                 {
                     Console.WriteLine("the size of termStartBytes and postingsStartBytes are not matching!");
                 }
 
-                for(int i=0; i<termStartBytes.Count; i++) {
+                for (int i = 0; i < termStartBytes.Count; i++)
+                {
                     writer.Write(termStartBytes[i]);        //each starting address with 8-byte integer (long)
                     writer.Write(postingsStartBytes[i]);    //each starting address with 8-byte integer (long)
                 }
@@ -134,6 +137,31 @@ namespace Search.Index
             }
 
         }
-        
+
+        ///<sumary>
+        /// Writes 8-byte values of document weights to docWeights.bin 
+        /// </summary>
+        /// <param name="index">the index to write</param>
+        /// <param name="dirPath">the absolute path to a directory where 'vocab.bin' be saved</param>
+        /// <returns>the list of starting byte positions of each term in vocab.bin</returns>
+        public List<long> WriteDocWeights(IIndex index, string dirPath)
+        {
+            string filePath = dirPath + "docWeights.bin";
+            File.Create(filePath).Dispose();
+            List<long> startBytes = new List<long>();
+
+            using (BinaryWriter writer = new BinaryWriter(File.Open(filePath, FileMode.Append)))
+            {
+
+                foreach (double weight in index.GetAllDocWeights())
+                {
+                    startBytes.Add(writer.BaseStream.Length);
+                    writer.Write(BitConverter.DoubleToInt64Bits(weight));
+                }
+            }
+
+            return startBytes;
+
+        }
     }
 }

@@ -134,6 +134,27 @@ namespace UnitTests.IndexTests
         //     // Assert.True(index.GetPosting("world",1).Positions.Contains(2));
         // }
 
+        [Fact]
+        public void DocumentWeightTest()
+        {
+            //Arrange
+            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
+            PositionalInvertedIndex index = Indexer.IndexCorpus(corpus);
+
+            //Act
+            var actual = index.GetAllDocWeights();
+
+            actual.Count.Should().Be(5);
+            Math.Round(actual[0], 9).Should().Be(2.620447934);
+            Math.Round(actual[1], 9).Should().Be(3.377006594);
+            Math.Round(actual[2], 9).Should().Be(2.898995264);
+            Math.Round(actual[3], 9).Should().Be(2.828427125);
+            Math.Round(actual[4], 9).Should().Be(3.377006594);
+
+
+        }
+
+
     }
 
 }
