@@ -37,18 +37,18 @@ namespace Habeas.Controllers
                     //the result is saved as a string[]
                     string[] files = await Electron.Dialog.ShowOpenDialogAsync(mainWindow, options);
                     //the result is then converted to a string
-                    string check = String.Join("", files);
+                    string path = String.Join("", files);
                     //if the path is valid and contains content...
-                    if (BEP.PathIsValid(check) && BEP.PathContainsContent(check))
+                    if (BEP.PathIsValid(path) && BEP.PathContainsContent(path))
                     {
                         //index it, it's the new corpus
-                        BEP.GenerateIndex(check);
+                        BEP.GetIndex(path);
                         //send message to the view
                         Electron.IpcMain.Send(mainWindow, "select-directory-reply", "true");
 
                     }
                     //otherwise, if the path does not exist...
-                    else if (!BEP.PathIsValid(check))
+                    else if (!BEP.PathIsValid(path))
                     {
                         //send a message to the view
                         Electron.IpcMain.Send(mainWindow, "select-directory-reply", "invalidPath");

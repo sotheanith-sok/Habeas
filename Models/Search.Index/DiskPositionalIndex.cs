@@ -25,14 +25,26 @@ namespace Search.Index
             try
             {
                 this.dirPath = dirPath;
+                Console.WriteLine("Hello- " + dirPath);
+                if (!Directory.Exists(dirPath))
+                {
+                    Console.WriteLine("Directory does not exist");
+                }
                 vocabReader = new BinaryReader(File.OpenRead(dirPath + "vocab.bin"));
+                Console.WriteLine("Opening Posting Reader");
                 postingReader = new BinaryReader(File.OpenRead(dirPath + "postings.bin"));
+                Console.WriteLine("Reading VocabTable");
                 vocabTable = ReadVocabTable(dirPath);
-                docWeightsReader = new BinaryReader(File.OpenRead(dirPath + "docWeights.bin"));
+                // Console.WriteLine("Opening docWeightReader");
+                // docWeightsReader = new BinaryReader(File.OpenRead(dirPath + "docWeights.bin"));
                 Console.WriteLine("Opened 3 binary files.");
             }
             catch (FileNotFoundException ex)
             {
+// <<<<<<< QueryingIndex
+//                 Console.WriteLine("we have an error");
+// =======
+// >>>>>>> master
                 Console.WriteLine(ex.ToString());
             }
         }

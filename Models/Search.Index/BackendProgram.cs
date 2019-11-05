@@ -11,14 +11,35 @@ namespace Search.Index
 {
     public class BackendProgram
     {
-        private static PositionalInvertedIndex index;
+        private static IIndex index; //currently set-up to use on-disk index
         private static IDocumentCorpus corpus;
+
+        /// <summary>
+        /// Gets a corpus
+        /// </summary>
+        /// <param name="path">the selected directory path</param>
+        public void GetIndex(string path)
+        {
+            string binFiles = path + "\\index\\";
+            //if bin files exist, done
+            if (Directory.Exists(binFiles))
+            {
+                index = new DiskPositionalIndex(binFiles);
+                corpus = DirectoryCorpus.LoadTextDirectory(path);
+                return;
+            }
+            //else
+            else
+            {
+                GenerateIndex(path);
+            }
+        }
 
         /// <summary>
         /// Indexes the corpus
         /// </summary>
-        /// <param name="check">the selected directory path</param>
-        public void GenerateIndex(string check)
+        /// <param name="path">the selected directory path</param>
+        public void GenerateIndex(string path)
         {
             //make a boolean query parser
             BooleanQueryParser parser = new BooleanQueryParser();
@@ -32,12 +53,17 @@ namespace Search.Index
             string projectVersion = appName.Version.Major.ToString()
                               + '.' + appName.Version.Minor.ToString();
             //make corpus out of the selected directory path
-            corpus = DirectoryCorpus.LoadTextDirectory(check);
+            corpus = DirectoryCorpus.LoadTextDirectory(path);
             //if the corpus contains content
             if (corpus != null && corpus.CorpusSize != 0)
             {
                 //make an index for the corpus
-                index = Indexer.IndexCorpus(corpus);
+                PositionalInvertedIndex inMemoryIndex = Indexer.IndexCorpus(corpus);
+                DiskIndexWriter diskIndexWriter = new DiskIndexWriter();
+
+                diskIndexWriter.WriteIndex(inMemoryIndex, path);
+                //TODO: hide index better
+                index = new DiskPositionalIndex(path + "\\index\\");
             }
         }
 
