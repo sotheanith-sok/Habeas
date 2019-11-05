@@ -40,6 +40,8 @@ namespace Search.Index
         /// A (sorted) list of all terms in the index vocabulary.
         /// </summary>
         IReadOnlyList<string> GetVocabulary();
+
+        IList<double> GetAllDocWeights();
     }
 }
 

@@ -1,16 +1,17 @@
 using Xunit;
 using System.Collections.Generic;
-using System.Linq;
+using System;
 using Search.Text;
 using Search.Index;
+
 namespace UnitTests.IndexTests
 {
+    [Collection("FileIORelated")]
     public class KGramTests
     {
-
         /// <summary>
         /// Test k-gram retrieval
-        /// </summary>
+        /// </summary>+
         [Fact]
         public void TestKGramRetrieval()
         {
@@ -20,7 +21,7 @@ namespace UnitTests.IndexTests
             {
                 vocabularies[i] = processor.ProcessToken(vocabularies[i])[0];
             }
-            KGram kGram = new KGram(vocabularies.ToHashSet());
+            KGram kGram = new KGram("./").buildKGram(new HashSet<string>(vocabularies));
             Assert.Equal(new List<string> { "apple", "appreciation", "approachable" }, kGram.getVocabularies("$ap"));
         }
     }
