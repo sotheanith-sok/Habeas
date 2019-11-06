@@ -30,14 +30,17 @@ namespace Search.Index
                 {
                     Console.WriteLine("Directory does not exist");
                 }
+                Console.WriteLine("Opening vocab.bin");
                 vocabReader = new BinaryReader(File.OpenRead(dirPath + "vocab.bin"));
-                Console.WriteLine("Opening Posting Reader");
+                Console.WriteLine("Opening postings.bin");
                 postingReader = new BinaryReader(File.OpenRead(dirPath + "postings.bin"));
-                Console.WriteLine("Reading VocabTable");
+                Console.WriteLine("Opening and Reading vocabtable.bin");
                 vocabTable = ReadVocabTable(dirPath);
-                // Console.WriteLine("Opening docWeightReader");
+
+                //TODO: enable later for docWeights
+                // Console.WriteLine("Opening docWeights.bin");
                 // docWeightsReader = new BinaryReader(File.OpenRead(dirPath + "docWeights.bin"));
-                Console.WriteLine("Opened 3 binary files.");
+                
             }
             catch (FileNotFoundException ex)
             {
@@ -306,7 +309,13 @@ namespace Search.Index
             postingReader?.Dispose();
             docWeightsReader?.Dispose();
 
-            Console.WriteLine("Disposed all binary files.");
+            Console.WriteLine("Disposed(Closed) all binary files.");
+        }
+
+        // Destroctor of the class
+        ~DiskPositionalIndex()
+        {
+            this.Dispose();
         }
     }
 

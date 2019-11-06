@@ -20,20 +20,14 @@ namespace Search.Index
         {
             Console.WriteLine($"\nWriting the index ({index.GetVocabulary().Count} terms) in '{dirPath}'");
 
-            String dirIndexPath = dirPath+"\\index\\";
+            String dirIndexPath = dirPath+"/index/";
 
-//<<<<<<< QueryingIndex
             Directory.CreateDirectory(dirIndexPath);
 
             List<long> vocabStartBytes = WriteVocab(index, dirIndexPath);
             List<long> postingsStartBytes = WritePostings(index, dirIndexPath);
             WriteVocabTable(vocabStartBytes, postingsStartBytes, dirIndexPath);
-// =======
-//             List<long> vocabStartBytes = WriteVocab(index, dirPath);
-//             List<long> postingsStartBytes = WritePostings(index, dirPath);
-//             List<long> docWeightsStartBytes = WriteDocWeights(index, dirPath);
-//             WriteVocabTable(vocabStartBytes, postingsStartBytes, dirPath);
-// >>>>>>> master
+            // List<long> docWeightsStartBytes = WriteDocWeights(index, dirPath);
 
             Console.WriteLine("Finished writing the index on disk\n");
 
