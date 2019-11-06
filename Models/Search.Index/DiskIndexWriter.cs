@@ -10,6 +10,8 @@ namespace Search.Index
     /// </summary>
     public class DiskIndexWriter
     {
+        //TODO: Make all methods except WriteIndex() private later after testing
+
         /// <summary>
         /// Writes the index on disk as three files
         /// 1) vocab.bin, 2) postings.bin, 3) vocabTable.bin
@@ -27,9 +29,10 @@ namespace Search.Index
             List<long> vocabStartBytes = WriteVocab(index, dirIndexPath);
             List<long> postingsStartBytes = WritePostings(index, dirIndexPath);
             WriteVocabTable(vocabStartBytes, postingsStartBytes, dirIndexPath);
-            // List<long> docWeightsStartBytes = WriteDocWeights(index, dirPath);
 
-            Console.WriteLine("Finished writing the index on disk\n");
+            List<long> docWeightsStartBytes = WriteDocWeights(index, dirPath);
+
+            Console.WriteLine("Finished writing the index on disk.\n");
 
         }
 
@@ -154,16 +157,17 @@ namespace Search.Index
 
             using (BinaryWriter writer = new BinaryWriter(File.Open(filePath, FileMode.Append)))
             {
-
                 foreach (double weight in index.GetAllDocWeights())
                 {
                     startBytes.Add(writer.BaseStream.Length);
                     writer.Write(BitConverter.DoubleToInt64Bits(weight));
                 }
+
+                Console.WriteLine($"docWeights.bin  {writer.BaseStream.Length} bytes");
             }
 
             return startBytes;
-
         }
+
     }
 }
