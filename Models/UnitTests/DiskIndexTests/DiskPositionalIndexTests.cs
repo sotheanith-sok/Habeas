@@ -46,6 +46,10 @@ namespace UnitTests.DiskIndexTests
             diskIndex.Dispose();
         }
 
+
+
+        
+
         // //The method BinarySearchVocabulary() became private
         // [Theory]
         // [InlineData("hello", "2C")]

@@ -309,6 +309,18 @@ namespace Search.Index
         public void RankedDocuments(List<string> query, int corpusSize)
         {
 
+            //Build the Accumulator Hashmap
+            BuildAccumulator(query, corpusSize);
+
+            //Build Priority Queue using the Accumulator divided by L_{d}  
+            BuildPriorityQueue();
+            
+
+
+
+        }
+        private void BuildAccumulator(List<string> query, int corpusSize)
+        {
             double query2TermWeight;
             double doc2TermWeight;
             double docAccumulator;
@@ -355,13 +367,13 @@ namespace Search.Index
                     prevDocID = docID;  //update prevDocID
                 }
             }
-
-            //For every document in the Accumulator divid by L_{d}
+        }
+        private MaxPriorityQueue BuildPriorityQueue()
+        {
 
             double tempDocWeight;
             double finalRank;
             int documentID;
-
 
             MaxPriorityQueue priorityQueue = new MaxPriorityQueue();
             foreach (KeyValuePair<int, double> candidate in Accumulator)
@@ -380,14 +392,7 @@ namespace Search.Index
                 priorityQueue.MAXHEAPINSERT(finalRank, documentID);
             }
 
-            priorityQueue.RetrieveTopTen();
-            for(int i = 0 ; i<10; i++)
-            {
-                
-            }
-
-
-
+            return priorityQueue;
         }
 
         public void Dispose()
