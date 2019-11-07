@@ -37,8 +37,8 @@ namespace UnitTests
         public void AndMergeTest_NoOverlap_ReturnsEmpty()
         {
             //Test with two
-            IList<Posting> first = UnitTest.GeneratePostings("(1,[0,5]), (5,[10])");
-            IList<Posting> second = UnitTest.GeneratePostings("(2,[2,9]), (7,[77])");
+            IList<Posting> first = UnitTest.GeneratePostings("(1,[0,5]), (3,[10])");
+            IList<Posting> second = UnitTest.GeneratePostings("(2,[2,9]), (4,[77])");
 
             IList<Posting> result = Merge.AndMerge(first, second);
             result.Should().BeEmpty("because nothing overlaps between the two");
@@ -102,8 +102,8 @@ namespace UnitTests
         public void OrMergeTest_NoOverlap_ReturnsAllPostings()
         {
             //Test with two
-            IList<Posting> first = UnitTest.GeneratePostings("(1,[0,5]), (5,[10])");
-            IList<Posting> second = UnitTest.GeneratePostings("(2,[2,9]), (7,[77])");
+            IList<Posting> first = UnitTest.GeneratePostings("(1,[0,5]), (3,[10])");
+            IList<Posting> second = UnitTest.GeneratePostings("(2,[2,9]), (4,[77])");
             IList<Posting> result = Merge.OrMerge(first, second);
             result.Should().HaveCount(4, "because nothing overlaps between the two");
 
@@ -111,11 +111,10 @@ namespace UnitTests
             List<IList<Posting>> list = new List<IList<Posting>>{
                 UnitTest.GeneratePostings("(1,[0,5])"),
                 UnitTest.GeneratePostings("(2,[10])"),
-                UnitTest.GeneratePostings("(4,[30]), (5,[99])"),
-                UnitTest.GeneratePostings("(3,[7]), (6,[77])")
+                UnitTest.GeneratePostings("(3,[7]), (0,[77])")
             };
             result = Merge.OrMerge(list);
-            result.Should().HaveCount(6, "because nothing in the list overlaps");
+            result.Should().HaveCount(4, "because nothing in the list overlaps");
         }
 
         [Fact]

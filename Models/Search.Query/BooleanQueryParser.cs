@@ -309,7 +309,7 @@ namespace Search.Query
                     //create WildcardLiteral
                     return new Literal(
                         new StringBounds(startIndex, lengthOut),
-                        new WildcardLiteral(subquery.Substring(startIndex, lengthOut), new KGram(Indexer.kGramPath))
+                        new WildcardLiteral(subquery.Substring(startIndex, lengthOut), new KGram(Indexer.path))
                     );
                 }
 

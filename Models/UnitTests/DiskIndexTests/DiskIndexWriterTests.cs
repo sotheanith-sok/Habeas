@@ -10,25 +10,36 @@ namespace UnitTests.OnDiskIndexTests
     public class DiskIndexWriterTests
     {
         string corpusDir = "../../../Models/UnitTests/testCorpus/testCorpusBasic";
-        string dirPath = "../../../Models/UnitTests/testCorpus/testCorpusBasic/index/";
 
         [Fact]
-        public void BinaryWriterTest()
+        public void WriteIndexTest()
         {
-            //Just testing the BinaryWriter
-            Directory.CreateDirectory(dirPath);
-            string filePath = dirPath + "test.bin";
-
-            File.Create(filePath).Dispose();
-            BinaryWriter writer = new BinaryWriter(File.Open(filePath, FileMode.Append));
-            writer.Write(16);   // 10(hex)
-            writer.Write(40);   // 28(hex)
-
-            long length = writer.BaseStream.Length;
-            length.Should().Be( 2 * 4 );  // two 4-byte integers
+            //Arrange
+            string pathToIndex = corpusDir + "/index/";
+            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(corpusDir);
+            PositionalInvertedIndex index = Indexer.IndexCorpus(corpus);
             
-            writer.Dispose();
+            //Act
+            DiskIndexWriter indexWriter = new DiskIndexWriter();
+            indexWriter.WriteIndex(index, pathToIndex);
+
+            //Assert
+            File.Exists(pathToIndex+"vocab.bin").Should().BeTrue();
+            File.Exists(pathToIndex+"postings.bin").Should().BeTrue();
+            File.Exists(pathToIndex+"vocabTable.bin").Should().BeTrue();
+            File.Exists(pathToIndex+"docWeights.bin").Should().BeTrue();
+
+            // int expectedVocabLength = 0; //??
+            // File.ReadAllBytes(pathToIndex+"vocab.bin").Length.Should().Be(expectedVocabLength);
+            int expectedPostingsLength = (13 + 34 + 75) * 4;   // (# of documentFrequencies + # of docIDs + # of termFrequencies + # of positions) * byteSize
+            File.ReadAllBytes(pathToIndex+"postings.bin").Length.Should().Be(expectedPostingsLength);
+            int expectedVocabTableLength = 13 * 2 * 8;
+            File.ReadAllBytes(pathToIndex+"vocabTable.bin").Length.Should().Be(expectedVocabTableLength);
+            int expectedDocWeightsLength = 5 * 8;
+            File.ReadAllBytes(pathToIndex+"docWeights.bin").Length.Should().Be(expectedDocWeightsLength);
+
         }
+
 
         // [Fact]
         // public void WritePostingTest()
@@ -85,33 +96,6 @@ namespace UnitTests.OnDiskIndexTests
             
         //     writer.Dispose();
         // }
-
-        [Fact]
-        public void WriteIndexTest()
-        {
-            //Arrange
-            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(corpusDir);
-            PositionalInvertedIndex index = Indexer.IndexCorpus(corpus);
-            
-            //Act
-            DiskIndexWriter indexWriter = new DiskIndexWriter();
-            indexWriter.WriteIndex(index, corpusDir+"/index/");
-
-            //Assert
-            File.Exists(corpusDir+"/index/vocab.bin").Should().BeTrue();
-            File.Exists(corpusDir+"/index/postings.bin").Should().BeTrue();
-            File.Exists(corpusDir+"/index/vocabTable.bin").Should().BeTrue();
-            File.Exists(corpusDir+"/index/docWeights.bin").Should().BeTrue();
-            // int expectedVocabLength = 0; //??
-            // File.ReadAllBytes(corpusDir+"/index/vocab.bin").Length.Should().Be(expectedVocabLength);
-            int expectedPostingsLength = (13 + 34 + 75) * 4;   // (# of documentFrequencies + # of docIDs + # of termFrequencies + # of positions) * byteSize
-            File.ReadAllBytes(corpusDir+"/index/postings.bin").Length.Should().Be(expectedPostingsLength);
-            int expectedVocabTableLength = 13 * 2 * 8;
-            File.ReadAllBytes(corpusDir+"/index/vocabTable.bin").Length.Should().Be(expectedVocabTableLength);
-            int expectedDocWeightsLength = 5 * 8;
-            File.ReadAllBytes(corpusDir+"/index/docWeights.bin").Length.Should().Be(expectedDocWeightsLength);
-
-        }
 
     }
 }

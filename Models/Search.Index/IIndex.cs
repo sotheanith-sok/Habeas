@@ -23,6 +23,13 @@ namespace Search.Index
         IList<Posting> GetPostings(List<string> term);
 
         /// <summary>
+        /// Retrieves a list of Postings of documents that contain the given term.
+        /// This returns postings with docID and positions.
+        /// </summary>
+        /// <param name="term">a processed string</param>
+        IList<Posting> GetPositionalPostings(string term);
+
+        /// <summary>
         /// Retrieves a list of Postings of documents that contain the given list of terms.
         /// This returns postings with docID and positions.
         /// </summary>
