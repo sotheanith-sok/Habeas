@@ -14,6 +14,11 @@ namespace Search.Index
         private static IIndex index; //currently set-up to use on-disk index
         private static IDocumentCorpus corpus;
 
+        //mode indicates if the search engine is in boolean mode or ranked retrieval mode
+        //if mode is true, the search engine is in boolean mode
+        //if mode is false, it's in ranked retrieval mode
+        private static Boolean mode = true;
+
         /// <summary>
         /// Gets a corpus
         /// </summary>
@@ -110,6 +115,9 @@ namespace Search.Index
         {
             // Console.Write("Corpus size is:");
             // Console.WriteLine(corpus.CorpusSize);
+            if(mode == false){
+                //do ranked retrieval
+            }
             //the list of strings to return 
             List<String> results = new List<string>();
             //the list of postings
@@ -178,6 +186,23 @@ namespace Search.Index
             {
                 //return false
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// switches from boolean mode to rr mode and vice versa
+        /// </summary>
+        public void switchMode()
+        {
+            if (mode == true)
+            {
+                mode = false;
+                Console.WriteLine(mode);
+            }
+            else
+            {
+                mode = true;
+                Console.WriteLine(mode);
             }
         }
 

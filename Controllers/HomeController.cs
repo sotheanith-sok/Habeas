@@ -152,6 +152,11 @@ namespace Habeas.Controllers
 
                 });
 
+                Electron.IpcMain.On("modeSwitch", (args) =>
+                {
+                    BEP.switchMode();
+                });
+
             }
             return View();
         }
