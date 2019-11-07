@@ -38,7 +38,7 @@ namespace Search.Query
             {
                 //Process the term
                 List<string> processedTerms = processor.ProcessToken(term);
-                postingLists.Add(index.GetPostings(processedTerms));
+                postingLists.Add(index.GetPositionalPostings(processedTerms));
             }
             //positional merge all posting lists
             return Merge.PositionalMerge(postingLists);

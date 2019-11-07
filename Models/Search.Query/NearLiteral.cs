@@ -32,8 +32,8 @@ namespace Search.Query
             //Get postings for the two term
             List<string> termsFromFirst = processor.ProcessToken(firstTerm);
             List<string> termsFromSecond = processor.ProcessToken(secondTerm);
-            IList<Posting> firstPostings = index.GetPostings(termsFromFirst);
-            IList<Posting> secondPostings = index.GetPostings(termsFromSecond);
+            IList<Posting> firstPostings = index.GetPositionalPostings(termsFromFirst);
+            IList<Posting> secondPostings = index.GetPositionalPostings(termsFromSecond);
 
             //PositionalMerge to any postings found with gap(distance) 1 to k (up to k)
             List<IList<Posting>> list = new List<IList<Posting>>();

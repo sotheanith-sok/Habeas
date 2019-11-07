@@ -10,6 +10,8 @@ namespace Search.Index
     /// </summary>
     public class DiskIndexWriter
     {
+        //TODO: Make all methods except WriteIndex() private later after testing
+
         /// <summary>
         /// Writes the index on disk as three files
         /// 1) vocab.bin, 2) postings.bin, 3) vocabTable.bin
@@ -20,14 +22,17 @@ namespace Search.Index
         {
             Console.WriteLine($"\nWriting the index ({index.GetVocabulary().Count} terms) in '{dirPath}'");
 
-            Directory.CreateDirectory(dirPath);
+            String dirIndexPath = dirPath+"/index/";
 
-            List<long> vocabStartBytes = WriteVocab(index, dirPath);
-            List<long> postingsStartBytes = WritePostings(index, dirPath);
-            List<long> docWeightsStartBytes = WriteDocWeights(index, dirPath);
-            WriteVocabTable(vocabStartBytes, postingsStartBytes, dirPath);
+            Directory.CreateDirectory(dirIndexPath);
 
-            Console.WriteLine("Finished writing the index on disk\n");
+            List<long> vocabStartBytes = WriteVocab(index, dirIndexPath);
+            List<long> postingsStartBytes = WritePostings(index, dirIndexPath);
+            WriteVocabTable(vocabStartBytes, postingsStartBytes, dirIndexPath);
+
+            List<long> docWeightsStartBytes = WriteDocWeights(index, dirIndexPath);
+
+            Console.WriteLine("Finished writing the index on disk.\n");
 
         }
 
@@ -50,7 +55,7 @@ namespace Search.Index
                 foreach (string term in vocabulary)
                 {
                     startBytes.Add(writer.BaseStream.Length);       //add start byte positions of each posting list
-                    IList<Posting> postings = index.GetPostings(term);
+                    IList<Posting> postings = index.GetPositionalPostings(term);
 
                     //1. Write document frequency (# of postings)
                     writer.Write(postings.Count);
@@ -152,16 +157,17 @@ namespace Search.Index
 
             using (BinaryWriter writer = new BinaryWriter(File.Open(filePath, FileMode.Append)))
             {
-
                 foreach (double weight in index.GetAllDocWeights())
                 {
                     startBytes.Add(writer.BaseStream.Length);
                     writer.Write(BitConverter.DoubleToInt64Bits(weight));
                 }
+
+                Console.WriteLine($"docWeights.bin  {writer.BaseStream.Length} bytes");
             }
 
             return startBytes;
-
         }
+
     }
 }

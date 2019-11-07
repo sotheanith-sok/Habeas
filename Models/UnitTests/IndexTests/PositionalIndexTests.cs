@@ -143,14 +143,15 @@ namespace UnitTests.IndexTests
 
             //Act
             var actual = index.GetAllDocWeights();
+            var expected = new List<double>{
+                2.620447934, 3.377006594, 2.898995264, 2.828427125, 3.377006594
+            };
 
+            //Assert
             actual.Count.Should().Be(5);
-            Math.Round(actual[0], 9).Should().Be(2.620447934);
-            Math.Round(actual[1], 9).Should().Be(3.377006594);
-            Math.Round(actual[2], 9).Should().Be(2.898995264);
-            Math.Round(actual[3], 9).Should().Be(2.828427125);
-            Math.Round(actual[4], 9).Should().Be(3.377006594);
-
+            for(int i=0; i<actual.Count; i++) {
+                actual[i].Should().BeApproximately(expected[i], 9);
+            }
 
         }
 
