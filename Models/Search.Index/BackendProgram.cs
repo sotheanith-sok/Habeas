@@ -108,6 +108,8 @@ namespace Search.Index
         /// <param name="query">the query which the user is making to the search engine</param>
         public List<string> searchTerm(string query)
         {
+            // Console.Write("Corpus size is:");
+            // Console.WriteLine(corpus.CorpusSize);
             //the list of strings to return 
             List<String> results = new List<string>();
             //the list of postings
@@ -187,7 +189,6 @@ namespace Search.Index
         {
             //return true if the chosen path contains content
             return Directory.GetFiles(CandidatePath).Length != 0;
-
         }
 
 
