@@ -359,7 +359,7 @@ namespace Search.Index
                 tempDocWeight = GetDocumentWeight(candidate.Key);
 
                 // divide Accumulated Value A_{d} by L_{d} 
-                finalRank = candidate.Value / tempDocWeight;
+                finalRank = (double) candidate.Value / tempDocWeight;
 
                 //TO-DO implement binary heap priority queue
                 //get docID
@@ -369,8 +369,11 @@ namespace Search.Index
                 priorityQueue.MAXHEAPINSERT(finalRank, documentID);
             }
 
-
             priorityQueue.RetrieveTopTen();
+            for(int i = 0 ; i<10; i++)
+            {
+                
+            }
 
 
 
