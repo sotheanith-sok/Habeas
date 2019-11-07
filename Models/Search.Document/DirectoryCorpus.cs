@@ -82,6 +82,9 @@ namespace Search.Document
         /// </summary>
         private Dictionary<int, IFileDocument> ReadDocuments()
         {
+            int approxCorpusSize = Directory.GetFiles(DirectoryPath, "*.*", SearchOption.TopDirectoryOnly).Length;
+            Console.WriteLine($"[Corpus] Read {approxCorpusSize} documents...");
+            
             // Build the mapping from 0-based document ID to each file in the directory path.
 
             // First, identify all compatible files: those that match the file extension filter, and for which we have
@@ -141,10 +144,11 @@ namespace Search.Document
         public static DirectoryCorpus LoadTextDirectory(string absolutePath)
         {
             DirectoryCorpus corpus = new DirectoryCorpus(absolutePath);
+            
             corpus.RegisterFileDocumentFactory(".txt", TextFileDocument.CreateTextFileDocument);
             corpus.RegisterFileDocumentFactory(".json", JsonFileDocument.CreateJsonFileDocument);
-            return corpus;
 
+            return corpus;
         }
 
     }

@@ -24,15 +24,16 @@ namespace Search.Index
             bool doesOnDiskIndexExist = Directory.Exists(pathToIndex);
             // bool doesOnDiskIndexExist = Directory.Exists(pathToIndex) && (Directory.GetFiles(pathToIndex).Length != 0);
             
+            corpus = DirectoryCorpus.LoadTextDirectory(path);
+
             if (doesOnDiskIndexExist)
             {
                 Console.WriteLine("[Index] The on-disk index exists! Reading the on-disk index.");
                 index = new DiskPositionalIndex(pathToIndex);
-                corpus = DirectoryCorpus.LoadTextDirectory(path);
             }
             else
             {
-                Console.WriteLine("[Index] The on-disk index doesn't exist! Generating new index.");
+                Console.WriteLine("[Index] Generating new index.");
                 GenerateIndex(path);
             }
         }
@@ -41,15 +42,11 @@ namespace Search.Index
         /// Indexes the corpus and writes the generated index
         /// </summary>
         /// <param name="path">the path to the selected corpus</param>
-        public void GenerateIndex(string path)
+        private void GenerateIndex(string path)
         {
-            AssemblyName appName = Assembly.GetEntryAssembly().GetName();
-            string projectName = appName.Name;
-            string projectVersion = appName.Version.Major.ToString()
-                              + '.' + appName.Version.Minor.ToString();
-
             //make corpus out of the selected directory path
-            corpus = DirectoryCorpus.LoadTextDirectory(path);
+            // corpus = DirectoryCorpus.LoadTextDirectory(path);
+
             //if the corpus contains content
             if (corpus != null && corpus.CorpusSize != 0)
             {
