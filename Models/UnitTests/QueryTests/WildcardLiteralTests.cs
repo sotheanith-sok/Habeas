@@ -24,16 +24,8 @@ namespace UnitTests.QueryTests
             WildcardLiteral wildcard = new WildcardLiteral("*ell*", kGram);
             IList<Posting> result = wildcard.GetPostings(index, processor);
 
-            IList<Posting> expected;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                expected = UnitTest.GeneratePostings("(4,[0,1]), (2,[0,2,3])");
-            }
-            else
-            {
-                expected = UnitTest.GeneratePostings("(0,[0,1]), (2,[0,2,3])");
-            }
-
+            IList<Posting> expected = UnitTest.GeneratePostings("(0,[0,1]), (2,[0,2,3])");
+            
             result.Should().BeEquivalentTo(expected);
         }
 
@@ -44,15 +36,7 @@ namespace UnitTests.QueryTests
             WildcardLiteral wildcard = new WildcardLiteral("*ello", kGram);
             IList<Posting> result = wildcard.GetPostings(index, processor);
 
-            IList<Posting> expected;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                expected = UnitTest.GeneratePostings("(4,[0,1]), (2,[0,2,3])");
-            }
-            else
-            {
-                expected = UnitTest.GeneratePostings("(0,[0,1]), (2,[0,2,3])");
-            }
+            IList<Posting> expected = UnitTest.GeneratePostings("(0,[0,1]), (2,[0,2,3])");
 
             result.Should().BeEquivalentTo(expected);
         }
@@ -62,16 +46,8 @@ namespace UnitTests.QueryTests
         {
             WildcardLiteral wildcard = new WildcardLiteral("hell*", kGram);
             IList<Posting> result = wildcard.GetPostings(index, processor);
-
-            IList<Posting> expected;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                expected = UnitTest.GeneratePostings("(4,[0,1]), (2,[0,2,3])");
-            }
-            else
-            {
-                expected = UnitTest.GeneratePostings("(0,[0,1]), (2,[0,2,3])");
-            }
+            
+            IList<Posting> expected = UnitTest.GeneratePostings("(0,[0,1]), (2,[0,2,3])");
 
             result.Should().BeEquivalentTo(expected);
         }

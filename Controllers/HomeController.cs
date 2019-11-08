@@ -39,7 +39,7 @@ namespace Habeas.Controllers
                     //the result is then converted to a string
                     string path = String.Join("", files);
                     //if the path is valid and contains content...
-                    if (BEP.PathIsValid(path) && BEP.PathContainsContent(path))
+                    if (BEP.CheckIfPathValid(path) && BEP.CheckIfPathContainsContent(path))
                     {
                         //index it, it's the new corpus
                         BEP.GetIndex(path);
@@ -48,7 +48,7 @@ namespace Habeas.Controllers
 
                     }
                     //otherwise, if the path does not exist...
-                    else if (!BEP.PathIsValid(path))
+                    else if (!BEP.CheckIfPathValid(path))
                     {
                         //send a message to the view
                         Electron.IpcMain.Send(mainWindow, "select-directory-reply", "invalidPath");
@@ -67,7 +67,7 @@ namespace Habeas.Controllers
                     //turns argument into a string
                     string term = args.ToString();
                     //stems the argument
-                    string stemmedTerm = BEP.termStemmer(term);
+                    string stemmedTerm = BEP.StemTerm(term);
                     //sends result back to the view
                     Electron.IpcMain.Send(mainWindow, "stemmedTerm", stemmedTerm);
                 });
@@ -115,7 +115,7 @@ namespace Habeas.Controllers
                     //terms argument into string
                     string term = args.ToString();
                     //gets list of posting titles from backend
-                    List<string> Postings = BEP.searchTerm(term);
+                    List<string> Postings = BEP.SearchQuery(term);
                     //sends results to view
                     Electron.IpcMain.Send(mainWindow, "searchText", Postings);
                 });
@@ -127,7 +127,7 @@ namespace Habeas.Controllers
                     //turns argument into string
                     string term = args.ToString();
                     //gets list of strings from backend
-                    List<string> Postings = BEP.soundexTerm(term);
+                    List<string> Postings = BEP.SearchSoundexQuery(term);
                     //sends results to view
                     Electron.IpcMain.Send(mainWindow, "soundexText", Postings);
                 });
@@ -138,14 +138,14 @@ namespace Habeas.Controllers
                     //argument is turned into string
                     string term = args.ToString();
                     //content of document retrieved from backend
-                    string Content = BEP.getDocContent(term);
+                    string Content = BEP.GetDocContent(term);
                     //creates message box out of document content
                     var options = new MessageBoxOptions(
                         Content
                         )
                     {
                         Type = MessageBoxType.none,
-                        Title = BEP.getDocTitle(term)
+                        Title = BEP.GetDocTitle(term)
                     };
                     var result = Electron.Dialog.ShowMessageBoxAsync(options);
                     var mainWindow = Electron.WindowManager.BrowserWindows.First();

@@ -41,34 +41,49 @@ namespace Search.Index
         }
 
         /// <summary>
-        /// Indexes the corpus
+        /// Gets on-disk index or generate a new index out of the selected corpus
         /// </summary>
-        /// <param name="path">the selected directory path</param>
-        public void GenerateIndex(string path)
+        /// <param name="path">the path to the selected corpus</param>
+        public void GetIndex(string path)
         {
-            //make a boolean query parser
-            BooleanQueryParser parser = new BooleanQueryParser();
-            //make a stemming token processor
-            ITokenProcessor processor = new StemmingTokenProcesor();
-
-            AssemblyName appName = Assembly.GetEntryAssembly().GetName();
-
-            string projectName = appName.Name;
-
-            string projectVersion = appName.Version.Major.ToString()
-                              + '.' + appName.Version.Minor.ToString();
-            //make corpus out of the selected directory path
+            string pathToIndex = path + "/index/";
+            bool doesOnDiskIndexExist = Directory.Exists(pathToIndex);
+            // bool doesOnDiskIndexExist = Directory.Exists(pathToIndex) && (Directory.GetFiles(pathToIndex).Length != 0);
+            
             corpus = DirectoryCorpus.LoadTextDirectory(path);
+
+            if (doesOnDiskIndexExist)
+            {
+                Console.WriteLine("[Index] The on-disk index exists! Reading the on-disk index.");
+                index = new DiskPositionalIndex(pathToIndex);
+            }
+            else
+            {
+                Console.WriteLine("[Index] Generating new index.");
+                GenerateIndex(path);
+            }
+        }
+
+        /// <summary>
+        /// Indexes the corpus and writes the generated index
+        /// </summary>
+        /// <param name="path">the path to the selected corpus</param>
+        private void GenerateIndex(string path)
+        {
+            //make corpus out of the selected directory path
+            // corpus = DirectoryCorpus.LoadTextDirectory(path);
+
             //if the corpus contains content
             if (corpus != null && corpus.CorpusSize != 0)
             {
                 //make an index for the corpus
                 PositionalInvertedIndex inMemoryIndex = Indexer.IndexCorpus(corpus);
+                //Write the in-memory index on disk.
                 DiskIndexWriter diskIndexWriter = new DiskIndexWriter();
 
                 diskIndexWriter.WriteIndex(inMemoryIndex, path);
-                //TODO: hide index better
-                index = new DiskPositionalIndex(path + "\\index\\");
+                //TODO: hide index better (hidden folder)
+                index = new DiskPositionalIndex(path + "/index/");
             }
         }
 
@@ -76,7 +91,7 @@ namespace Search.Index
         /// Returns postings for soundex query
         /// </summary>
         /// <param name="name">the author name being queried</param>
-        public List<string> soundexTerm(string name)
+        public List<string> SearchSoundexQuery(string name)
         {
             //get a list of postings given the name
             IList<Posting> postings = new SoundEx(Indexer.path).GetPostings(name);
@@ -111,7 +126,7 @@ namespace Search.Index
         /// Returns postings for a query
         /// </summary>
         /// <param name="query">the query which the user is making to the search engine</param>
-        public List<string> searchTerm(string query)
+        public List<string> SearchQuery(string query)
         {
             // Console.Write("Corpus size is:");
             // Console.WriteLine(corpus.CorpusSize);
@@ -161,7 +176,7 @@ namespace Search.Index
         /// Returns stemmed version of a string
         /// </summary>
         /// <param name="term">string to be stemmed</param>
-        public string termStemmer(string term)
+        public string StemTerm(string term)
         {
             //send the term into the stemmer
             string result = new StemmingTokenProcesor().StemWords(term);
@@ -172,11 +187,11 @@ namespace Search.Index
         /// <summary>
         /// Returns true if the indicated path exists
         /// </summary>
-        /// <param name="CandidatePath">the directory path chosen by the user</param>
-        public bool PathIsValid(string CandidatePath)
+        /// <param name="path">the directory path chosen by the user</param>
+        public bool CheckIfPathValid(string path)
         {
             //if the path exists...
-            if (Directory.Exists(CandidatePath))
+            if (Directory.Exists(path))
             {
                 //return true
                 return true;
@@ -209,11 +224,12 @@ namespace Search.Index
         /// <summary>
         /// Returns true if the indicated path contains content
         /// </summary>
-        /// <param name="CandidatePath">the directory path chosen by the user</param>
-        public bool PathContainsContent(string CandidatePath)
+        /// <param name="path">the directory path chosen by the user</param>
+        public bool CheckIfPathContainsContent(string path)
         {
             //return true if the chosen path contains content
-            return Directory.GetFiles(CandidatePath).Length != 0;
+            return Directory.GetFiles(path).Length != 0;
+
         }
 
 
@@ -255,7 +271,7 @@ namespace Search.Index
         /// Gets the content of a document
         /// </summary>
         /// <param name="doc">the id of the document in question</param>
-        public string getDocContent(string doc)
+        public string GetDocContent(string doc)
         {
             //string to be returned
             string finalString;
@@ -277,7 +293,7 @@ namespace Search.Index
         /// Gets the title of a document
         /// </summary>
         /// <param name="doc">the id of the document in question</param>
-        public string getDocTitle(string doc)
+        public string GetDocTitle(string doc)
         {
             //convert doc into an int
             int selected = Int32.Parse(doc);
