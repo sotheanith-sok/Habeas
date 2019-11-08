@@ -101,8 +101,26 @@ namespace Search.Index
             //Convert List<string> to string
             IEncoderDecoder<string> stringEncoderDecoder = new StringEncoderDecoder();
             IEncoderDecoder<List<string>> stringListEncoderDecoder = new StringListEncoderDecoder();
+            map.ToDictionary(k => k.Key, k => k.Value);
+
+
+            //Bypass miniMap duplicate key problem.
+            Dictionary<string, List<string>> tempMiniMap = new Dictionary<string, List<string>>();
+            foreach (string key in miniMap.Keys)
+            {
+                if (tempMiniMap.ContainsKey(key))
+                {
+                    tempMiniMap[key] = tempMiniMap[key].Union(miniMap[key]).ToList();
+                }
+                else
+                {
+                    tempMiniMap.Add(key, miniMap[key]);
+                }
+            }
+
+            // miniMap.ToDictionary(k => k.Key, k => k.Value);
             new OnDiskDictionary<string, List<string>>().Save(stringEncoderDecoder, stringListEncoderDecoder, map.ToDictionary(k => k.Key, k => k.Value), path, "KGram");
-            new OnDiskDictionary<string, List<string>>().Save(stringEncoderDecoder, stringListEncoderDecoder, miniMap.ToDictionary(k => k.Key, k => k.Value), path, "MiniKGram");
+            new OnDiskDictionary<string, List<string>>().Save(stringEncoderDecoder, stringListEncoderDecoder, tempMiniMap, path, "MiniKGram");
             Console.WriteLine("Complete KGram generating process");
             return this;
         }

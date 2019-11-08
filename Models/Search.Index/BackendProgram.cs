@@ -23,22 +23,22 @@ namespace Search.Index
         /// Gets a corpus
         /// </summary>
         /// <param name="path">the selected directory path</param>
-        public void GetIndex(string path)
-        {
-            string binFiles = path + "\\index\\";
-            //if bin files exist, done
-            if (Directory.Exists(binFiles))
-            {
-                index = new DiskPositionalIndex(binFiles);
-                corpus = DirectoryCorpus.LoadTextDirectory(path);
-                return;
-            }
-            //else
-            else
-            {
-                GenerateIndex(path);
-            }
-        }
+        // public void GetIndex(string path)
+        // {
+        //     string binFiles = path + "\\index\\";
+        //     //if bin files exist, done
+        //     if (Directory.Exists(binFiles))
+        //     {
+        //         index = new DiskPositionalIndex(binFiles);
+        //         corpus = DirectoryCorpus.LoadTextDirectory(path);
+        //         return;
+        //     }
+        //     //else
+        //     else
+        //     {
+        //         GenerateIndex(path);
+        //     }
+        // }
 
         /// <summary>
         /// Gets on-disk index or generate a new index out of the selected corpus
@@ -46,22 +46,28 @@ namespace Search.Index
         /// <param name="path">the path to the selected corpus</param>
         public void GetIndex(string path)
         {
-            string pathToIndex = path + "/index/";
-            bool doesOnDiskIndexExist = Directory.Exists(pathToIndex);
-            // bool doesOnDiskIndexExist = Directory.Exists(pathToIndex) && (Directory.GetFiles(pathToIndex).Length != 0);
-            
-            corpus = DirectoryCorpus.LoadTextDirectory(path);
+            try
+            {
+                string pathToIndex = path + "/index/";
+                bool doesOnDiskIndexExist = Directory.Exists(pathToIndex);
+                // bool doesOnDiskIndexExist = Directory.Exists(pathToIndex) && (Directory.GetFiles(pathToIndex).Length != 0);
 
-            if (doesOnDiskIndexExist)
-            {
-                Console.WriteLine("[Index] The on-disk index exists! Reading the on-disk index.");
-                index = new DiskPositionalIndex(pathToIndex);
+                corpus = DirectoryCorpus.LoadTextDirectory(path);
+
+                if (doesOnDiskIndexExist)
+                {
+                    Console.WriteLine("[Index] The on-disk index exists! Reading the on-disk index.");
+                    index = new DiskPositionalIndex(pathToIndex);
+                }
+                else
+                {
+                    Console.WriteLine("[Index] Generating new index.");
+                    GenerateIndex(path);
+                }
+            }catch(Exception e){
+                Console.WriteLine(e);
             }
-            else
-            {
-                Console.WriteLine("[Index] Generating new index.");
-                GenerateIndex(path);
-            }
+
         }
 
         /// <summary>
@@ -130,7 +136,8 @@ namespace Search.Index
         {
             // Console.Write("Corpus size is:");
             // Console.WriteLine(corpus.CorpusSize);
-            if(mode == false){
+            if (mode == false)
+            {
                 //do ranked retrieval
             }
             //the list of strings to return 
