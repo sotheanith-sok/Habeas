@@ -23,22 +23,6 @@ namespace Search.Index
         /// Gets a corpus
         /// </summary>
         /// <param name="path">the selected directory path</param>
-        // public void GetIndex(string path)
-        // {
-        //     string binFiles = path + "\\index\\";
-        //     //if bin files exist, done
-        //     if (Directory.Exists(binFiles))
-        //     {
-        //         index = new DiskPositionalIndex(binFiles);
-        //         corpus = DirectoryCorpus.LoadTextDirectory(path);
-        //         return;
-        //     }
-        //     //else
-        //     else
-        //     {
-        //         GenerateIndex(path);
-        //     }
-        // }
 
         /// <summary>
         /// Gets on-disk index or generate a new index out of the selected corpus
@@ -64,7 +48,9 @@ namespace Search.Index
                     Console.WriteLine("[Index] Generating new index.");
                     GenerateIndex(path);
                 }
-            }catch(Exception e){
+            }
+            catch (Exception e)
+            {
                 Console.WriteLine(e);
             }
 
@@ -76,21 +62,29 @@ namespace Search.Index
         /// <param name="path">the path to the selected corpus</param>
         private void GenerateIndex(string path)
         {
-            //make corpus out of the selected directory path
-            // corpus = DirectoryCorpus.LoadTextDirectory(path);
-
-            //if the corpus contains content
-            if (corpus != null && corpus.CorpusSize != 0)
+            try
             {
-                //make an index for the corpus
-                PositionalInvertedIndex inMemoryIndex = Indexer.IndexCorpus(corpus);
-                //Write the in-memory index on disk.
-                DiskIndexWriter diskIndexWriter = new DiskIndexWriter();
+                //make corpus out of the selected directory path
+                // corpus = DirectoryCorpus.LoadTextDirectory(path);
 
-                diskIndexWriter.WriteIndex(inMemoryIndex, path);
-                //TODO: hide index better (hidden folder)
-                index = new DiskPositionalIndex(path + "/index/");
+                //if the corpus contains content
+                if (corpus != null && corpus.CorpusSize != 0)
+                {
+                    //make an index for the corpus
+                    PositionalInvertedIndex inMemoryIndex = Indexer.IndexCorpus(corpus);
+                    //Write the in-memory index on disk.
+                    DiskIndexWriter diskIndexWriter = new DiskIndexWriter();
+
+                    diskIndexWriter.WriteIndex(inMemoryIndex, path);
+                    //TODO: hide index better (hidden folder)
+                    index = new DiskPositionalIndex(path + "/index/");
+                }
             }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
         }
 
         /// <summary>
@@ -99,32 +93,42 @@ namespace Search.Index
         /// <param name="name">the author name being queried</param>
         public List<string> SearchSoundexQuery(string name)
         {
-            //get a list of postings given the name
-            IList<Posting> postings = new SoundEx(Indexer.path).GetPostings(name);
+
             //list of strings to return
             List<String> results = new List<string>();
-            //if the query returns any results
-            if (postings.Count > 0)
+
+            try
             {
-                //add the number of postings to the list of strings to return
-                results.Add(postings.Count.ToString());
-                //for each posting
-                foreach (Posting p in postings)
+                //get a list of postings given the name
+                IList<Posting> postings = new SoundEx(Indexer.path).GetPostings(name);
+                //if the query returns any results
+                if (postings.Count > 0)
                 {
-                    //use the posting's id to access the document
-                    IDocument doc = corpus.GetDocument(p.DocumentId);
-                    //add the title and name of the author to the list of strings to be returned 
-                    results.Add(doc.Title + " (Author: " + doc.Author + ")");
-                    //also add the document id to the list of strings to be returned
-                    results.Add(doc.DocumentId.ToString());
+                    //add the number of postings to the list of strings to return
+                    results.Add(postings.Count.ToString());
+                    //for each posting
+                    foreach (Posting p in postings)
+                    {
+                        //use the posting's id to access the document
+                        IDocument doc = corpus.GetDocument(p.DocumentId);
+                        //add the title and name of the author to the list of strings to be returned 
+                        results.Add(doc.Title + " (Author: " + doc.Author + ")");
+                        //also add the document id to the list of strings to be returned
+                        results.Add(doc.DocumentId.ToString());
+                    }
                 }
+                else
+                {
+                    //if there are no postings just return a list with a zero in it
+                    results.Add("0");
+                }
+                //return the final list of strings
             }
-            else
+            catch (Exception e)
             {
-                //if there are no postings just return a list with a zero in it
-                results.Add("0");
+                Console.WriteLine(e);
             }
-            //return the final list of strings
+
             return results;
         }
 
@@ -134,49 +138,58 @@ namespace Search.Index
         /// <param name="query">the query which the user is making to the search engine</param>
         public List<string> SearchQuery(string query)
         {
+            try
+            {
+                if (mode == false)
+                {
+                    //do ranked retrieval
+                }
+                //the list of strings to return 
+                List<String> results = new List<string>();
+                //the list of postings
+                IList<Posting> postings;
+                IQueryComponent component;
+                //create a boolean query parser
+                BooleanQueryParser parser = new BooleanQueryParser();
+                //create a stemming token processor
+                ITokenProcessor processor = new StemmingTokenProcesor();
+                //parse the query
+                component = parser.ParseQuery(query);
+                //get the postings
+                postings = component.GetPostings(index, processor);
+                //if there are any postings...
+                if (postings.Count > 0)
+                {
+                    //add the count of the postings to the list of strings to be returned
+                    results.Add(postings.Count.ToString());
+                    //for each posting...
+                    foreach (Posting p in postings)
+                    {
+                        //use the document id to access the document
+                        IDocument doc = corpus.GetDocument(p.DocumentId);
+                        //add the title to the list of strings to be returned
+                        results.Add(doc.Title);
+                        //add the document id to the list of strings to be returned 
+                        results.Add(doc.DocumentId.ToString());
+                    }
+                }
+                //if there aren't any postings...
+                else
+                {
+                    //add a zero to the list of strings to be returned
+                    results.Add("0");
+                }
+                //return the list of strings
+                return results;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return new List<string>();
+            }
             // Console.Write("Corpus size is:");
             // Console.WriteLine(corpus.CorpusSize);
-            if (mode == false)
-            {
-                //do ranked retrieval
-            }
-            //the list of strings to return 
-            List<String> results = new List<string>();
-            //the list of postings
-            IList<Posting> postings;
-            IQueryComponent component;
-            //create a boolean query parser
-            BooleanQueryParser parser = new BooleanQueryParser();
-            //create a stemming token processor
-            ITokenProcessor processor = new StemmingTokenProcesor();
-            //parse the query
-            component = parser.ParseQuery(query);
-            //get the postings
-            postings = component.GetPostings(index, processor);
-            //if there are any postings...
-            if (postings.Count > 0)
-            {
-                //add the count of the postings to the list of strings to be returned
-                results.Add(postings.Count.ToString());
-                //for each posting...
-                foreach (Posting p in postings)
-                {
-                    //use the document id to access the document
-                    IDocument doc = corpus.GetDocument(p.DocumentId);
-                    //add the title to the list of strings to be returned
-                    results.Add(doc.Title);
-                    //add the document id to the list of strings to be returned 
-                    results.Add(doc.DocumentId.ToString());
-                }
-            }
-            //if there aren't any postings...
-            else
-            {
-                //add a zero to the list of strings to be returned
-                results.Add("0");
-            }
-            //return the list of strings
-            return results;
+
         }
 
         /// <summary>
@@ -216,6 +229,14 @@ namespace Search.Index
         /// </summary>
         public void switchMode()
         {
+            try
+            {
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
             if (mode == true)
             {
                 mode = false;
@@ -234,6 +255,7 @@ namespace Search.Index
         /// <param name="path">the directory path chosen by the user</param>
         public bool CheckIfPathContainsContent(string path)
         {
+
             //return true if the chosen path contains content
             return Directory.GetFiles(path).Length != 0;
 
