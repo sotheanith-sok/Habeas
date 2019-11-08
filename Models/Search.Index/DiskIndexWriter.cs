@@ -24,8 +24,6 @@ namespace Search.Index
 
             String dirIndexPath = dirPath+"/index/";
 
-            Directory.CreateDirectory(dirIndexPath);
-
             List<long> vocabStartBytes = WriteVocab(index, dirIndexPath);
             List<long> postingsStartBytes = WritePostings(index, dirIndexPath);
             WriteVocabTable(vocabStartBytes, postingsStartBytes, dirIndexPath);

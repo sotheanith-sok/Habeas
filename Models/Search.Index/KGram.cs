@@ -15,6 +15,7 @@ namespace Search.Index
 
         //Path to kGrame
         private string path;
+        private OnDiskDictionary<string, List<string>> map;
 
         /// <summary>
         /// Constructor
@@ -25,6 +26,7 @@ namespace Search.Index
         {
             this.size = size;
             this.path = path;
+            this.map = new OnDiskDictionary<string, List<string>>(new StringEncoderDecoder(), new StringListEncoderDecoder());
         }
 
         /// <summary>
@@ -99,8 +101,6 @@ namespace Search.Index
             // kGramWriter.WriteKGram(map, miniMap, this.path);
 
             //Convert List<string> to string
-            IEncoderDecoder<string> stringEncoderDecoder = new StringEncoderDecoder();
-            IEncoderDecoder<List<string>> stringListEncoderDecoder = new StringListEncoderDecoder();
             map.ToDictionary(k => k.Key, k => k.Value);
 
 
@@ -119,8 +119,8 @@ namespace Search.Index
             }
 
             // miniMap.ToDictionary(k => k.Key, k => k.Value);
-            new OnDiskDictionary<string, List<string>>().Save(stringEncoderDecoder, stringListEncoderDecoder, map.ToDictionary(k => k.Key, k => k.Value), path, "KGram");
-            new OnDiskDictionary<string, List<string>>().Save(stringEncoderDecoder, stringListEncoderDecoder, tempMiniMap, path, "MiniKGram");
+            this.map.Save(map.ToDictionary(k => k.Key, k => k.Value), path, "KGram");
+            this.map.Save(tempMiniMap, path, "MiniKGram");
             Console.WriteLine("Complete KGram generating process");
             return this;
         }
@@ -132,21 +132,19 @@ namespace Search.Index
         /// <returns>A list of vocabularies</returns>
         public List<string> getVocabularies(string kGram)
         {
-            IEncoderDecoder<string> stringEncoderDecoder = new StringEncoderDecoder();
-            IEncoderDecoder<List<string>> stringListEncoderDecoder = new StringListEncoderDecoder();
             //If requested k-gram's length is less than this k-gram size, use mini kgram to find the right k-gram 
             if (kGram.Length < this.size)
             {
                 HashSet<string> candidates = new HashSet<string>();
 
-                List<string> possibleKGram = new OnDiskDictionary<string, List<string>>().Get(stringEncoderDecoder, stringListEncoderDecoder, kGram, this.path, "MiniKGram");
+                List<string> possibleKGram = this.map.Get( kGram, this.path, "MiniKGram");
                 if (possibleKGram == default(List<string>))
                 {
                     return new List<string>();
                 }
                 foreach (string k in possibleKGram)
                 {
-                    foreach (string v in new OnDiskDictionary<string, List<string>>().Get(stringEncoderDecoder, stringListEncoderDecoder, k, this.path, "KGram"))
+                    foreach (string v in this.map.Get(k, this.path, "KGram"))
                     {
                         candidates.Add(v);
                     }
@@ -155,7 +153,7 @@ namespace Search.Index
             }
             else
             {
-                List<string> result = new OnDiskDictionary<string, List<string>>().Get(stringEncoderDecoder, stringListEncoderDecoder, kGram, this.path, "KGram");
+                List<string> result = this.map.Get(kGram, this.path, "KGram");
                 return default(List<string>) == result ? new List<string>() : result;
             }
         }

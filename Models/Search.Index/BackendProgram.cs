@@ -11,8 +11,8 @@ namespace Search.Index
 {
     public class BackendProgram
     {
-        private static IIndex index; //currently set-up to use on-disk index
-        private static IDocumentCorpus corpus;
+        private IIndex index; //currently set-up to use on-disk index
+        private IDocumentCorpus corpus;
 
         //mode indicates if the search engine is in boolean mode or ranked retrieval mode
         //if mode is true, the search engine is in boolean mode
@@ -32,7 +32,8 @@ namespace Search.Index
         {
             try
             {
-                string pathToIndex = path + "/index/";
+                string pathToIndex = Path.Join(path, "/index/");
+                Indexer.path = pathToIndex;
                 bool doesOnDiskIndexExist = Directory.Exists(pathToIndex);
                 // bool doesOnDiskIndexExist = Directory.Exists(pathToIndex) && (Directory.GetFiles(pathToIndex).Length != 0);
 
@@ -41,7 +42,7 @@ namespace Search.Index
                 if (doesOnDiskIndexExist)
                 {
                     Console.WriteLine("[Index] The on-disk index exists! Reading the on-disk index.");
-                    index = new DiskPositionalIndex(pathToIndex);
+                    index = new SpecialIndex(pathToIndex);
                 }
                 else
                 {
@@ -64,6 +65,9 @@ namespace Search.Index
         {
             try
             {
+                //Generate directory if we need to index corpus.
+                Directory.CreateDirectory(Path.Join(path, "/index/"));
+
                 //make corpus out of the selected directory path
                 // corpus = DirectoryCorpus.LoadTextDirectory(path);
 
@@ -71,13 +75,13 @@ namespace Search.Index
                 if (corpus != null && corpus.CorpusSize != 0)
                 {
                     //make an index for the corpus
-                    PositionalInvertedIndex inMemoryIndex = Indexer.IndexCorpus(corpus);
-                    //Write the in-memory index on disk.
-                    DiskIndexWriter diskIndexWriter = new DiskIndexWriter();
+                    IIndex index = Indexer.IndexCorpus(corpus);
+                    // //Write the in-memory index on disk.
+                    // DiskIndexWriter diskIndexWriter = new DiskIndexWriter();
 
-                    diskIndexWriter.WriteIndex(inMemoryIndex, path);
-                    //TODO: hide index better (hidden folder)
-                    index = new DiskPositionalIndex(path + "/index/");
+                    // diskIndexWriter.WriteIndex(inMemoryIndex, path);
+                    // //TODO: hide index better (hidden folder)
+                    // index = new DiskPositionalIndex(Path.Join(path, "/index/"));
                 }
             }
             catch (Exception e)

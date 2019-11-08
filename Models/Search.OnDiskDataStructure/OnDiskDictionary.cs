@@ -12,23 +12,35 @@ namespace Search.OnDiskDataStructure
     public class OnDiskDictionary<TKey, TValue> : IOnDiskDictionary<TKey, TValue> where TKey : IComparable
     {
 
+        private IEncoderDecoder<TKey> keyEncoderDecoder;
+        private IEncoderDecoder<TValue> valueEncoderDecoder;
+
         /// <summary>
-        /// Save a dictionary onto disk
+        /// Construct a new on-disk dictionary
         /// </summary>
         /// <param name="keyEncoderDecoder">Encoder/Decoder for key</param>
         /// <param name="valueEncoderDecoder">Encoder/Decoder for value</param>
+        public OnDiskDictionary(IEncoderDecoder<TKey> keyEncoderDecoder, IEncoderDecoder<TValue> valueEncoderDecoder)
+        {
+            this.keyEncoderDecoder = keyEncoderDecoder;
+            this.valueEncoderDecoder = valueEncoderDecoder;
+        }
+
+        /// <summary>
+        /// Save a dictionary onto disk
+        /// </summary>
         /// <param name="valuePairs">Dictionary</param>
         /// <param name="path">Path to save disk to</param>
         /// <param name="fileName">Filename of dictionary</param>
-        public void Save(IEncoderDecoder<TKey> keyEncoderDecoder, IEncoderDecoder<TValue> valueEncoderDecoder, Dictionary<TKey, TValue> valuePairs, string path, string fileName)
+        public void Save(Dictionary<TKey, TValue> valuePairs, string path, string fileName)
         {
             path = Path.GetFullPath(path);
             string keyBin = Path.Join(path, fileName + "_Key.bin");
             string valueBin = Path.Join(path, fileName + "_Value.bin");
             string tableBin = Path.Join(path, fileName + "_Table.bin");
 
-            long[] keyPositions = this.WriteKeyBin(keyEncoderDecoder, valuePairs.Keys.ToList(), keyBin);
-            long[] valuePositions = this.WriteValueBin(valueEncoderDecoder, valuePairs.Values.ToList(), valueBin);
+            long[] keyPositions = this.WriteKeyBin(valuePairs.Keys.ToList(), keyBin);
+            long[] valuePositions = this.WriteValueBin(valuePairs.Values.ToList(), valueBin);
             this.WriteTableBin(keyPositions, valuePositions, tableBin);
 
         }
@@ -37,13 +49,11 @@ namespace Search.OnDiskDataStructure
         /// <summary>
         /// Get value for a given key
         /// </summary>
-        /// <param name="keyEncoderDecoder">Encoder/Decoder for key</param>
-        /// <param name="valueEncoderDecoder">Encoder/Decoder for value</param>
         /// <param name="key">Key to search for</param>
         /// <param name="path">Path to save disk to</param>
         /// <param name="fileName">Filename of dictionary</param>
         /// <returns>Value related to a given key</returns>
-        public TValue Get(IEncoderDecoder<TKey> keyEncoderDecoder, IEncoderDecoder<TValue> valueEncoderDecoder, TKey key, string path, string fileName)
+        public TValue Get(TKey key, string path, string fileName)
         {
 
             path = Path.GetFullPath(path);
@@ -52,8 +62,8 @@ namespace Search.OnDiskDataStructure
             string tableBin = Path.Join(path, fileName + "_Table.bin");
 
             long[] table = this.ReadTableBin(tableBin);
-            int index = this.ReadKeyBin(keyEncoderDecoder, table, keyBin, key);
-            TValue value = this.ReadValueBin(valueEncoderDecoder, table, index, valueBin);
+            int index = this.ReadKeyBin(table, keyBin, key);
+            TValue value = this.ReadValueBin(table, index, valueBin);
 
             return value;
         }
@@ -62,11 +72,10 @@ namespace Search.OnDiskDataStructure
         /// <summary>
         /// Write keys to bin
         /// </summary>
-        /// <param name="keyEncoderDecoder">Encoder/Decoder for key</param>
         /// <param name="key">List of keys</param>
         /// <param name="path">Path to save keys to</param>
         /// <returns>array of positions</returns>
-        private long[] WriteKeyBin(IEncoderDecoder<TKey> keyEncoderDecoder, List<TKey> keys, string path)
+        private long[] WriteKeyBin(List<TKey> keys, string path)
         {
             List<long> keyPositions = new List<long>();
             using (BinaryWriter writer = new BinaryWriter(File.Create(path)))
@@ -83,11 +92,10 @@ namespace Search.OnDiskDataStructure
         /// <summary>
         /// Write values to bin
         /// </summary>
-        /// <param name="valueEncoderDecoder">Encoder/Decoder for value</param>
         /// <param name="values">List of values</param>
         /// <param name="path">Path to save values to</param>
         /// <returns>array of positions</returns>
-        private long[] WriteValueBin(IEncoderDecoder<TValue> valueEncoderDecoder, List<TValue> values, string path)
+        private long[] WriteValueBin(List<TValue> values, string path)
         {
             List<long> valuePositions = new List<long>();
             using (BinaryWriter writer = new BinaryWriter(File.Create(path)))
@@ -142,12 +150,11 @@ namespace Search.OnDiskDataStructure
         /// <summary>
         /// Search for key in key bin
         /// </summary>
-        /// <param name="keyEncoderDecoder">Encoder/Decoder for key</param>
         /// <param name="table">Array of positions</param>
         /// <param name="path">Path to key bin</param>
         /// <param name="term">term to search for</param>
         /// <returns>index in table where key is located</returns>
-        private int ReadKeyBin(IEncoderDecoder<TKey> keyEncoderDecoder, long[] table, string path, TKey term)
+        private int ReadKeyBin(long[] table, string path, TKey term)
         {
             using (FileStream file = File.Open(path, FileMode.Open))
             using (BinaryReader binaryReader = new BinaryReader(file))
@@ -185,12 +192,11 @@ namespace Search.OnDiskDataStructure
         /// <summary>
         /// Read value from value bin
         /// </summary>
-        /// <param name="valueEncoderDecoder">Encoder/Decoder for value</param>
         /// <param name="table">Array of positions</param>
         /// <param name="index">Index where key was found</param>
         /// <param name="path">Path to value bin</param>
         /// <returns>Value</returns>
-        private TValue ReadValueBin(IEncoderDecoder<TValue> valueEncoderDecoder, long[] table, int index, string path)
+        private TValue ReadValueBin(long[] table, int index, string path)
         {
             if (index == -1)
             {
@@ -214,11 +220,10 @@ namespace Search.OnDiskDataStructure
         /// <summary>
         /// Get all keys
         /// </summary>
-        /// <param name="keyEncoderDecoder"> Encoder/Decoder for key</param>
         /// <param name="path">Path to keys bin</param>
         /// <param name="fileName">Name of keys bin</param>
         /// <returns>Array of Keys</returns>
-        public TKey[] GetKeys(IEncoderDecoder<TKey> keyEncoderDecoder, string path, string fileName)
+        public TKey[] GetKeys(string path, string fileName)
         {
             path = Path.GetFullPath(path);
             string keyBin = Path.Join(path, fileName + "_Key.bin");
@@ -227,7 +232,7 @@ namespace Search.OnDiskDataStructure
 
             long[] table = this.ReadTableBin(tableBin);
             List<TKey> keys = new List<TKey>();
-            
+
             using (FileStream file = File.Open(keyBin, FileMode.Open))
             using (BinaryReader reader = new BinaryReader(file))
             {
@@ -257,11 +262,10 @@ namespace Search.OnDiskDataStructure
         /// <summary>
         /// Get all values from values bin
         /// </summary>
-        /// <param name="valueEncoderDecoder">Encoder/Decoder for value</param>
         /// <param name="path">Path to values bin</param>
         /// <param name="fileName">Name of values bin</param>
         /// <returns></returns>
-        public TValue[] GetValues(IEncoderDecoder<TValue> valueEncoderDecoder, string path, string fileName)
+        public TValue[] GetValues(string path, string fileName)
         {
             path = Path.GetFullPath(path);
             string keyBin = Path.Join(path, fileName + "_Key.bin");
