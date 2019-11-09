@@ -232,5 +232,94 @@ namespace Search.Index
 
             return startBytes;
         }
+
+
+        
+        public void RankedDocuments(List<string> query, int corpusSize)
+        {
+
+            //Build the Accumulator Hashmap
+            BuildAccumulator(query, corpusSize);
+
+            //Build Priority Queue using the Accumulator divided by L_{d}  
+            BuildPriorityQueue();
+        
+        }
+
+        private void BuildAccumulator(List<string> query, int corpusSize)
+        {
+            double query2TermWeight;
+            double doc2TermWeight;
+            double docAccumulator;
+
+            //caculate accumulated Value for each relevant document A_{d}
+            foreach (string term in query)
+            {
+                long startByte = ReadKeyBin(term);
+
+                //0. Jump to the starting byte
+                postingReader.BaseStream.Seek(startByte, SeekOrigin.Begin);
+
+
+
+                //1. Read document frequency
+                int docFrequency = postingReader.ReadInt32();
+
+                query2TermWeight = Math.Log(1 + corpusSize / docFrequency);
+
+                int prevDocID = 0;
+                for (int i = 0; i < docFrequency; i++)         //for each posting
+                {
+                    //2. Read documentID using gap
+                    int docID = prevDocID + postingReader.ReadInt32();
+
+                    //3. Read term frequency
+                    int termFrequency = postingReader.ReadInt32();
+
+                    doc2TermWeight = 1 + Math.Log(termFrequency);
+                    docAccumulator = query2TermWeight * doc2TermWeight;
+
+                    if (Accumulator.ContainsKey(docID))
+                    {
+                        Accumulator[docID] += docAccumulator;
+                    }
+                    else
+                    {
+                        Accumulator.Add(docID, docAccumulator);
+                    }
+
+                    //Skip the positions
+                    postingReader.BaseStream.Seek(termFrequency * sizeof(int), SeekOrigin.Current);
+
+                    prevDocID = docID;  //update prevDocID
+                }
+            }
+        }
+        private MaxPriorityQueue BuildPriorityQueue()
+        {
+
+            double tempDocWeight;
+            double finalRank;
+            int documentID;
+
+            MaxPriorityQueue priorityQueue = new MaxPriorityQueue();
+            foreach (KeyValuePair<int, double> candidate in Accumulator)
+            {
+                //get document weight by id from docWeights.bin file
+                tempDocWeight = GetDocumentWeight(candidate.Key);
+
+                // divide Accumulated Value A_{d} by L_{d} 
+                finalRank = (double) candidate.Value / tempDocWeight;
+
+                //TO-DO implement binary heap priority queue
+                //get docID
+                documentID = candidate.Key;
+
+                //add to list to perform priority queue on 
+                priorityQueue.MAXHEAPINSERT(finalRank, documentID);
+            }
+
+            return priorityQueue;
+        }
     }
 }
