@@ -97,30 +97,10 @@ namespace Search.Index
             //WriteKGramToDisk
             Console.WriteLine("Write K-Gram to disk...");
             Console.WriteLine("Path:" + Path.GetFullPath(this.path));
-            // DiskKGramWriter kGramWriter = new DiskKGramWriter();
-            // kGramWriter.WriteKGram(map, miniMap, this.path);
-
-            //Convert List<string> to string
-            map.ToDictionary(k => k.Key, k => k.Value);
 
 
-            //Bypass miniMap duplicate key problem.
-            Dictionary<string, List<string>> tempMiniMap = new Dictionary<string, List<string>>();
-            foreach (string key in miniMap.Keys)
-            {
-                if (tempMiniMap.ContainsKey(key))
-                {
-                    tempMiniMap[key] = tempMiniMap[key].Union(miniMap[key]).ToList();
-                }
-                else
-                {
-                    tempMiniMap.Add(key, miniMap[key]);
-                }
-            }
-
-            // miniMap.ToDictionary(k => k.Key, k => k.Value);
-            this.map.Save(map.ToDictionary(k => k.Key, k => k.Value), path, "KGram");
-            this.map.Save(tempMiniMap, path, "MiniKGram");
+            this.map.Save(map, path, "KGram");
+            this.map.Save(miniMap, path, "MiniKGram");
             Console.WriteLine("Complete KGram generating process");
             return this;
         }
@@ -137,17 +117,23 @@ namespace Search.Index
             {
                 HashSet<string> candidates = new HashSet<string>();
 
-                List<string> possibleKGram = this.map.Get( kGram, this.path, "MiniKGram");
+                List<string> possibleKGram = this.map.Get(kGram, this.path, "MiniKGram");
                 if (possibleKGram == default(List<string>))
                 {
                     return new List<string>();
                 }
+
                 foreach (string k in possibleKGram)
                 {
-                    foreach (string v in this.map.Get(k, this.path, "KGram"))
+                    List<string> KGram = this.map.Get(k, this.path, "KGram");
+                    if (KGram != default(List<string>))
                     {
-                        candidates.Add(v);
+                        foreach (string v in KGram)
+                        {
+                            candidates.Add(v);
+                        }
                     }
+
                 }
                 return candidates.ToList();
             }

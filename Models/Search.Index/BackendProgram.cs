@@ -49,12 +49,13 @@ namespace Search.Index
                     Console.WriteLine("[Index] Generating new index.");
                     GenerateIndex(path);
                 }
+
+
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
             }
-
         }
 
         /// <summary>
@@ -75,7 +76,7 @@ namespace Search.Index
                 if (corpus != null && corpus.CorpusSize != 0)
                 {
                     //make an index for the corpus
-                    IIndex index = Indexer.IndexCorpus(corpus);
+                    index = Indexer.IndexCorpus(corpus);
                     // //Write the in-memory index on disk.
                     // DiskIndexWriter diskIndexWriter = new DiskIndexWriter();
 

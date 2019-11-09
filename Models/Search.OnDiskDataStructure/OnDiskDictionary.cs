@@ -11,7 +11,6 @@ namespace Search.OnDiskDataStructure
     /// <typeparam name="TValue">Type of Value</typeparam>
     public class OnDiskDictionary<TKey, TValue> : IOnDiskDictionary<TKey, TValue> where TKey : IComparable
     {
-
         private IEncoderDecoder<TKey> keyEncoderDecoder;
         private IEncoderDecoder<TValue> valueEncoderDecoder;
 
@@ -32,7 +31,7 @@ namespace Search.OnDiskDataStructure
         /// <param name="valuePairs">Dictionary</param>
         /// <param name="path">Path to save disk to</param>
         /// <param name="fileName">Filename of dictionary</param>
-        public void Save(Dictionary<TKey, TValue> valuePairs, string path, string fileName)
+        public void Save(SortedDictionary<TKey, TValue> valuePairs, string path, string fileName)
         {
             path = Path.GetFullPath(path);
             string keyBin = Path.Join(path, fileName + "_Key.bin");
@@ -55,7 +54,6 @@ namespace Search.OnDiskDataStructure
         /// <returns>Value related to a given key</returns>
         public TValue Get(TKey key, string path, string fileName)
         {
-
             path = Path.GetFullPath(path);
             string keyBin = Path.Join(path, fileName + "_Key.bin");
             string valueBin = Path.Join(path, fileName + "_Value.bin");

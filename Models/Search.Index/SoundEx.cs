@@ -36,13 +36,13 @@ namespace Search.Index
                 }
                 AddDocIdByAuthor(d.Author, d.DocumentId, SoundMap);
             }
-            this.map.Save(SoundMap.ToDictionary(k => k.Key, k => k.Value), this.path, "SoundEx");
+            this.map.Save(SoundMap, this.path, "SoundEx");
         }
 
 
-        public void BuildSoundexIndex(Dictionary<string, List<int>> SoundMap)
+        public void BuildSoundexIndex(SortedDictionary<string, List<int>> SoundMap)
         {
-            this.map.Save(SoundMap.ToDictionary(k => k.Key, k => k.Value), this.path, "SoundEx");
+            this.map.Save(SoundMap, this.path, "SoundEx");
         }
         /// <summary>
         /// Adds docID to the soundexIndex(hashmap) by the sound code of author name as a key
@@ -214,7 +214,8 @@ namespace Search.Index
 
         public List<int> Get(string key)
         {
-            return this.map.Get(key, this.path, "SoundEx");
+            List<int> result = this.map.Get(key, this.path, "SoundEx");
+            return (result == default(List<int>) ? new List<int>() : result);
         }
     }
 }

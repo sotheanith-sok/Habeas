@@ -3,6 +3,7 @@ using System.Linq;
 using Search.Query;
 using System;
 using Search.OnDiskDataStructure;
+using System.IO;
 namespace Search.Index
 {
     public class SpecialIndex : IIndex
@@ -21,6 +22,8 @@ namespace Search.Index
         private OnDiskDictionary<string, List<Posting>> onDiskPostingMap;
         private OnDiskDictionary<string, int> onDiskTermFrequencyMap;
 
+        private OnDiskDictionary<int, int> onDiskDocWeight;
+
         /// <summary>
         /// Constructs a hash table.
         /// </summary>
@@ -32,6 +35,7 @@ namespace Search.Index
 
             onDiskPostingMap = new OnDiskDictionary<string, List<Posting>>(new StringEncoderDecoder(), new PostingListEncoderDecoder());
             onDiskTermFrequencyMap = new OnDiskDictionary<string, int>(new StringEncoderDecoder(), new IntEncoderDecoder());
+            onDiskDocWeight = new OnDiskDictionary<int, int>(new IntEncoderDecoder(), new IntEncoderDecoder());
         }
 
         /// <summary>
@@ -104,7 +108,7 @@ namespace Search.Index
         /// </summary>
         public IReadOnlyList<string> GetVocabulary()
         {
-            List<string> vocabulary = onDiskPostingMap.GetKeys(Indexer.path,"Postings").ToList();
+            List<string> vocabulary = onDiskPostingMap.GetKeys(Indexer.path, "Postings").ToList();
             vocabulary.Sort();
             return vocabulary;
         }
@@ -196,11 +200,37 @@ namespace Search.Index
 
         public void Save()
         {
-            onDiskPostingMap.Save(hashMap.ToDictionary(k => k.Key, k => k.Value), Indexer.path, "Postings");
-            onDiskTermFrequencyMap.Save(termFrequency.ToDictionary(k => k.Key, k => k.Value), Indexer.path, "TermFrequency");
-
+            onDiskPostingMap.Save(hashMap, Indexer.path, "Postings");
+            onDiskTermFrequencyMap.Save(termFrequency, Indexer.path, "TermFrequency");
+            this.WriteDocWeights();
             hashMap.Clear();
             termFrequency.Clear();
+        }
+
+        ///<sumary>
+        /// Writes 8-byte values of document weights to docWeights.bin 
+        /// </summary>
+        /// <param name="index">the index to write</param>
+        /// <param name="dirPath">the absolute path to a directory where 'docWeights.bin' be saved</param>
+        /// <returns>the list of starting byte positions of each doc weight in docWeights.bin</returns>
+        public List<long> WriteDocWeights()
+        {
+            string filePath = Indexer.path + "docWeights.bin";
+            File.Create(filePath).Dispose();
+            List<long> startBytes = new List<long>();
+
+            using (BinaryWriter writer = new BinaryWriter(File.Open(filePath, FileMode.Append)))
+            {
+                foreach (double weight in this.GetAllDocWeights())
+                {
+                    startBytes.Add(writer.BaseStream.Length);
+                    writer.Write(BitConverter.DoubleToInt64Bits(weight));
+                }
+
+                Console.WriteLine($"docWeights.bin  {writer.BaseStream.Length} bytes");
+            }
+
+            return startBytes;
         }
     }
 }

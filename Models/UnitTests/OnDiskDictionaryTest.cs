@@ -16,7 +16,7 @@ namespace UnitTests
         [Fact]
         public void TestWriteToDisk()
         {
-            Dictionary<string, string> testValues = new Dictionary<string, string>();
+            SortedDictionary<string, string> testValues = new SortedDictionary<string, string>();
             testValues.Add("A", "Apple");
             testValues.Add("B", "Banana");
             testValues.Add("C", "Cat");

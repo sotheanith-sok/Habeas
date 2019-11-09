@@ -138,6 +138,7 @@ namespace Search.Query
 
             //Get posting for final candidates
             List<IList<Posting>> finalPostingList = new List<IList<Posting>>();
+            Console.WriteLine("Getting Postings for "+stemmedFinalCandidates.Count+" candidates");
             foreach (string candidate in stemmedFinalCandidates)
             {
                 finalPostingList.Add(index.GetPostings(candidate));
