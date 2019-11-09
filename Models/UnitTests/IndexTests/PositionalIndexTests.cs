@@ -25,7 +25,7 @@ namespace UnitTests.IndexTests
 
             //Act
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
-            PositionalInvertedIndex index = Indexer.IndexCorpus(corpus);
+            IIndex index = Indexer.IndexCorpus(corpus);
             var result = index.GetPostings(term);
 
             //Assert
@@ -57,7 +57,7 @@ namespace UnitTests.IndexTests
 
             //Act
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
-            PositionalInvertedIndex index = Indexer.IndexCorpus(corpus);
+            IIndex index = Indexer.IndexCorpus(corpus);
             var result = index.GetPostings(term);
 
             //Assert
@@ -89,7 +89,7 @@ namespace UnitTests.IndexTests
         {
             //Arrange
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
-            PositionalInvertedIndex index = Indexer.IndexCorpus(corpus);
+            IIndex index = Indexer.IndexCorpus(corpus);
             var expectedVocab = new List<string>{
                 "hello","world","it","is","snow",
                 "the","full","of","mystery","mr.snowman",
@@ -139,7 +139,7 @@ namespace UnitTests.IndexTests
         {
             //Arrange
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
-            PositionalInvertedIndex index = Indexer.IndexCorpus(corpus);
+            IIndex index = Indexer.IndexCorpus(corpus);
 
             //Act
             var actual = index.GetAllDocWeights();

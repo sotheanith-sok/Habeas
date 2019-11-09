@@ -24,15 +24,13 @@ namespace Search.Index
 
             String dirIndexPath = dirPath+"/index/";
 
-            Directory.CreateDirectory(dirIndexPath);
-
             List<long> vocabStartBytes = WriteVocab(index, dirIndexPath);
             List<long> postingsStartBytes = WritePostings(index, dirIndexPath);
             WriteVocabTable(vocabStartBytes, postingsStartBytes, dirIndexPath);
 
             List<long> docWeightsStartBytes = WriteDocWeights(index, dirIndexPath);
 
-            Console.WriteLine("Finished writing the index on disk.\n");
+            Console.WriteLine("Finished writing the index on disk.\n\n");
 
         }
 
@@ -147,8 +145,8 @@ namespace Search.Index
         /// Writes 8-byte values of document weights to docWeights.bin 
         /// </summary>
         /// <param name="index">the index to write</param>
-        /// <param name="dirPath">the absolute path to a directory where 'vocab.bin' be saved</param>
-        /// <returns>the list of starting byte positions of each term in vocab.bin</returns>
+        /// <param name="dirPath">the absolute path to a directory where 'docWeights.bin' be saved</param>
+        /// <returns>the list of starting byte positions of each doc weight in docWeights.bin</returns>
         public List<long> WriteDocWeights(IIndex index, string dirPath)
         {
             string filePath = dirPath + "docWeights.bin";

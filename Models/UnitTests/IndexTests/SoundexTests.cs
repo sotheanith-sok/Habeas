@@ -47,7 +47,7 @@ namespace UnitTests.IndexTests
             authorIndex.AddDocIdByAuthor("yoshi", 4, dictionary);
             authorIndex.AddDocIdByAuthor("yesh", 5, dictionary);
 
-            authorIndex.BuildSoundexIndex(dictionary.ToDictionary(k => k.Key, k => k.Value));
+            authorIndex.BuildSoundexIndex(dictionary);
             //Assert
             authorIndex.GetSoundexVocab().Should().HaveCount(2);
             authorIndex.Get("S440").Should().HaveCount(2);
@@ -66,7 +66,7 @@ namespace UnitTests.IndexTests
             authorIndex.AddDocIdByAuthor("sella  ", 2, dictionary);
             authorIndex.AddDocIdByAuthor("yashua  ovando", 2, dictionary);
             authorIndex.AddDocIdByAuthor(" yashua     ovando     ", 3, dictionary);
-            authorIndex.BuildSoundexIndex(dictionary.ToDictionary(k =>k.Key, k => k.Value));
+            authorIndex.BuildSoundexIndex(dictionary);
             //Assert
             authorIndex.GetSoundexVocab().Should().HaveCount(3);
         }
