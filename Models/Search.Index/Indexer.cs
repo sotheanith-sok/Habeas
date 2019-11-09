@@ -73,6 +73,7 @@ namespace Search.Index
 
             }
             new KGram(Indexer.path).buildKGram(unstemmedVocabulary);
+            new SoundEx(Indexer.path).BuildSoundexIndex(soundEx);
             index.Save();
             elapsedTime.Stop();
             Console.WriteLine("[Indexer] Done Indexing! Time Elapsed " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
