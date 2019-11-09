@@ -298,5 +298,84 @@ namespace Search.OnDiskDataStructure
             }
             return keys.ToArray();
         }
+
+
+
+        private List<int> ReadKeyBin(long[] table, string path, List<TKey> terms)
+        {
+            List<int> result = new List<int>();
+            using (FileStream file = File.Open(path, FileMode.Open))
+            using (BinaryReader binaryReader = new BinaryReader(file))
+            {
+                foreach (TKey term in terms)
+                {
+                    int i = 0;
+                    int j = table.Length / 2 - 1;
+                    while (i <= j)
+                    {
+                        int m = (i + j) / 2;
+                        long termStartByte = table[m * 2];
+
+                        long length = m * 2 < table.Length - 2 ? table[m * 2 + 2] - table[m * 2] : file.Length - table[m * 2];
+                        binaryReader.BaseStream.Position = termStartByte;
+                        TKey termFromFile = keyEncoderDecoder.Decoding((binaryReader.ReadBytes((int)(length))));
+
+                        int compareValue = term.CompareTo(termFromFile);
+                        if (compareValue == 0)
+                        {
+                            // found it!
+                            result.Add(m * 2 + 1);
+                            break;
+                        }
+                        else if (compareValue < 0)
+                        {
+                            j = m - 1;
+                        }
+                        else
+                        {
+                            i = m + 1;
+                        }
+                    }
+                    result.Add(-1);
+                }
+
+            }
+            Console.WriteLine(result.Count == terms.Count);
+            return result;
+
+        }
+
+        private List<TValue> ReadValueBin(long[] table, List<int> indexes, string path)
+        {
+            List<TValue> results = new List<TValue>();
+
+            using (FileStream file = File.Open(path, FileMode.Open))
+            using (BinaryReader reader = new BinaryReader(file))
+            {
+                foreach (int index in indexes)
+                {
+                    if (index == -1)
+                    {
+                        results.Add(default(TValue));
+                    }
+                    else
+                    {
+                        long startByte = table[index];
+                        long length = index < table.Length - 2 ? table[index + 2] - table[index] : file.Length - table[index];
+                        reader.BaseStream.Position = startByte;
+                        TValue result = valueEncoderDecoder.Decoding(reader.ReadBytes((int)(length)));
+                        results.Add(result);
+                    }
+                }
+            }
+
+            return results;
+
+        }
+
     }
+
+
 }
+
+
