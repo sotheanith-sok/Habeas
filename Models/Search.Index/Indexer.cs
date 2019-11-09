@@ -4,6 +4,8 @@ using Search.Text;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Timers;
 
 namespace Search.Index
 {
@@ -13,30 +15,25 @@ namespace Search.Index
         public static string path = "./";
 
 
-
-
-
-
-
-
         /// <summary>
         /// Constructs an index from a corpus of documents
         /// </summary>
         /// <param name="corpus">a corpus to be indexed</param>
-        public static PositionalInvertedIndex IndexCorpus(IDocumentCorpus corpus)
+        public static IIndex IndexCorpus(IDocumentCorpus corpus)
         {
-            //Time how long it takes to index the corpus
+            Console.WriteLine($"[Indexer] Indexing {corpus.CorpusSize} documents in the corpus...");
+
+            // Time how long it takes to index the corpus
             Stopwatch elapsedTime = new Stopwatch();
             elapsedTime.Start();
-            // Constuct a positional-inverted-index once 
-            PositionalInvertedIndex index = new PositionalInvertedIndex();
-            Console.WriteLine($"Indexing {corpus.CorpusSize} documents in the corpus...");
 
+            // Set the index type and token processor to use
+            SpecialIndex index = new SpecialIndex(Indexer.path);
             ITokenProcessor processor = new StemmingTokenProcesor();
 
             HashSet<string> unstemmedVocabulary = new HashSet<string>();
-
             SortedDictionary<string, List<int>> soundEx = new SortedDictionary<string, List<int>>();
+
             // Index the document
             foreach (IDocument doc in corpus.GetDocuments())
             {
@@ -76,10 +73,9 @@ namespace Search.Index
 
             }
             new KGram(Indexer.path).buildKGram(unstemmedVocabulary);
-
+            index.Save();
             elapsedTime.Stop();
-            Console.WriteLine("Elapsed " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
-
+            Console.WriteLine("[Indexer] Done Indexing! Time Elapsed " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
             return index;
         }
 
