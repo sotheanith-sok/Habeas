@@ -182,10 +182,9 @@ namespace Search.Index
                             //use the document id to access the document
                             IDocument doc = corpus.GetDocument(p.GetDocumentId());
                             //add the title to the list of strings to be returned
-                            results.Add(doc.Title);
+                            results.Add("("+p.GetRank().ToString()+") "+doc.Title);
                             //add the document id to the list of strings to be returned 
                             results.Add(doc.DocumentId.ToString());
-                            results.Add(p.GetRank().ToString());
                         }
                     }
                     //if there aren't any postings...
