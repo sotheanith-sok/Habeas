@@ -179,43 +179,45 @@ namespace Search.Index
                     return results;
                 }
 
-                
-                //the list of postings
-                IList<Posting> postings;
-                IQueryComponent component;
-                //create a stemming token processor
-                ITokenProcessor processor = new StemmingTokenProcesor();
-                //create a boolean query parser
-                BooleanQueryParser parser = new BooleanQueryParser();
-                //parse the query
-                component = parser.ParseQuery(query);
-                //get the postings
-                postings = component.GetPostings(index, processor);
-                //if there are any postings...
-                if (postings.Count > 0)
-                {
-                    //add the count of the postings to the list of strings to be returned
-                    results.Add(postings.Count.ToString());
-                    //for each posting...
-                    foreach (Posting p in postings)
-                    {
-                        //use the document id to access the document
-                        IDocument doc = corpus.GetDocument(p.DocumentId);
-                        //add the title to the list of strings to be returned
-                        results.Add(doc.Title);
-                        //add the document id to the list of strings to be returned 
-                        results.Add(doc.DocumentId.ToString());
-                    }
-                }
-                //if there aren't any postings...
                 else
                 {
-                    //add a zero to the list of strings to be returned
-                    results.Add("0");
-                }
-                //return the list of strings
-                return results;
+                    //the list of postings
+                    IList<Posting> postings;
+                    IQueryComponent component;
+                    //create a stemming token processor
+                    ITokenProcessor processor = new StemmingTokenProcesor();
+                    //create a boolean query parser
+                    BooleanQueryParser parser = new BooleanQueryParser();
+                    //parse the query
+                    component = parser.ParseQuery(query);
+                    //get the postings
+                    postings = component.GetPostings(index, processor);
+                    //if there are any postings...
+                    if (postings.Count > 0)
+                    {
+                        //add the count of the postings to the list of strings to be returned
+                        results.Add(postings.Count.ToString());
+                        //for each posting...
+                        foreach (Posting p in postings)
+                        {
+                            //use the document id to access the document
+                            IDocument doc = corpus.GetDocument(p.DocumentId);
+                            //add the title to the list of strings to be returned
+                            results.Add(doc.Title);
+                            //add the document id to the list of strings to be returned 
+                            results.Add(doc.DocumentId.ToString());
+                        }
+                    }
+                    //if there aren't any postings...
+                    else
+                    {
+                        //add a zero to the list of strings to be returned
+                        results.Add("0");
+                    }
+                    //return the list of strings
+                    return results;
 
+                }
             }
             catch (Exception e)
             {

@@ -18,7 +18,6 @@ namespace Search.Index
 
         private Dictionary<int, double> Accumulator; //stores the document id with its corresponding rank  [docId -> A_{docID}]
 
-        private List<int> HighestRankDocs; // stores the top 10 ranking documents using heap list
 
         /// <summary>
         /// Opens an on-disk positional inverted index that was constructed in the given path
@@ -43,6 +42,8 @@ namespace Search.Index
 
                 Console.WriteLine("Open docWeights.bin");
                 docWeightsReader = new BinaryReader(File.OpenRead(dirPath + "docWeights.bin"));
+
+                Accumulator = new Dictionary<int, double>();
                 
             }
             catch (FileNotFoundException ex)

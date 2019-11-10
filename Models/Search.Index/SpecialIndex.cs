@@ -1,4 +1,4 @@
-        /// <param name="term">a processed string</param>
+/// <param name="term">a processed string</param>
 using System.Collections.Generic;
 using System.Linq;
 using Search.Query;
@@ -28,8 +28,6 @@ namespace Search.Index
 
         private Dictionary<int, double> Accumulator; //stores the document id with its corresponding rank  [docId -> A_{docID}]
 
-        private List<int> HighestRankDocs; // stores the top 10 ranking documents using heap list
-        private BinaryReader docWeightsReader;
 
         /// <summary>
         /// Constructs a hash table.
@@ -43,6 +41,8 @@ namespace Search.Index
             onDiskPostingMap = new OnDiskDictionary<string, List<Posting>>(new StringEncoderDecoder(), new PostingListEncoderDecoder());
             onDiskTermFrequencyMap = new OnDiskDictionary<string, int>(new StringEncoderDecoder(), new IntEncoderDecoder());
             onDiskDocWeight = new OnDiskDictionary<int, int>(new IntEncoderDecoder(), new IntEncoderDecoder());
+
+            Accumulator = new Dictionary<int, double>();
         }
 
         /// <summary>
@@ -242,19 +242,25 @@ namespace Search.Index
 
         private double GetDocumentWeight(int docId)
         {
-            int startByte = docId * 8;
+            string filePath = Indexer.path + "docWeights.bin";
+        
+
+            using (BinaryReader docWeightsReader = new BinaryReader(File.Open(filePath,FileMode.Open)))
+            {
+                int startByte = docId * 8;
 
 
-            //Jump to the starting byte
-            docWeightsReader.BaseStream.Seek(startByte, SeekOrigin.Begin);
-            //Read a document weight and convert it
-            double docWeight = BitConverter.Int64BitsToDouble(docWeightsReader.ReadInt64());
+                //Jump to the starting byte
+                docWeightsReader.BaseStream.Seek(startByte, SeekOrigin.Begin);
+                //Read a document weight and convert it
+                double docWeight = BitConverter.Int64BitsToDouble(docWeightsReader.ReadInt64());
 
-            return docWeight;
+                return docWeight;
+            }
         }
 
         /// <summary>
-     
+
         /// </summary>
         /// <param name="query"></param>
         /// <returns></returns>
