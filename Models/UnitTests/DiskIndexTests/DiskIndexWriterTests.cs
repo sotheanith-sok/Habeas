@@ -15,16 +15,12 @@ namespace UnitTests.OnDiskIndexTests
         public void WriteIndexTest()
         {
             //Arrange
-<<<<<<< HEAD
-=======
-            string pathToIndex = corpusDir + "/index/";
-            Indexer.path = pathToIndex;
->>>>>>> RankedRetrieval
+
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(corpusDir);
             IIndex index = Indexer.IndexCorpus(corpus);
 
             //Act
-<<<<<<< HEAD
+
             DiskIndexWriter indexWriter = new DiskIndexWriter();
             indexWriter.WriteIndex(index, corpusDir);
 
@@ -33,33 +29,17 @@ namespace UnitTests.OnDiskIndexTests
             File.Exists(corpusDir+"/index/"+"postings.bin").Should().BeTrue();
             File.Exists(corpusDir+"/index/"+"vocabTable.bin").Should().BeTrue();
             File.Exists(corpusDir+"/index/"+"docWeights.bin").Should().BeTrue();
-=======
-            // DiskIndexWriter indexWriter = new DiskIndexWriter();
-            // indexWriter.WriteIndex(index, pathToIndex);
-
-            //Assert
-            File.Exists(pathToIndex + "Postings_Key.bin").Should().BeTrue();
-            File.Exists(pathToIndex + "Postings_Value.bin").Should().BeTrue();
-            File.Exists(pathToIndex + "Postings_Table.bin").Should().BeTrue();
-            File.Exists(pathToIndex + "docWeights.bin").Should().BeTrue();
->>>>>>> RankedRetrieval
 
             // int expectedVocabLength = 0; //??
             // File.ReadAllBytes(corpusDir+"vocab.bin").Length.Should().Be(expectedVocabLength);
             int expectedPostingsLength = (13 + 34 + 75) * 4;   // (# of documentFrequencies + # of docIDs + # of termFrequencies + # of positions) * byteSize
-<<<<<<< HEAD
+
             File.ReadAllBytes(corpusDir+"/index/"+"postings.bin").Length.Should().Be(expectedPostingsLength);
             int expectedVocabTableLength = 13 * 2 * 8;
             File.ReadAllBytes(corpusDir+"/index/"+"vocabTable.bin").Length.Should().Be(expectedVocabTableLength);
             int expectedDocWeightsLength = 5 * 8;
             File.ReadAllBytes(corpusDir+"/index/"+"docWeights.bin").Length.Should().Be(expectedDocWeightsLength);
-=======
-            File.ReadAllBytes(pathToIndex + "Postings_Value.bin").Length.Should().Be(expectedPostingsLength);
-            int expectedVocabTableLength = 13 * 2 * 8;
-            File.ReadAllBytes(pathToIndex + "Postings_Table.bin").Length.Should().Be(expectedVocabTableLength);
-            int expectedDocWeightsLength = 5 * 8;
-            File.ReadAllBytes(pathToIndex + "docWeights.bin").Length.Should().Be(expectedDocWeightsLength);
->>>>>>> RankedRetrieval
+
 
         }
 

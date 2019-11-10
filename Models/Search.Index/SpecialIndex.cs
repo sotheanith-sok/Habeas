@@ -24,6 +24,11 @@ namespace Search.Index
 
         private OnDiskDictionary<int, int> onDiskDocWeight;
 
+
+         private Dictionary<int, double> Accumulator; //stores the document id with its corresponding rank  [docId -> A_{docID}]
+
+        private List<int> HighestRankDocs; // stores the top 10 ranking documents using heap list
+
         /// <summary>
         /// Constructs a hash table.
         /// </summary>
@@ -235,18 +240,18 @@ namespace Search.Index
 
 
         
-        public void RankedDocuments(List<string> query, int corpusSize)
+        public void RankedDocuments(List<string> query)
         {
 
             //Build the Accumulator Hashmap
-            BuildAccumulator(query, corpusSize);
+            BuildAccumulator(query);
 
             //Build Priority Queue using the Accumulator divided by L_{d}  
             BuildPriorityQueue();
         
         }
 
-        private void BuildAccumulator(List<string> query, int corpusSize)
+        private void BuildAccumulator(List<string> query)
         {
             double query2TermWeight;
             double doc2TermWeight;
@@ -255,26 +260,20 @@ namespace Search.Index
             //caculate accumulated Value for each relevant document A_{d}
             foreach (string term in query)
             {
-                long startByte = ReadKeyBin(term);
-
-                //0. Jump to the starting byte
-                postingReader.BaseStream.Seek(startByte, SeekOrigin.Begin);
+        
 
 
+                
+                List<Posting> postings = onDiskPostingMap.Get(term, Indexer.path,"Postings");
+                int docFrequency = postings.Count;
 
-                //1. Read document frequency
-                int docFrequency = postingReader.ReadInt32();
+                query2TermWeight = Math.Log(1 + Indexer.corpusSize / docFrequency);
 
-                query2TermWeight = Math.Log(1 + corpusSize / docFrequency);
-
-                int prevDocID = 0;
-                for (int i = 0; i < docFrequency; i++)         //for each posting
-                {
-                    //2. Read documentID using gap
-                    int docID = prevDocID + postingReader.ReadInt32();
+                
+                for (int i = 0; i < docFrequency; i++)         
 
                     //3. Read term frequency
-                    int termFrequency = postingReader.ReadInt32();
+                    int termFrequency = onDiskTermFrequencyMap.Get(term, Indexer.path,"TermFrequency");
 
                     doc2TermWeight = 1 + Math.Log(termFrequency);
                     docAccumulator = query2TermWeight * doc2TermWeight;
