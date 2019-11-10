@@ -127,6 +127,8 @@
 		chooseDirectoryDIV.style.display = "block";
 		//clears remaining elements of the GUI
 		searchDirectoryDIV.style.display = "none";
+		document.getElementById("headerIndex").style.display = "none";
+		document.getElementById("chooseVocab").style.display = "none";
 		vocabTotal.innerHTML = "";
 		vocabContainer.innerHTML ="";
 		originalTerm.innerHTML ="";
