@@ -113,11 +113,32 @@ public class MaxPriorityQueue
     {
         List<InvertedIndex> priorityQueue = GetPriorityQueue();
         List<InvertedIndex> topTen = new List<InvertedIndex>();
-        for (int i = 0; i < 10; i++)
+        if (priorityQueue.Count > 0)
         {
-            InvertedIndex max = ExtractMax(priorityQueue);
-            topTen.Add(max);
+            if (priorityQueue.Count > 10)
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    InvertedIndex max = ExtractMax(priorityQueue);
+                    topTen.Add(max);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < priorityQueue.Count; i++)
+                {
+                    InvertedIndex max = ExtractMax(priorityQueue);
+                    topTen.Add(max);
+                }
+            }
         }
+        else
+        {
+            return topTen;
+        }
+
+
+        priorityQueue.Clear();
 
         return topTen;
 

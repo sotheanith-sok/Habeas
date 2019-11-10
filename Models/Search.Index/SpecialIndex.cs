@@ -16,15 +16,13 @@ namespace Search.Index
         //HashMap used to store termFrequency of current Document
         private readonly SortedDictionary<string, int> termFrequency;
 
-
         private static List<double> calculatedDocWeights;
 
-
         private OnDiskDictionary<string, List<Posting>> onDiskPostingMap;
+
         private OnDiskDictionary<string, int> onDiskTermFrequencyMap;
 
         private OnDiskDictionary<int, int> onDiskDocWeight;
-
 
         private Dictionary<int, double> Accumulator; //stores the document id with its corresponding rank  [docId -> A_{docID}]
 
@@ -272,7 +270,7 @@ namespace Search.Index
 
             //Build Priority Queue using the Accumulator divided by L_{d}  
             MaxPriorityQueue pq = BuildPriorityQueue();
-
+            Accumulator.Clear();
             //Retrieve Top Ten Documents and Return to Back End
             return pq.RetrieveTopTen();
 
