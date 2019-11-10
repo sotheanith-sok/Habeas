@@ -293,11 +293,11 @@ namespace Search.Index
                 {
                     int docFrequency = postings.Count;
 
-                    query2TermWeight = Math.Log(1 + Indexer.corpusSize / docFrequency);
+                    query2TermWeight = (double)Math.Log(1 + (double)Indexer.corpusSize / docFrequency);
 
                     foreach (Posting post in postings)
-                    {
-                        doc2TermWeight = 1 + Math.Log(post.Positions.Count); //TermFrequency = post.Positions.Count
+                    { 
+                        doc2TermWeight = (double)(1 + (double)Math.Log(post.Positions.Count)); //TermFrequency = post.Positions.Count
                         docAccumulator = query2TermWeight * doc2TermWeight;
 
                         if (Accumulator.ContainsKey(post.DocumentId))
