@@ -10,6 +10,7 @@ namespace Search.OnDiskDataStructure
     {
         void Save(SortedDictionary<TKey, TValue> valuePairs, string path, string fileName);
         TValue Get(TKey key, string path, string fileName);
+        List<TValue> Get(List<TKey> key, string path, string fileName);
         TKey[] GetKeys(string path, string fileName);
         TValue[] GetValues(string path, string fileName);
     }

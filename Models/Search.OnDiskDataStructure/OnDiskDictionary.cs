@@ -300,7 +300,13 @@ namespace Search.OnDiskDataStructure
         }
 
 
-
+        /// <summary>
+        /// Search for key bin for a list of term positions
+        /// </summary>
+        /// <param name="table">Array of positions</param>
+        /// <param name="path">Path to key bin</param>
+        /// <param name="term">term to search for</param>
+        /// <returns>index in table where key is located</returns>
         private List<int> ReadKeyBin(long[] table, string path, List<TKey> terms)
         {
             List<int> result = new List<int>();
@@ -340,11 +346,17 @@ namespace Search.OnDiskDataStructure
                 }
 
             }
-            Console.WriteLine(result.Count == terms.Count);
             return result;
 
         }
 
+
+        /// <summary>
+        /// Get all values for a list of keys
+        /// </summary>
+        /// <param name="path">Path to values bin</param>
+        /// <param name="fileName">Name of values bin</param>
+        /// <returns></returns>
         private List<TValue> ReadValueBin(long[] table, List<int> indexes, string path)
         {
             List<TValue> results = new List<TValue>();
@@ -368,11 +380,29 @@ namespace Search.OnDiskDataStructure
                     }
                 }
             }
-
             return results;
-
         }
 
+        /// <summary>
+        /// Get List of value for a list of key
+        /// </summary>
+        /// <param name="key">Key to search for</param>
+        /// <param name="path">Path to save disk to</param>
+        /// <param name="fileName">Filename of dictionary</param>
+        /// <returns>Value related to a given key</returns>
+        public List<TValue> Get(List<TKey> key, string path, string fileName)
+        {
+            path = Path.GetFullPath(path);
+            string keyBin = Path.Join(path, fileName + "_Key.bin");
+            string valueBin = Path.Join(path, fileName + "_Value.bin");
+            string tableBin = Path.Join(path, fileName + "_Table.bin");
+
+            long[] table = this.ReadTableBin(tableBin);
+            List<int> indexes = this.ReadKeyBin(table, keyBin, key);
+            List<TValue> values = this.ReadValueBin(table, indexes, valueBin);
+
+            return values;
+        }
     }
 
 

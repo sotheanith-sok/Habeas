@@ -47,6 +47,10 @@ namespace Search.Index
             }
             catch (FileNotFoundException ex)
             {
+// <<<<<<< QueryingIndex
+//                 Console.WriteLine("we have an error");
+// =======
+// >>>>>>> master
                 Console.WriteLine(ex.ToString());
             }
         }

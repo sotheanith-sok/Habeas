@@ -15,30 +15,29 @@ namespace UnitTests.OnDiskIndexTests
         public void WriteIndexTest()
         {
             //Arrange
-
+            string pathToIndex = corpusDir + "/index/";
+            Indexer.path = pathToIndex;
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(corpusDir);
             IIndex index = Indexer.IndexCorpus(corpus);
 
             //Act
-
-            DiskIndexWriter indexWriter = new DiskIndexWriter();
-            indexWriter.WriteIndex(index, corpusDir);
+            // DiskIndexWriter indexWriter = new DiskIndexWriter();
+            // indexWriter.WriteIndex(index, pathToIndex);
 
             //Assert
-            File.Exists(corpusDir+"/index/"+"vocab.bin").Should().BeTrue();
-            File.Exists(corpusDir+"/index/"+"postings.bin").Should().BeTrue();
-            File.Exists(corpusDir+"/index/"+"vocabTable.bin").Should().BeTrue();
-            File.Exists(corpusDir+"/index/"+"docWeights.bin").Should().BeTrue();
+            File.Exists(pathToIndex + "Postings_Key.bin").Should().BeTrue();
+            File.Exists(pathToIndex + "Postings_Value.bin").Should().BeTrue();
+            File.Exists(pathToIndex + "Postings_Table.bin").Should().BeTrue();
+            File.Exists(pathToIndex + "docWeights.bin").Should().BeTrue();
 
             // int expectedVocabLength = 0; //??
             // File.ReadAllBytes(corpusDir+"vocab.bin").Length.Should().Be(expectedVocabLength);
             int expectedPostingsLength = (13 + 34 + 75) * 4;   // (# of documentFrequencies + # of docIDs + # of termFrequencies + # of positions) * byteSize
-
-            File.ReadAllBytes(corpusDir+"/index/"+"postings.bin").Length.Should().Be(expectedPostingsLength);
+            File.ReadAllBytes(pathToIndex + "Postings_Value.bin").Length.Should().Be(expectedPostingsLength);
             int expectedVocabTableLength = 13 * 2 * 8;
-            File.ReadAllBytes(corpusDir+"/index/"+"vocabTable.bin").Length.Should().Be(expectedVocabTableLength);
+            File.ReadAllBytes(pathToIndex + "Postings_Table.bin").Length.Should().Be(expectedVocabTableLength);
             int expectedDocWeightsLength = 5 * 8;
-            File.ReadAllBytes(corpusDir+"/index/"+"docWeights.bin").Length.Should().Be(expectedDocWeightsLength);
+            File.ReadAllBytes(pathToIndex + "docWeights.bin").Length.Should().Be(expectedDocWeightsLength);
 
 
         }

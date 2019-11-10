@@ -1,3 +1,4 @@
+        /// <param name="term">a processed string</param>
 using System.Collections.Generic;
 using System.Linq;
 using Search.Query;
