@@ -288,12 +288,12 @@ namespace Search.Index
 
                 query2TermWeight = Math.Log(1 + Indexer.corpusSize / docFrequency);
 
-
+                
                 foreach (Posting post in postings)
                 {
                     doc2TermWeight = 1 + Math.Log(post.Positions.Count); //TermFrequency = post.Positions.Count
                     docAccumulator = query2TermWeight * doc2TermWeight;
-
+                    Console.WriteLine(post.DocumentId);
                     if (Accumulator.ContainsKey(post.DocumentId))
                     {
                         Accumulator[post.DocumentId] += docAccumulator;
