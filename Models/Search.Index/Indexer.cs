@@ -19,7 +19,7 @@ namespace Search.Index
         /// Constructs an index from a corpus of documents
         /// </summary>
         /// <param name="corpus">a corpus to be indexed</param>
-        public static PositionalInvertedIndex IndexCorpus(IDocumentCorpus corpus)
+        public static IIndex IndexCorpus(IDocumentCorpus corpus)
         {
             Console.WriteLine($"[Indexer] Indexing {corpus.CorpusSize} documents in the corpus...");
 
@@ -28,7 +28,7 @@ namespace Search.Index
             elapsedTime.Start();
 
             // Set the index type and token processor to use
-            PositionalInvertedIndex index = new PositionalInvertedIndex();
+            SpecialIndex index = new SpecialIndex(Indexer.path);
             ITokenProcessor processor = new StemmingTokenProcesor();
 
             HashSet<string> unstemmedVocabulary = new HashSet<string>();
@@ -73,10 +73,10 @@ namespace Search.Index
 
             }
             new KGram(Indexer.path).buildKGram(unstemmedVocabulary);
-
+            new SoundEx(Indexer.path).BuildSoundexIndex(soundEx);
+            index.Save();
             elapsedTime.Stop();
             Console.WriteLine("[Indexer] Done Indexing! Time Elapsed " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
-
             return index;
         }
 

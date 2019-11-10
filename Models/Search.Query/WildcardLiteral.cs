@@ -135,15 +135,8 @@ namespace Search.Query
             {
                 stemmedFinalCandidates.Add(stemmer.Stem(s).Value);
             }
-
-            //Get posting for final candidates
-            List<IList<Posting>> finalPostingList = new List<IList<Posting>>();
-            foreach (string candidate in stemmedFinalCandidates)
-            {
-                finalPostingList.Add(index.GetPostings(candidate));
-            }
-
-            return Merge.OrMerge(finalPostingList);
+            
+            return index.GetPostings(stemmedFinalCandidates.ToList());
         }
 
         /// <summary>

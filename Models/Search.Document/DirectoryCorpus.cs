@@ -120,6 +120,8 @@ namespace Search.Document
 
         public IDocument GetDocument(int id)
         {
+            if (mDocuments == null)
+                mDocuments = ReadDocuments();
             return mDocuments[id];
         }
 

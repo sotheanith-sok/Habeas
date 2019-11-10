@@ -10,12 +10,14 @@ namespace Search.Index
     {
         string path;
 
+        private OnDiskDictionary<string, List<int>> map;
         /// <summary>
         /// Constructs SoundExIndex with an empty soundMap
         /// </summary>
         public SoundEx(string path)
         {
             this.path = path;
+            map = new OnDiskDictionary<string, List<int>>(new StringEncoderDecoder(), new IntListEncoderDecoder());
         }
 
         /// <summary>
@@ -34,13 +36,13 @@ namespace Search.Index
                 }
                 AddDocIdByAuthor(d.Author, d.DocumentId, SoundMap);
             }
-            new OnDiskDictionary<string, List<int>>().Save(new StringEncoderDecoder(), new IntListEncoderDecoder(), SoundMap.ToDictionary(k => k.Key, k => k.Value), this.path, "SoundEx");
+            this.map.Save(SoundMap, this.path, "SoundEx");
         }
 
 
-        public void BuildSoundexIndex(Dictionary<string, List<int>> SoundMap)
+        public void BuildSoundexIndex(SortedDictionary<string, List<int>> SoundMap)
         {
-            new OnDiskDictionary<string, List<int>>().Save(new StringEncoderDecoder(), new IntListEncoderDecoder(), SoundMap.ToDictionary(k => k.Key, k => k.Value), this.path, "SoundEx");
+            this.map.Save(SoundMap, this.path, "SoundEx");
         }
         /// <summary>
         /// Adds docID to the soundexIndex(hashmap) by the sound code of author name as a key
@@ -173,7 +175,7 @@ namespace Search.Index
                 List<int> docIDs;
                 try
                 {
-                    List<int> temp = new OnDiskDictionary<string, List<int>>().Get(new StringEncoderDecoder(), new IntListEncoderDecoder(), soundCode, this.path, "SoundEx");
+                    List<int> temp = this.map.Get(soundCode, this.path, "SoundEx");
                     docIDs = temp == default(List<int>) ? new List<int>() : temp;
                 }
                 catch (KeyNotFoundException)
@@ -200,19 +202,20 @@ namespace Search.Index
         /// <returns>a sorted list of soundex</returns>
         public List<string> GetSoundexVocab()
         {
-            List<string> soundexVocab = new OnDiskDictionary<string, List<int>>().GetKeys(new StringEncoderDecoder(), this.path, "SoundEx").ToList();
+            List<string> soundexVocab = this.map.GetKeys(this.path, "SoundEx").ToList();
             soundexVocab.Sort();
             return soundexVocab;
         }
 
         public int GetCount()
         {
-            return new OnDiskDictionary<string, List<int>>().GetKeys(new StringEncoderDecoder(), this.path, "SoundEx").Length;
+            return this.map.GetKeys(this.path, "SoundEx").Length;
         }
 
         public List<int> Get(string key)
         {
-            return new OnDiskDictionary<string, List<int>>().Get(new StringEncoderDecoder(), new IntListEncoderDecoder(), key, this.path, "SoundEx");
+            List<int> result = this.map.Get(key, this.path, "SoundEx");
+            return (result == default(List<int>) ? new List<int>() : result);
         }
     }
 }
