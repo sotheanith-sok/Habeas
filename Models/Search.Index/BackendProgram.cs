@@ -178,14 +178,16 @@ namespace Search.Index
                         //add the count of the postings to the list of strings to be returned
                         results.Add(topTenDocs.Count.ToString());
                         //for each posting...
+                        int numberRank = 1;
                         foreach (MaxPriorityQueue.InvertedIndex p in topTenDocs)
                         {
                             //use the document id to access the document
                             IDocument doc = corpus.GetDocument(p.GetDocumentId());
                             //add the title to the list of strings to be returned
-                            results.Add("("+p.GetRank().ToString()+") "+doc.Title);
+                            results.Add("#"+numberRank+": ("+Math.Round(p.GetRank(), 5).ToString()+") "+doc.Title);
                             //add the document id to the list of strings to be returned 
                             results.Add(doc.DocumentId.ToString());
+                            numberRank++;
                         }
                     }
                     //if there aren't any postings...
