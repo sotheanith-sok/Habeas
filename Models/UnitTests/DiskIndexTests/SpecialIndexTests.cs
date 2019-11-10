@@ -12,6 +12,7 @@ using Search.Document;
 using System.Globalization;
 namespace UnitTests.DiskIndexTest
 {
+    [Collection("FileIORelated")]
     public class SpecialIndexTests
     {
         private static string corpusDir = "../../../Models/UnitTests/testCorpus/testCorpusBasic";
