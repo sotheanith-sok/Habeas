@@ -304,21 +304,20 @@ namespace Search.Index
         /// </summary>
 
 
-
-        public void RankedDocuments(List<string> query, int corpusSize)
+        public IList<MaxPriorityQueue.InvertedIndex> GetRankedDocuments(string[] query)
         {
 
             //Build the Accumulator Hashmap
-            BuildAccumulator(query, corpusSize);
+            BuildAccumulator(query);
 
             //Build Priority Queue using the Accumulator divided by L_{d}  
-            BuildPriorityQueue();
-            
+            MaxPriorityQueue pq = BuildPriorityQueue();
 
-
+            //Retrieve Top Ten Documents and Return to Back End
+            return pq.RetrieveTopTen();
 
         }
-        private void BuildAccumulator(List<string> query, int corpusSize)
+        private void BuildAccumulator(string[] query)
         {
             double query2TermWeight;
             double doc2TermWeight;
@@ -337,7 +336,7 @@ namespace Search.Index
                 //1. Read document frequency
                 int docFrequency = postingReader.ReadInt32();
 
-                query2TermWeight = Math.Log(1 + corpusSize / docFrequency);
+                query2TermWeight = Math.Log(1 + Indexer.corpusSize / docFrequency);
 
                 int prevDocID = 0;
                 for (int i = 0; i < docFrequency; i++)         //for each posting
@@ -388,7 +387,7 @@ namespace Search.Index
                 documentID = candidate.Key;
 
                 //add to list to perform priority queue on 
-                priorityQueue.MAXHEAPINSERT(finalRank, documentID);
+                priorityQueue.MaxHeapInsert(finalRank, documentID);
             }
 
             return priorityQueue;

@@ -4,12 +4,12 @@ using System.IO;
 using Search.Query;
 public class MaxPriorityQueue
 {
-    public class RevertedIndex
+    public class InvertedIndex
     {
         private double rank;
         private int docID;
 
-        public RevertedIndex(double rank, int docID)
+        public InvertedIndex(double rank, int docID)
         {
             this.rank = rank;
             this.docID = docID;
@@ -19,23 +19,27 @@ public class MaxPriorityQueue
         {
             return rank;
         }
+        public int GetDocumentId()
+        {
+            return docID;
+        }
     }
 
-    private List<RevertedIndex> priorityQueue;
+    private List<InvertedIndex> priorityQueue;
 
 
     public MaxPriorityQueue()
     {
-        priorityQueue = new List<RevertedIndex>();
+        priorityQueue = new List<InvertedIndex>();
     }
 
-    private int LEFT(int index)
+    private int Left(int index)
     {
-        int LEFT = index * 2 + 1;
-        return LEFT;
+        int Left = index * 2 + 1;
+        return Left;
     }
 
-    private int PARENT(int index)
+    private int Parent(int index)
     {
 
         if (index < 1)
@@ -47,17 +51,17 @@ public class MaxPriorityQueue
         }
 
     }
-    private int RIGHT(int index)
+    private int Right(int index)
     {
-        int RIGHT = index * 2 + 2;
-        return RIGHT;
+        int Right = index * 2 + 2;
+        return Right;
     }
 
-    private void MAXHEAPIFY(List<RevertedIndex> queue, int index)
+    private void MaxHeapify(List<InvertedIndex> queue, int index)
     {
 
-        int leftChild = LEFT(index);
-        int rightChild = RIGHT(index);
+        int leftChild = Left(index);
+        int rightChild = Right(index);
         int largest = index;
 
         if (leftChild <= queue.Count - 1 && rightChild <= queue.Count - 1)
@@ -81,37 +85,37 @@ public class MaxPriorityQueue
 
         if (largest != index)
         {
-            RevertedIndex temp = queue[index];
+            InvertedIndex temp = queue[index];
             queue[index] = queue[largest];
             queue[largest] = temp;
-            MAXHEAPIFY(queue, largest);
+            MaxHeapify(queue, largest);
         }
     }
 
 
 
-    public void MAXHEAPINSERT(double queue, int docId)
+    public void MaxHeapInsert(double rank, int docId)
     {
-        RevertedIndex element = new RevertedIndex(queue, docId);
-        List<RevertedIndex> tempQueue = GetPriorityQueue();
+        InvertedIndex element = new InvertedIndex(rank, docId);
+        List<InvertedIndex> tempQueue = GetPriorityQueue();
         tempQueue.Add(element);
 
         for (int i = tempQueue.Count / 2; i >= 0; i--)
         {
-            MAXHEAPIFY(tempQueue, i);
+            MaxHeapify(tempQueue, i);
         }
 
         SetPriorityQueue(tempQueue);
 
     }
 
-    public List<RevertedIndex> RetrieveTopTen()
+    public List<InvertedIndex> RetrieveTopTen()
     {
-        List<RevertedIndex> priorityQueue = GetPriorityQueue();
-        List<RevertedIndex> topTen = new List<RevertedIndex>();
+        List<InvertedIndex> priorityQueue = GetPriorityQueue();
+        List<InvertedIndex> topTen = new List<InvertedIndex>();
         for (int i = 0; i < 10; i++)
         {
-            RevertedIndex max = EXTRACTMAX(priorityQueue);
+            InvertedIndex max = ExtractMax(priorityQueue);
             topTen.Add(max);
         }
 
@@ -119,25 +123,25 @@ public class MaxPriorityQueue
 
     }
 
-    private RevertedIndex EXTRACTMAX(List<RevertedIndex> queue)
+    private InvertedIndex ExtractMax(List<InvertedIndex> queue)
     {
         if (queue.Count < 1)
             Console.WriteLine("ERROR: Underflow");
-        RevertedIndex max = queue[0];
+        InvertedIndex max = queue[0];
         queue[0] = queue[queue.Count - 1];
         queue.RemoveAt(queue.Count - 1);
-        MAXHEAPIFY(queue, 0);
+        MaxHeapify(queue, 0);
 
         return max;
 
     }
 
-    public List<RevertedIndex> GetPriorityQueue()
+    public List<InvertedIndex> GetPriorityQueue()
     {
         return priorityQueue;
     }
 
-    public void SetPriorityQueue(List<RevertedIndex> sortedRankedList)
+    public void SetPriorityQueue(List<InvertedIndex> sortedRankedList)
     {
         priorityQueue = sortedRankedList;
     }

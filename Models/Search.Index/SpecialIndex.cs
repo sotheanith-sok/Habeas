@@ -25,9 +25,10 @@ namespace Search.Index
         private OnDiskDictionary<int, int> onDiskDocWeight;
 
 
-         private Dictionary<int, double> Accumulator; //stores the document id with its corresponding rank  [docId -> A_{docID}]
+        private Dictionary<int, double> Accumulator; //stores the document id with its corresponding rank  [docId -> A_{docID}]
 
         private List<int> HighestRankDocs; // stores the top 10 ranking documents using heap list
+        private BinaryReader docWeightsReader;
 
         /// <summary>
         /// Constructs a hash table.
@@ -238,59 +239,68 @@ namespace Search.Index
             return startBytes;
         }
 
+        private double GetDocumentWeight(int docId)
+        {
+            int startByte = docId * 8;
 
-        
-        public void RankedDocuments(List<string> query)
+
+            //Jump to the starting byte
+            docWeightsReader.BaseStream.Seek(startByte, SeekOrigin.Begin);
+            //Read a document weight and convert it
+            double docWeight = BitConverter.Int64BitsToDouble(docWeightsReader.ReadInt64());
+
+            return docWeight;
+        }
+
+        /// <summary>
+     
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        public IList<MaxPriorityQueue.InvertedIndex> GetRankedDocuments(string[] query)
         {
 
             //Build the Accumulator Hashmap
             BuildAccumulator(query);
 
             //Build Priority Queue using the Accumulator divided by L_{d}  
-            BuildPriorityQueue();
-        
+            MaxPriorityQueue pq = BuildPriorityQueue();
+
+            //Retrieve Top Ten Documents and Return to Back End
+            return pq.RetrieveTopTen();
+
         }
 
-        private void BuildAccumulator(List<string> query)
+        private void BuildAccumulator(string[] query)
         {
             double query2TermWeight;
             double doc2TermWeight;
             double docAccumulator;
+            string path = Indexer.path;
 
             //caculate accumulated Value for each relevant document A_{d}
             foreach (string term in query)
             {
-        
 
-
-                
-                List<Posting> postings = onDiskPostingMap.Get(term, Indexer.path,"Postings");
+                List<Posting> postings = onDiskPostingMap.Get(term, path, "Postings");
                 int docFrequency = postings.Count;
 
                 query2TermWeight = Math.Log(1 + Indexer.corpusSize / docFrequency);
 
-                
-                for (int i = 0; i < docFrequency; i++)         
 
-                    //3. Read term frequency
-                    int termFrequency = onDiskTermFrequencyMap.Get(term, Indexer.path,"TermFrequency");
-
-                    doc2TermWeight = 1 + Math.Log(termFrequency);
+                foreach (Posting post in postings)
+                {
+                    doc2TermWeight = 1 + Math.Log(post.Positions.Count); //TermFrequency = post.Positions.Count
                     docAccumulator = query2TermWeight * doc2TermWeight;
 
-                    if (Accumulator.ContainsKey(docID))
+                    if (Accumulator.ContainsKey(post.DocumentId))
                     {
-                        Accumulator[docID] += docAccumulator;
+                        Accumulator[post.DocumentId] += docAccumulator;
                     }
                     else
                     {
-                        Accumulator.Add(docID, docAccumulator);
+                        Accumulator.Add(post.DocumentId, docAccumulator);
                     }
-
-                    //Skip the positions
-                    postingReader.BaseStream.Seek(termFrequency * sizeof(int), SeekOrigin.Current);
-
-                    prevDocID = docID;  //update prevDocID
                 }
             }
         }
@@ -299,7 +309,6 @@ namespace Search.Index
 
             double tempDocWeight;
             double finalRank;
-            int documentID;
 
             MaxPriorityQueue priorityQueue = new MaxPriorityQueue();
             foreach (KeyValuePair<int, double> candidate in Accumulator)
@@ -308,17 +317,17 @@ namespace Search.Index
                 tempDocWeight = GetDocumentWeight(candidate.Key);
 
                 // divide Accumulated Value A_{d} by L_{d} 
-                finalRank = (double) candidate.Value / tempDocWeight;
+                finalRank = (double)candidate.Value / tempDocWeight;
 
-                //TO-DO implement binary heap priority queue
-                //get docID
-                documentID = candidate.Key;
+
 
                 //add to list to perform priority queue on 
-                priorityQueue.MAXHEAPINSERT(finalRank, documentID);
+                priorityQueue.MaxHeapInsert(finalRank, candidate.Key);
             }
 
             return priorityQueue;
+
+
         }
     }
 }

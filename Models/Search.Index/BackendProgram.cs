@@ -145,19 +145,48 @@ namespace Search.Index
         {
             try
             {
-                if (mode == false)
-                {
-                    //do ranked retrieval
-                }
+
                 //the list of strings to return 
                 List<String> results = new List<string>();
+                if (mode == false)
+                {
+                    IList<MaxPriorityQueue.InvertedIndex> topTenDocs;
+                    string[] terms = query.Split(' ');
+                    topTenDocs = index.GetRankedDocuments(terms);
+                    if (topTenDocs.Count > 0)
+                    {
+                        //add the count of the postings to the list of strings to be returned
+                        results.Add(topTenDocs.Count.ToString());
+                        //for each posting...
+                        foreach (MaxPriorityQueue.InvertedIndex p in topTenDocs)
+                        {
+                            //use the document id to access the document
+                            IDocument doc = corpus.GetDocument(p.GetDocumentId());
+                            //add the title to the list of strings to be returned
+                            results.Add(doc.Title);
+                            //add the document id to the list of strings to be returned 
+                            results.Add(doc.DocumentId.ToString());
+                            results.Add(p.GetRank().ToString());
+                        }
+                    }
+                    //if there aren't any postings...
+                    else
+                    {
+                        //add a zero to the list of strings to be returned
+                        results.Add("0");
+                    }
+                    //return the list of strings
+                    return results;
+                }
+
+                
                 //the list of postings
                 IList<Posting> postings;
                 IQueryComponent component;
-                //create a boolean query parser
-                BooleanQueryParser parser = new BooleanQueryParser();
                 //create a stemming token processor
                 ITokenProcessor processor = new StemmingTokenProcesor();
+                //create a boolean query parser
+                BooleanQueryParser parser = new BooleanQueryParser();
                 //parse the query
                 component = parser.ParseQuery(query);
                 //get the postings
@@ -186,6 +215,7 @@ namespace Search.Index
                 }
                 //return the list of strings
                 return results;
+
             }
             catch (Exception e)
             {

@@ -42,6 +42,8 @@ namespace Search.Index
         IReadOnlyList<string> GetVocabulary();
 
         IList<double> GetAllDocWeights();
+
+        IList<MaxPriorityQueue.InvertedIndex> GetRankedDocuments(string[] query);
     }
 }
 
