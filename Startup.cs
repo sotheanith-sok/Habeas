@@ -72,6 +72,7 @@ namespace Habeas
                 Show = false
             };
             var mainWindow = Electron.WindowManager.CreateWindowAsync(options).Result;
+            mainWindow.WebContents.Session.ClearCacheAsync();
             mainWindow.SetMenuBarVisibility(false);
             mainWindow.OnReadyToShow += () =>
             {
