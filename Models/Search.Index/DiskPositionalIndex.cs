@@ -309,7 +309,7 @@ namespace Search.Index
         /// </summary>
 
 
-        public IList<MaxPriorityQueue.InvertedIndex> GetRankedDocuments(string[] query)
+        public IList<MaxPriorityQueue.InvertedIndex> GetRankedDocuments(List<string> query)
         {
 
             //Build the Accumulator Hashmap
@@ -322,7 +322,7 @@ namespace Search.Index
             return pq.RetrieveTopTen();
 
         }
-        private void BuildAccumulator(string[] query)
+        private void BuildAccumulator(List<string> query)
         {
             double query2TermWeight;
             double doc2TermWeight;

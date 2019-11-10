@@ -8,18 +8,29 @@ using System.IO;
 using FluentAssertions;
 using Search.Index;
 using Xunit;
+using Search.Document;
 using System.Globalization;
 namespace UnitTests.DiskIndexTest
 {
     public class SpecialIndexTests
     {
-        private static string dirPath = "../../../Models/UnitTests/testCorpus/testCorpusBasic";
+        private static string corpusDir = "../../../Models/UnitTests/testCorpus/testCorpusBasic";
 
         [Fact]
         public void GetRankedDocumentsTest()
         {
-            SpecialIndex testIndex = new SpecialIndex(dirPath);
-            string[] terms = {"hello"};
+            string pathToIndex = Path.Join(corpusDir, "/index/");
+            // Indexer.path = pathToIndex;
+            // IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(corpusDir);
+
+
+            // Directory.CreateDirectory(Path.Join(corpusDir, "/index/"));
+            // IIndex index = Indexer.IndexCorpus(corpus);
+
+    
+            IIndex testIndex = new SpecialIndex(pathToIndex);
+            List<string> terms= new List<string>();
+            terms.Add("hello");
             testIndex.GetRankedDocuments(terms);
         }
     }

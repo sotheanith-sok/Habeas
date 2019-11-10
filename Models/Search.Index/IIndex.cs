@@ -43,7 +43,7 @@ namespace Search.Index
 
         IList<double> GetAllDocWeights();
 
-        IList<MaxPriorityQueue.InvertedIndex> GetRankedDocuments(string[] query);
+        IList<MaxPriorityQueue.InvertedIndex> GetRankedDocuments(List<string> query);
     }
 }
 

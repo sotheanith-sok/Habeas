@@ -192,7 +192,7 @@ namespace Search.Index
             return calculatedDocWeights;
         }
 
-        public IList<MaxPriorityQueue.InvertedIndex> GetRankedDocuments(string[] query)
+        public IList<MaxPriorityQueue.InvertedIndex> GetRankedDocuments(List<string> query)
         {
             MaxPriorityQueue temp = new MaxPriorityQueue();
             return temp.GetPriorityQueue();;

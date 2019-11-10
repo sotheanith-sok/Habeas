@@ -243,9 +243,9 @@ namespace Search.Index
         private double GetDocumentWeight(int docId)
         {
             string filePath = Indexer.path + "docWeights.bin";
-        
 
-            using (BinaryReader docWeightsReader = new BinaryReader(File.Open(filePath,FileMode.Open)))
+
+            using (BinaryReader docWeightsReader = new BinaryReader(File.Open(filePath, FileMode.Open)))
             {
                 int startByte = docId * 8;
 
@@ -264,7 +264,7 @@ namespace Search.Index
         /// </summary>
         /// <param name="query"></param>
         /// <returns></returns>
-        public IList<MaxPriorityQueue.InvertedIndex> GetRankedDocuments(string[] query)
+        public IList<MaxPriorityQueue.InvertedIndex> GetRankedDocuments(List<string> query)
         {
 
             //Build the Accumulator Hashmap
@@ -278,7 +278,7 @@ namespace Search.Index
 
         }
 
-        private void BuildAccumulator(string[] query)
+        private void BuildAccumulator(List<string> query)
         {
             double query2TermWeight;
             double doc2TermWeight;
@@ -290,23 +290,28 @@ namespace Search.Index
             {
 
                 List<Posting> postings = onDiskPostingMap.Get(term, path, "Postings");
-                int docFrequency = postings.Count;
 
-                query2TermWeight = Math.Log(1 + Indexer.corpusSize / docFrequency);
-
-
-                foreach (Posting post in postings)
+                if (postings != default(List<Posting>))
                 {
-                    doc2TermWeight = 1 + Math.Log(post.Positions.Count); //TermFrequency = post.Positions.Count
-                    docAccumulator = query2TermWeight * doc2TermWeight;
 
-                    if (Accumulator.ContainsKey(post.DocumentId))
+                    int docFrequency = postings.Count;
+
+                    query2TermWeight = Math.Log(1 + Indexer.corpusSize / docFrequency);
+
+
+                    foreach (Posting post in postings)
                     {
-                        Accumulator[post.DocumentId] += docAccumulator;
-                    }
-                    else
-                    {
-                        Accumulator.Add(post.DocumentId, docAccumulator);
+                        doc2TermWeight = 1 + Math.Log(post.Positions.Count); //TermFrequency = post.Positions.Count
+                        docAccumulator = query2TermWeight * doc2TermWeight;
+
+                        if (Accumulator.ContainsKey(post.DocumentId))
+                        {
+                            Accumulator[post.DocumentId] += docAccumulator;
+                        }
+                        else
+                        {
+                            Accumulator.Add(post.DocumentId, docAccumulator);
+                        }
                     }
                 }
             }

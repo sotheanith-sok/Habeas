@@ -152,7 +152,26 @@ namespace Search.Index
                 {
                     IList<MaxPriorityQueue.InvertedIndex> topTenDocs;
                     string[] terms = query.Split(' ');
-                    topTenDocs = index.GetRankedDocuments(terms);
+                    List<List<string>> processedTerms = new List<List<string>>();
+
+                    ITokenProcessor processor = new StemmingTokenProcesor();
+             
+                    foreach(string term in terms)
+                    {
+                        processedTerms.Add(processor.ProcessToken(term));
+                    }
+                    
+                    List<string> finalTerms = new List<string>();
+                    foreach(List<string> term in processedTerms)
+                    {
+                        foreach(string independentTerm in term)
+                        {
+                            finalTerms.Add(independentTerm);
+                        }
+                    }
+
+                    
+                    topTenDocs = index.GetRankedDocuments(finalTerms);
                     if (topTenDocs.Count > 0)
                     {
                         //add the count of the postings to the list of strings to be returned
