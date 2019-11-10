@@ -38,6 +38,7 @@ namespace Search.Index
                 // bool doesOnDiskIndexExist = Directory.Exists(pathToIndex) && (Directory.GetFiles(pathToIndex).Length != 0);
 
                 corpus = DirectoryCorpus.LoadTextDirectory(path);
+                Indexer.corpusSize= corpus.CorpusSize;
 
                 if (doesOnDiskIndexExist)
                 {

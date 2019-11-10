@@ -20,18 +20,16 @@ namespace UnitTests.DiskIndexTest
         public void GetRankedDocumentsTest()
         {
             string pathToIndex = Path.Join(corpusDir, "/index/");
-            // Indexer.path = pathToIndex;
-            // IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(corpusDir);
+            Indexer.path = pathToIndex;
+            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(corpusDir);
 
 
-            // Directory.CreateDirectory(Path.Join(corpusDir, "/index/"));
-            // IIndex index = Indexer.IndexCorpus(corpus);
+            Directory.CreateDirectory(Path.Join(corpusDir, "/index/"));
+            IIndex index = Indexer.IndexCorpus(corpus);
 
-    
-            IIndex testIndex = new SpecialIndex(pathToIndex);
             List<string> terms= new List<string>();
             terms.Add("hello");
-            testIndex.GetRankedDocuments(terms);
+            index.GetRankedDocuments(terms);
         }
     }
 

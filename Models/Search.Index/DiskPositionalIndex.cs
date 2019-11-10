@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System;
 using System.IO;
 using Search.Query;
+using Search.Document;
 
 namespace Search.Index
 {
@@ -340,7 +341,6 @@ namespace Search.Index
 
                 //1. Read document frequency
                 int docFrequency = postingReader.ReadInt32();
-
                 query2TermWeight = Math.Log(1 + Indexer.corpusSize / docFrequency);
 
                 int prevDocID = 0;

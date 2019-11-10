@@ -291,7 +291,6 @@ namespace Search.Index
 
                 if (postings != default(List<Posting>))
                 {
-
                     int docFrequency = postings.Count;
 
                     query2TermWeight = Math.Log(1 + Indexer.corpusSize / docFrequency);
@@ -300,24 +299,14 @@ namespace Search.Index
                     {
                         doc2TermWeight = 1 + Math.Log(post.Positions.Count); //TermFrequency = post.Positions.Count
                         docAccumulator = query2TermWeight * doc2TermWeight;
-                        Console.WriteLine(post.DocumentId);
+
                         if (Accumulator.ContainsKey(post.DocumentId))
                         {
                             Accumulator[post.DocumentId] += docAccumulator;
                         }
                         else
                         {
-                            doc2TermWeight = 1 + Math.Log(post.Positions.Count); //TermFrequency = post.Positions.Count
-                            docAccumulator = query2TermWeight * doc2TermWeight;
-
-                            if (Accumulator.ContainsKey(post.DocumentId))
-                            {
-                                Accumulator[post.DocumentId] += docAccumulator;
-                            }
-                            else
-                            {
-                                Accumulator.Add(post.DocumentId, docAccumulator);
-                            }
+                            Accumulator.Add(post.DocumentId, docAccumulator);
                         }
                     }
                 }
@@ -337,8 +326,6 @@ namespace Search.Index
 
                 // divide Accumulated Value A_{d} by L_{d} 
                 finalRank = (double)candidate.Value / tempDocWeight;
-
-
 
                 //add to list to perform priority queue on 
                 priorityQueue.MaxHeapInsert(finalRank, candidate.Key);
