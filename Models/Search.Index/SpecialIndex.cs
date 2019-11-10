@@ -26,6 +26,10 @@ namespace Search.Index
 
         private Dictionary<int, double> Accumulator; //stores the document id with its corresponding rank  [docId -> A_{docID}]
 
+        public Dictionary<int, double> returnAccumulatorValue (){
+            return Accumulator;
+        }
+
 
         /// <summary>
         /// Constructs a hash table.
@@ -296,7 +300,7 @@ namespace Search.Index
                     query2TermWeight = (double)Math.Log(1 + (double)Indexer.corpusSize / docFrequency);
 
                     foreach (Posting post in postings)
-                    { 
+                    {
                         doc2TermWeight = (double)(1 + (double)Math.Log(post.Positions.Count)); //TermFrequency = post.Positions.Count
                         docAccumulator = query2TermWeight * doc2TermWeight;
 
