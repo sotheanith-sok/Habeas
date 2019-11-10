@@ -123,18 +123,30 @@ namespace Search.Index
                     return new List<string>();
                 }
 
-                foreach (string k in possibleKGram)
-                {
-                    List<string> KGram = this.map.Get(k, this.path, "KGram");
-                    if (KGram != default(List<string>))
-                    {
-                        foreach (string v in KGram)
-                        {
-                            candidates.Add(v);
-                        }
-                    }
+               
+                // foreach (string k in possibleKGram)
+                // {
+                //     List<string> KGram = this.map.Get(k, this.path, "KGram");
+                //     if (KGram != default(List<string>))
+                //     {
+                //         foreach (string v in KGram)
+                //         {
+                //             candidates.Add(v);
+                //         }
+                //     }
 
+                // }
+
+                List<List<string>> KGramLists = new List<List<string>>(this.map.Get(possibleKGram,this.path,"KGram"));
+                KGramLists.RemoveAll(item =>item ==null);
+
+                foreach(List<string> k in KGramLists){
+                    foreach (string item in k)
+                    {
+                        candidates.Add(item);
+                    }
                 }
+
                 return candidates.ToList();
             }
             else
