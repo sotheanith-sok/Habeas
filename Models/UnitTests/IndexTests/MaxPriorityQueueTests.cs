@@ -18,7 +18,9 @@ namespace UnitTests.IndexTests
         [Fact]
         public void testingMaxPQ()
         {
+            //random rank values corresponding to list of document id
             List<double> rankValue = new List<double>{8.5,9.5,12.5,2.5,6.5,8.5,17.5,3.5,0.5,1.5};
+
             List<int> docId = new List<int>{1,2,3,4,5,6,7,8,9,10};
 
             //insert into the priority queue using max heap property
@@ -42,8 +44,12 @@ namespace UnitTests.IndexTests
             // this implements extract max from priority queue. which pulls highest documents continuously and returns a list
             List<MaxPriorityQueue.InvertedIndex> testList =  testingQueue.RetrieveTopTen();
             testList.Count.Should().Be(10);
-            testList[0].GetDocumentId().Should().Be(7); // highest value (17.5) in the priority queue 
-            testList[1].GetDocumentId().Should().Be(3); // document with second highest value (12.5) in the priority queue
+
+            // highest value (17.5) in the priority queue 
+            testList[0].GetDocumentId().Should().Be(7); 
+
+            // document with second highest value (12.5) in the priority queue
+            testList[1].GetDocumentId().Should().Be(3); 
             
         }
     }
