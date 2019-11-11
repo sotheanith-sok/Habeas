@@ -46,16 +46,19 @@ namespace Search.Index
                     //Process token to term
                     List<string> terms = processor.ProcessToken(token);
                     //Add term to the index
+                    bool termsIsAdded = false;
                     foreach (string term in terms)
                     {
                         if (term.Length > 0)
                         {
+                            Console.WriteLine(position + ":" + term);
                             index.AddTerm(term, doc.DocumentId, position);
+                            termsIsAdded = true;
                             // Console.WriteLine("¾"); //This thing will print out as _. So index is correct.
                         }
                     }
                     //Increase the position num
-                    position += 1;
+                    position = termsIsAdded ? position + 1 : position;
 
                     //Keep track of vocabularies for K-gram
                     foreach (string term in ((NormalTokenProcessor)processor).ProcessToken(token))
