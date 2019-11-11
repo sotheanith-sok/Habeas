@@ -13,6 +13,7 @@ namespace Search.Index
     {
 
         public static string path = "./";
+        public static int corpusSize = 0;
 
 
         /// <summary>
@@ -22,7 +23,6 @@ namespace Search.Index
         public static IIndex IndexCorpus(IDocumentCorpus corpus)
         {
             Console.WriteLine($"[Indexer] Indexing {corpus.CorpusSize} documents in the corpus...");
-
             // Time how long it takes to index the corpus
             Stopwatch elapsedTime = new Stopwatch();
             elapsedTime.Start();

@@ -38,6 +38,7 @@ namespace Search.Index
                 // bool doesOnDiskIndexExist = Directory.Exists(pathToIndex) && (Directory.GetFiles(pathToIndex).Length != 0);
 
                 corpus = DirectoryCorpus.LoadTextDirectory(path);
+                Indexer.corpusSize= corpus.CorpusSize;
 
                 if (doesOnDiskIndexExist)
                 {
@@ -145,47 +146,103 @@ namespace Search.Index
         {
             try
             {
-                if (mode == false)
-                {
-                    //do ranked retrieval
-                }
+
                 //the list of strings to return 
                 List<String> results = new List<string>();
-                //the list of postings
-                IList<Posting> postings;
-                IQueryComponent component;
-                //create a boolean query parser
-                BooleanQueryParser parser = new BooleanQueryParser();
-                //create a stemming token processor
-                ITokenProcessor processor = new StemmingTokenProcesor();
-                //parse the query
-                component = parser.ParseQuery(query);
-                //get the postings
-                postings = component.GetPostings(index, processor);
-                //if there are any postings...
-                if (postings.Count > 0)
+                if (mode == false)
                 {
-                    //add the count of the postings to the list of strings to be returned
-                    results.Add(postings.Count.ToString());
-                    //for each posting...
-                    foreach (Posting p in postings)
-                    {
-                        //use the document id to access the document
-                        IDocument doc = corpus.GetDocument(p.DocumentId);
-                        //add the title to the list of strings to be returned
-                        results.Add(doc.Title);
-                        //add the document id to the list of strings to be returned 
-                        results.Add(doc.DocumentId.ToString());
+                    if(query.Contains('*')){
+                        return new List<string>();
                     }
+                    IList<MaxPriorityQueue.InvertedIndex> topTenDocs;
+                    string[] terms = query.Split(' ');
+                    List<List<string>> processedTerms = new List<List<string>>();
+
+                    ITokenProcessor processor = new StemmingTokenProcesor();
+             
+                    foreach(string term in terms)
+                    {
+                        processedTerms.Add(processor.ProcessToken(term));
+                    }
+                    
+                    List<string> finalTerms = new List<string>();
+                    foreach(List<string> term in processedTerms)
+                    {
+                        foreach(string independentTerm in term)
+                        {
+                            finalTerms.Add(independentTerm);
+                        }
+                    }
+
+                    
+                    topTenDocs = index.GetRankedDocuments(finalTerms);
+                    if (topTenDocs.Count > 0)
+                    {
+                        //add the count of the postings to the list of strings to be returned
+                        results.Add(topTenDocs.Count.ToString());
+                        //for each posting...
+                        int numberRank = 1;
+                        foreach (MaxPriorityQueue.InvertedIndex p in topTenDocs)
+                        {
+                            //use the document id to access the document
+                            IDocument doc = corpus.GetDocument(p.GetDocumentId());
+                            //add the title to the list of strings to be returned
+                            results.Add("#"+numberRank+": ("+Math.Round(p.GetRank(), 5).ToString()+") "+doc.Title);
+                            //add the document id to the list of strings to be returned 
+                            results.Add(doc.DocumentId.ToString());
+                            Console.WriteLine(p.GetDocumentId()+""+doc.Title);
+                            numberRank++;
+                        }
+                    }
+                    //if there aren't any postings...
+                    else
+                    {
+                        //add a zero to the list of strings to be returned
+                        results.Add("0");
+                    }
+                    //return the list of strings
+                    return results;
                 }
-                //if there aren't any postings...
+
                 else
                 {
-                    //add a zero to the list of strings to be returned
-                    results.Add("0");
+                    //the list of postings
+                    IList<Posting> postings;
+                    IQueryComponent component;
+                    //create a stemming token processor
+                    ITokenProcessor processor = new StemmingTokenProcesor();
+                    //create a boolean query parser
+                    BooleanQueryParser parser = new BooleanQueryParser();
+                    //parse the query
+                    component = parser.ParseQuery(query);
+                    //get the postings
+                    postings = component.GetPostings(index, processor);
+                    //if there are any postings...
+                    if (postings.Count > 0)
+                    {
+                        //add the count of the postings to the list of strings to be returned
+                        results.Add(postings.Count.ToString());
+                        //for each posting...
+                        foreach (Posting p in postings)
+                        {
+                            //use the document id to access the document
+                            IDocument doc = corpus.GetDocument(p.DocumentId);
+                            //add the title to the list of strings to be returned
+                            results.Add(doc.Title);
+                            //add the document id to the list of strings to be returned 
+                            results.Add(doc.DocumentId.ToString());
+                        }
+                    }
+                    //if there aren't any postings...
+                    else
+                    {
+                        //add a zero to the list of strings to be returned
+                        results.Add("0");
+                    }
+                    //return the list of strings
+                    return results;
+
                 }
-                //return the list of strings
-                return results;
             }
             catch (Exception e)
             {
