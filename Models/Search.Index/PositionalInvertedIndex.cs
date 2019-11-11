@@ -74,21 +74,9 @@ namespace Search.Index
         /// <return>a or-merged posting list</return>
         public IList<Posting> GetPostings(List<string> terms)
         {
-            //TODO: change to retrieve postings without regard to position for ranked retrieval?
-            List<IList<Posting>> postingLists = new List<IList<Posting>>();
-            foreach (string term in terms)
-            {
-                List<Posting> result = onDiskPostingMap.Get(term, Indexer.path, "Postings");
-                if (default(List<Posting>) == result)
-                {
-                    postingLists.Add(new List<Posting>());
-                }
-                else
-                {
-                    postingLists.Add(result);
-                }
-            }
-            return Merge.OrMerge(postingLists);
+            List<List<Posting>> postingLists = onDiskPostingMap.Get(terms, Indexer.path, "Postings");
+            postingLists.RemoveAll(item => item == default(List<Posting>));
+            return Merge.OrMerge(new List<IList<Posting>>(postingLists));
         }
 
 
