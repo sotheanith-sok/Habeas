@@ -16,6 +16,12 @@ namespace Search.Query
             mComponents.AddRange(components);
         }
 
+        /// <summary>
+        /// Get Postings
+        /// </summary>
+        /// <param name="index">Index</param>
+        /// <param name="processor">Tokene processor</param>
+        /// <returns></returns>
         public IList<Posting> GetPostings(IIndex index, ITokenProcessor processor)
         {
             //list of posting lists from all query components to be OR-merged
@@ -30,6 +36,10 @@ namespace Search.Query
             return Merge.OrMerge(postingLists);
         }
 
+        /// <summary>
+        /// Convert this query component to string
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return string.Join(" + ", mComponents.Select(c => c.ToString()));

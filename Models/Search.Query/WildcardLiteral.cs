@@ -15,7 +15,7 @@ namespace Search.Query
         private string token;
 
         //KGram for look up
-        private KGram kGram;
+        private DiskKGram kGram;
 
         //Use for internal stemming of words
         private EnglishPorter2Stemmer stemmer;
@@ -25,7 +25,7 @@ namespace Search.Query
         /// </summary>
         /// <param name="token"> Pre-processed token</param>
         /// <param name="kGram"> KGram for lookup</param>
-        public WildcardLiteral(string token, KGram kGram)
+        public WildcardLiteral(string token, DiskKGram kGram)
         {
             this.token = token;
             this.kGram = kGram;
@@ -135,7 +135,7 @@ namespace Search.Query
             {
                 stemmedFinalCandidates.Add(stemmer.Stem(s).Value);
             }
-            
+
             return index.GetPostings(stemmedFinalCandidates.ToList());
         }
 

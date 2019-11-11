@@ -2,7 +2,7 @@ using System.Collections.Generic;
 namespace Search.OnDiskDataStructure
 {
     /// <summary>
-    /// An implmentation of on-disk dictionary
+    /// An interface for on-disk dictionary
     /// </summary>
     /// <typeparam name="TKey">Generic type of key</typeparam>
     /// <typeparam name="TValue">Generic type of value</typeparam>

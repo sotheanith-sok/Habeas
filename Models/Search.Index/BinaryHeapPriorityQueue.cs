@@ -204,6 +204,10 @@ public class MaxPriorityQueue
 
     }
 
+    /// <summary>
+    /// Get the instance of priority queue
+    /// </summary>
+    /// <returns>Priority Queue</returns>
     public List<InvertedIndex> GetPriorityQueue()
     {
         return this.priorityQueue;

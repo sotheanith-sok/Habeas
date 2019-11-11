@@ -6,7 +6,7 @@ using Search.OnDiskDataStructure;
 
 namespace Search.Index
 {
-    public class SoundEx
+    public class DiskSoundEx
     {
         string path;
 
@@ -14,7 +14,7 @@ namespace Search.Index
         /// <summary>
         /// Constructs SoundExIndex with an empty soundMap
         /// </summary>
-        public SoundEx(string path)
+        public DiskSoundEx(string path)
         {
             this.path = path;
             map = new OnDiskDictionary<string, List<int>>(new StringEncoderDecoder(), new IntListEncoderDecoder());
@@ -40,10 +40,15 @@ namespace Search.Index
         }
 
 
+        /// <summary>
+        /// Write soundex to disk
+        /// </summary>
+        /// <param name="SoundMap">soundex</param>
         public void BuildSoundexIndex(SortedDictionary<string, List<int>> SoundMap)
         {
             this.map.Save(SoundMap, this.path, "SoundEx");
         }
+
         /// <summary>
         /// Adds docID to the soundexIndex(hashmap) by the sound code of author name as a key
         /// </summary>

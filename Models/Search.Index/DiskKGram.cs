@@ -8,7 +8,7 @@ namespace Search.Index
     /// <summary>
     /// K-gram object uses to store and process k-gram requests
     /// </summary>
-    public class KGram
+    public class DiskKGram
     {
         //size of each k-gram terms.
         public int size { get; }
@@ -22,7 +22,7 @@ namespace Search.Index
         /// </summary>
         /// <param name="vocabularies">List of unique vocabularies.false Non stem.</param>
         /// <param name="size">Size of each k-gram term</param>
-        public KGram(string path, int size = 3)
+        public DiskKGram(string path, int size = 3)
         {
             this.size = size;
             this.path = path;
@@ -33,7 +33,7 @@ namespace Search.Index
         /// Build KGram onto disk
         /// </summary>
         /// <param name="vocabularies">List of unique vocabularies</param>
-        public KGram buildKGram(HashSet<string> vocabularies)
+        public DiskKGram buildKGram(HashSet<string> vocabularies)
         {
             Console.WriteLine("Start KGram generating process...");
             Console.WriteLine("Vocbularies' size: " + vocabularies.Count);
@@ -123,24 +123,11 @@ namespace Search.Index
                     return new List<string>();
                 }
 
-               
-                // foreach (string k in possibleKGram)
-                // {
-                //     List<string> KGram = this.map.Get(k, this.path, "KGram");
-                //     if (KGram != default(List<string>))
-                //     {
-                //         foreach (string v in KGram)
-                //         {
-                //             candidates.Add(v);
-                //         }
-                //     }
+                List<List<string>> KGramLists = new List<List<string>>(this.map.Get(possibleKGram, this.path, "KGram"));
+                KGramLists.RemoveAll(item => item == null);
 
-                // }
-
-                List<List<string>> KGramLists = new List<List<string>>(this.map.Get(possibleKGram,this.path,"KGram"));
-                KGramLists.RemoveAll(item =>item ==null);
-
-                foreach(List<string> k in KGramLists){
+                foreach (List<string> k in KGramLists)
+                {
                     foreach (string item in k)
                     {
                         candidates.Add(item);

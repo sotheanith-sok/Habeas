@@ -1,112 +1,103 @@
 using System.Collections.Generic;
-using System;
-using System.IO;
+using System.Linq;
 using Search.Query;
-using Search.Document;
-
+using System;
+using Search.OnDiskDataStructure;
+using System.IO;
 namespace Search.Index
 {
-    /// <summary>
-    /// Reads the On-disk positional inverted index that was constructed by DiskIndexWriter
-    /// </summary>
-    public class DiskPositionalIndex : IIndex, IDisposable
+    public class DiskPositionalIndex : IIndex
     {
-        private string dirPath;
-        private BinaryReader vocabReader;
-        private BinaryReader postingReader;
-        private long[] vocabTable;  // [t1Start, p1Start, t2Start, p2Start, ...]
-        private BinaryReader docWeightsReader;
+        //Hashmap is used to store the index. O(1)
+        //Dictionary in C# is equivalent to HashMap in Java.
+        private readonly SortedDictionary<string, List<Posting>> hashMap;
 
-        private Dictionary<int, double> Accumulator; //stores the document id with its corresponding rank  [docId -> A_{docID}]
+        //HashMap used to store termFrequency of current Document
+        private readonly SortedDictionary<string, int> termFrequency;
+
+        //maintains a list of the docWeights to store in the docWeights.bin file
+        private static List<double> calculatedDocWeights;
+
+        //maintains the hashmap for the posting list for a specific term
+        private OnDiskDictionary<string, List<Posting>> onDiskPostingMap;
+
+        //maintains a hashmap for the termfrequency for a specific term
+        private OnDiskDictionary<string, int> onDiskTermFrequencyMap;
+
+        //maintains a hashmap for the document weight for a specific document id
+        private OnDiskDictionary<int, int> onDiskDocWeight;
+
+        //temporarily stores the document id with its corresponding rank  [docId -> A_{docID}]
+        private Dictionary<int, double> Accumulator;
 
 
         /// <summary>
-        /// Opens an on-disk positional inverted index that was constructed in the given path
+        /// Constructs a hash table.
         /// </summary>
-        /// <param name="dirPath">the absolute path to the folder where binary files are saved</param>
-        public DiskPositionalIndex(string dirPath)
+        public DiskPositionalIndex(string path)
         {
-            try
-            {
-                this.dirPath = dirPath;
-                if (!Directory.Exists(dirPath)) {
-                    Console.WriteLine("Directory does not exist");
-                }
-                Console.WriteLine("\nLoad on-disk index at '" + dirPath + "'");
-                
-                Console.WriteLine("Open vocab.bin");
-                vocabReader = new BinaryReader(File.OpenRead(dirPath + "vocab.bin"));
-                Console.WriteLine("Open postings.bin");
-                postingReader = new BinaryReader(File.OpenRead(dirPath + "postings.bin"));
-                Console.WriteLine("Open and Read vocabtable.bin");
-                vocabTable = ReadVocabTable(dirPath);
+            hashMap = new SortedDictionary<string, List<Posting>>();
+            termFrequency = new SortedDictionary<string, int>();
+            calculatedDocWeights = new List<double>();
 
-                Console.WriteLine("Open docWeights.bin");
-                docWeightsReader = new BinaryReader(File.OpenRead(dirPath + "docWeights.bin"));
+            onDiskPostingMap = new OnDiskDictionary<string, List<Posting>>(new StringEncoderDecoder(), new PostingListEncoderDecoder());
+            onDiskTermFrequencyMap = new OnDiskDictionary<string, int>(new StringEncoderDecoder(), new IntEncoderDecoder());
+            onDiskDocWeight = new OnDiskDictionary<int, int>(new IntEncoderDecoder(), new IntEncoderDecoder());
 
-                Accumulator = new Dictionary<int, double>();
-                
-            }
-            catch (FileNotFoundException ex)
-            {
-// <<<<<<< QueryingIndex
-//                 Console.WriteLine("we have an error");
-// =======
-// >>>>>>> master
-                Console.WriteLine(ex.ToString());
-            }
+            Accumulator = new Dictionary<int, double>();
         }
 
         /// <summary>
-        /// Gets Postings only with docIDs from a given term from on-disk index.
+        /// Gets Postings of a given term from in-memory index.
         /// </summary>
         /// <param name="term">a processed string</param>
         /// <return>a posting list</return>
         public IList<Posting> GetPostings(string term)
         {
-            long postingStart = BinarySearchVocabulary(term);
-            return ReadPostings(postingStart, false);
+
+            List<Posting> result = onDiskPostingMap.Get(term, Indexer.path, "Postings");
+            if (default(List<Posting>) == result)
+            {
+                return new List<Posting>();
+            }
+            else
+            {
+                return result;
+            }
         }
 
         /// <summary>
-        /// Gets Postings only with docIDs from a given list of terms from on-disk index.
+        /// Gets Postings of a given list of terms from in-memory index.
+        /// This or-merge the all the results from the multiple terms
         /// </summary>
         /// <param name="terms">a list of processed strings</param>
         /// <return>a or-merged posting list</return>
         public IList<Posting> GetPostings(List<string> terms)
         {
-            var postingLists = new List<IList<Posting>>();
-            foreach (string term in terms)
-            {
-                postingLists.Add(GetPostings(term));
-            }
-            return Merge.OrMerge(postingLists);
+            List<List<Posting>> postingLists = onDiskPostingMap.Get(terms, Indexer.path, "Postings");
+            postingLists.RemoveAll(item => item == default(List<Posting>));
+            return Merge.OrMerge(new List<IList<Posting>>(postingLists));
         }
 
+
         /// <summary>
-        /// Gets Postings with positions from a given term from on-disk index.
+        /// Gets Postings of a given term from in-memory index.
         /// </summary>
-        /// <param name="term">a processed string</param>
-        /// <return>a posting list</return>
+        /// <param name="terms">a list of processed strings</param>
         public IList<Posting> GetPositionalPostings(string term)
         {
-            long postingStart = BinarySearchVocabulary(term);
-            return ReadPostings(postingStart, true);
+            return GetPostings(term);
         }
 
         /// <summary>
-        /// Gets Postings with positions from a given list of terms from on-disk index.
+        /// Gets Postings of a given list of terms from in-memory index.
+        /// This or-merge the all the results from the multiple terms
         /// </summary>
         /// <param name="terms">a list of processed strings</param>
         /// <return>a or-merged posting list</return>
         public IList<Posting> GetPositionalPostings(List<string> terms)
         {
-            var postingLists = new List<IList<Posting>>();
-            foreach (string term in terms)
-            {
-                postingLists.Add(GetPositionalPostings(term));
-            }
-            return Merge.OrMerge(postingLists);
+            return GetPostings(terms);
         }
 
         /// <summary>
@@ -114,202 +105,162 @@ namespace Search.Index
         /// </summary>
         public IReadOnlyList<string> GetVocabulary()
         {
-            List<string> finalList = new List<string>();
-            int termCount = GetTermCount();
-            for (int i = 0; i < termCount; i++)
-            {
-                finalList.Add(vocabReader.ReadString());
-            }
-            return finalList;
-        }
-
-        /// <summary>
-        /// Locates the byte position of the postings for the given term.
-        /// For example, binarySearchVocabulary("angel") will return the byte position
-        /// to seek to in postings.bin to find the postings for "angel".
-        /// </summary>
-        /// <param name="term">the term to find</param>
-        /// <returns>the byte position of the postings</returns>
-        private long BinarySearchVocabulary(string term)
-        {
-            // Do a binary search over the vocabulary,
-            // using the vocabTable and the vocabReader(vocab.bin).
-            int i = 0;
-            int j = vocabTable.Length / 2 - 1;
-            while (i <= j)
-            {
-                try
-                {
-                    int m = (i + j) / 2;
-                    long termStartByte = vocabTable[m * 2];
-                    vocabReader.BaseStream.Seek(termStartByte, SeekOrigin.Begin);
-                    string termFromFile = vocabReader.ReadString();
-
-                    int compareValue = term.CompareTo(termFromFile);
-                    if (compareValue == 0)
-                    {
-                        // found it!
-                        return vocabTable[m * 2 + 1];
-                    }
-                    else if (compareValue < 0)
-                    {
-                        j = m - 1;
-                    }
-                    else
-                    {
-                        i = m + 1;
-                    }
-                }
-                catch (IOException ex)
-                {
-                    Console.WriteLine(ex.ToString());
-                }
-            }
-            return -1;
-        }
-
-        /// <summary>
-        /// Reads the file vocabTable.bin into memory
-        /// </summary>
-        /// <param name="dirPath">the absolute path to the folder where binary index files are saved</param>
-        /// <returns>the long array of vocabTable</returns>
-        private static long[] ReadVocabTable(string dirPath)
-        {
-            try
-            {
-                var vocabTable = new List<long>();
-                var reader = new BinaryReader(File.OpenRead(dirPath + "vocabTable.bin"));
-                while (reader.BaseStream.Position != reader.BaseStream.Length)
-                {
-                    vocabTable.Add(reader.ReadInt64()); //termStart
-                    vocabTable.Add(reader.ReadInt64()); //postingStart
-                }
-                reader.Close();
-                return vocabTable.ToArray();
-            }
-            catch (FileNotFoundException ex)
-            {
-                Console.WriteLine(ex.ToString());
-            }
-            catch (IOException ex)
-            {
-                Console.WriteLine(ex.ToString());
-            }
-            return null;
+            List<string> vocabulary = onDiskPostingMap.GetKeys(Indexer.path, "Postings").ToList();
+            vocabulary.Sort();
+            return vocabulary;
         }
 
 
         /// <summary>
-        /// Gets the term count of the vocabulary(vocab.bin)
+        /// Adds a term into the index with its docId and position.
         /// </summary>
-        /// <returns>the size of the vocabulary</returns>
-        public int GetTermCount()
+        /// <param name="term">a processed string to be added</param>
+        /// <param name="docID">the document id in which the term is coming from</param>
+        /// <param name="position">the position of the term within the document</param>
+        public void AddTerm(string term, int docID, int position)
         {
-            return vocabTable.Length / 2;
-        }
+            //ChangeFrequency
+            UpdateTermFrequencyForDoc(term);
 
-
-        /// <summary>
-        /// Read postings without positions for a term from postings.bin
-        /// </summary>
-        /// <param name="startByte">the starting byte of a posting list within postings.bin</param>
-        /// <param name="wantPositions">Do you want positions? or not?</param>
-        /// <returns>a posting list</returns>
-        private IList<Posting> ReadPostings(long startByte, bool wantPositions)
-        {
-            // Read and construct a posting list from postings.bin
-            // < df, (docID tf p1 p2 p3), (doc2 tf p1 p2), ... >
-            // docIDs and positions are written as gap)
-
-            //0. Jump to the starting byte
-            postingReader.BaseStream.Seek(startByte, SeekOrigin.Begin);
-
-            IList<Posting> postings = new List<Posting>();
-
-            //1. Read document frequency
-            int docFrequency = postingReader.ReadInt32();
-
-            int prevDocID = 0;
-            for (int i = 0; i < docFrequency; i++)         //for each posting
+            //Check if inverted index contains the term (key)
+            if (hashMap.ContainsKey(term))
             {
-                //2. Read documentID using gap
-                int docID = prevDocID + postingReader.ReadInt32();
-
-                List<int> positions = new List<int>();
-
-                //3. Read term frequency
-                int termFrequency = postingReader.ReadInt32();
-
-                if (wantPositions)
+                //Check if the document of the term is in the posting list
+                Posting lastPosting = hashMap[term].Last();
+                if (lastPosting.DocumentId == docID)
                 {
-                    //4. Read positions using gap
-                    int prevPos = 0;
-                    for (int j = 0; j < termFrequency; j++)    //for each position
-                    {
-                        int pos = prevPos + postingReader.ReadInt32();
-                        positions.Add(pos);
-                        prevPos = pos;  //update prevPos
-                    }
+                    //Add a position to the posting
+                    lastPosting.Positions.Add(position);
                 }
                 else
                 {
-                    //Skip the positions
-                    postingReader.BaseStream.Seek(termFrequency * sizeof(int), SeekOrigin.Current);
+                    //Create a posting with (docID & position) to the posting list
+                    hashMap[term].Add(new Posting(docID, new List<int> { position }));
                 }
 
-                //Insert a posting to the posting list
-                postings.Add(new Posting(docID, positions));
+            }
+            else
+            {
 
-                prevDocID = docID;  //update prevDocID
+                //Add term and a posting (docID & position) to the hashmap
+                List<Posting> postingList = new List<Posting>();
+                postingList.Add(new Posting(docID, new List<int> { position }));
+                hashMap.Add(term, postingList);
+
             }
 
-            return postings;
         }
 
-
         /// <summary>
-        /// Gets the document weight from docWeights.bin
+        /// Increases the instance of a term in a document in our Term Frequence HashMap
         /// </summary>
-        /// <param name="docId">the docId of the document to get weight of</param>
-        /// <returns>the document weight</returns>
-        private double GetDocumentWeight(int docId)
+        /// <param name="term">Takes in the term that we want to update</param>
+        public void UpdateTermFrequencyForDoc(string term)
         {
-            int startByte = docId * 8;
 
-            //Jump to the starting byte
-            docWeightsReader.BaseStream.Seek(startByte, SeekOrigin.Begin);
-            //Read a document weight and convert it
-            double docWeight = BitConverter.Int64BitsToDouble(docWeightsReader.ReadInt64());
+            if (termFrequency.ContainsKey(term))
+            {
+                termFrequency[term] += 1;
+            }
+            else
+            {
+                termFrequency.Add(term, 1);
+            }
 
-            return docWeight;
+        }
+
+        /// <summary>
+        /// Applies the mathematical rule that we are using to calculate the document weight
+        /// </summary>
+        public void CalculateDocWeight()
+        {
+            double temp = 0;
+            foreach (int value in termFrequency.Values)
+            {
+                temp = temp + Math.Pow((1 + Math.Log(value)), 2);
+            }
+            calculatedDocWeights.Add(Math.Sqrt(temp));
+            //clear frequency map for next iteration of document
+            termFrequency.Clear();
         }
 
 
         /// <summary>
-        /// Retrives all the the document weights from the DocWeights.bin file.
+        /// Gets all the document weights saved in memory
         /// </summary>
-        /// <returns>A list of the document weights </returns>
+        /// <returns></returns>
         public IList<double> GetAllDocWeights()
         {
+            return calculatedDocWeights;
+        }
 
-            IList<double> allDocWeights = new List<double>();
-            docWeightsReader.BaseStream.Seek(0, SeekOrigin.Begin);
 
-            while (docWeightsReader.BaseStream.Position != docWeightsReader.BaseStream.Length)
+        /// <summary>
+        /// Write dictionaries to disk
+        /// </summary>
+        public void Save()
+        {
+            onDiskPostingMap.Save(hashMap, Indexer.path, "Postings");
+            onDiskTermFrequencyMap.Save(termFrequency, Indexer.path, "TermFrequency");
+            this.WriteDocWeights();
+            hashMap.Clear();
+            termFrequency.Clear();
+        }
+
+        ///<sumary>
+        /// Writes 8-byte values of document weights to docWeights.bin 
+        /// </summary>
+        /// <param name="index">the index to write</param>
+        /// <param name="dirPath">the absolute path to a directory where 'docWeights.bin' be saved</param>
+        /// <returns>the list of starting byte positions of each doc weight in docWeights.bin</returns>
+        public List<long> WriteDocWeights()
+        {
+            string filePath = Indexer.path + "docWeights.bin";
+            File.Create(filePath).Dispose();
+            List<long> startBytes = new List<long>();
+
+            using (BinaryWriter writer = new BinaryWriter(File.Open(filePath, FileMode.Append)))
             {
-                double docWeight = BitConverter.Int64BitsToDouble(docWeightsReader.ReadInt64());
-                allDocWeights.Add(docWeight);
+                foreach (double weight in this.GetAllDocWeights())
+                {
+                    startBytes.Add(writer.BaseStream.Length);
+                    writer.Write(BitConverter.DoubleToInt64Bits(weight));
+                }
 
+                Console.WriteLine($"docWeights.bin  {writer.BaseStream.Length} bytes");
             }
 
-            return allDocWeights;
-
+            return startBytes;
         }
+
         /// <summary>
-        /// Dispose all binary readers
+        /// Uses the document id to access the docWeights.bin file to retrieve the corresponding L_{d} value
         /// </summary>
+        /// <param name="docId"></param>
+        /// <returns></returns>
+        private double GetDocumentWeight(int docId)
+        {
+            string filePath = Indexer.path + "docWeights.bin";
 
 
+            using (BinaryReader docWeightsReader = new BinaryReader(File.Open(filePath, FileMode.Open)))
+            {
+                int startByte = docId * 8;
+
+                //Jump to the starting byte
+                docWeightsReader.BaseStream.Seek(startByte, SeekOrigin.Begin);
+                //Read a document weight and convert it
+                double docWeight = BitConverter.Int64BitsToDouble(docWeightsReader.ReadInt64());
+
+                return docWeight;
+            }
+        }
+
+        /// <summary>
+        /// Method that takes in the query and returns a list of the top ten ranking documents
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
         public IList<MaxPriorityQueue.InvertedIndex> GetRankedDocuments(List<string> query)
         {
 
@@ -318,95 +269,112 @@ namespace Search.Index
 
             //Build Priority Queue using the Accumulator divided by L_{d}  
             MaxPriorityQueue pq = BuildPriorityQueue();
-
+            Accumulator.Clear();
             //Retrieve Top Ten Documents and Return to Back End
             return pq.RetrieveTopTen();
 
         }
+
+        /// <summary>
+        /// Builds the Accumulator hashmap for the query to retrieve top 10 documents
+        /// </summary>
+        /// <param name="query"></param>
         private void BuildAccumulator(List<string> query)
         {
+            //w_{q,t}
             double query2TermWeight;
+            //w_{d,t}
             double doc2TermWeight;
+            //stores temporary Accumulator value that will be added to the accumulator hashmap
             double docAccumulator;
+            //gets path to access on disk file
+            string path = Indexer.path;
 
             //caculate accumulated Value for each relevant document A_{d}
             foreach (string term in query)
             {
-                long startByte = BinarySearchVocabulary(term);
+                //posting list of a term grabbed from the On Disk file
+                List<Posting> postings = onDiskPostingMap.Get(term, path, "Postings");
 
-                //0. Jump to the starting byte
-                postingReader.BaseStream.Seek(startByte, SeekOrigin.Begin);
-
-
-
-                //1. Read document frequency
-                int docFrequency = postingReader.ReadInt32();
-                query2TermWeight = Math.Log(1 + Indexer.corpusSize / docFrequency);
-
-                int prevDocID = 0;
-                for (int i = 0; i < docFrequency; i++)         //for each posting
+                if (postings != default(List<Posting>))
                 {
-                    //2. Read documentID using gap
-                    int docID = prevDocID + postingReader.ReadInt32();
+                    int docFrequency = postings.Count;
 
-                    //3. Read term frequency
-                    int termFrequency = postingReader.ReadInt32();
+                    //implements formula for w_{q,t}
+                    query2TermWeight = (double)Math.Log(1 + (double)(this.GetCorpusSize(path) / docFrequency));
 
-                    doc2TermWeight = 1 + Math.Log(termFrequency);
-                    docAccumulator = query2TermWeight * doc2TermWeight;
-
-                    if (Accumulator.ContainsKey(docID))
+                    foreach (Posting post in postings)
                     {
-                        Accumulator[docID] += docAccumulator;
-                    }
-                    else
-                    {
-                        Accumulator.Add(docID, docAccumulator);
-                    }
+                        //implements formula for w_{d,t}
+                        doc2TermWeight = (double)(1 + (double)Math.Log(post.Positions.Count)); //TermFrequency = post.Positions.Count
 
-                    //Skip the positions
-                    postingReader.BaseStream.Seek(termFrequency * sizeof(int), SeekOrigin.Current);
+                        //the A_{d} value for a specific term in that document
+                        docAccumulator = query2TermWeight * doc2TermWeight;
 
-                    prevDocID = docID;  //update prevDocID
+                        //if the A_{d} value exists on the hashmap increase its value else create a new key-value pair
+                        if (Accumulator.ContainsKey(post.DocumentId))
+                        {
+                            Accumulator[post.DocumentId] += docAccumulator;
+                        }
+                        else
+                        {
+                            Accumulator.Add(post.DocumentId, docAccumulator);
+                        }
+                    }
                 }
             }
         }
+
+        /// <summary>
+        /// Creates a new priority queue by inserting the rank of the document and document id 
+        /// 
+        /// </summary>
+        /// <returns> a priority queue with max heap property</returns>
         private MaxPriorityQueue BuildPriorityQueue()
         {
-
+            //temporary variable to hold the doc weight
             double tempDocWeight;
+            //temporary variable to hold the final ranking value of that document
             double finalRank;
-            int documentID;
 
+            //Make a new priority queue
             MaxPriorityQueue priorityQueue = new MaxPriorityQueue();
+
+            //for every key value in the Accumulator divide A_{d} by L_{d}
             foreach (KeyValuePair<int, double> candidate in Accumulator)
             {
                 //get document weight by id from docWeights.bin file
                 tempDocWeight = GetDocumentWeight(candidate.Key);
 
                 // divide Accumulated Value A_{d} by L_{d} 
-                finalRank = (double) candidate.Value / tempDocWeight;
-
-                //TO-DO implement binary heap priority queue
-                //get docID
-                documentID = candidate.Key;
+                finalRank = (double)candidate.Value / tempDocWeight;
 
                 //add to list to perform priority queue on 
-                priorityQueue.MaxHeapInsert(finalRank, documentID);
+                priorityQueue.MaxHeapInsert(finalRank, candidate.Key);
             }
 
             return priorityQueue;
+
         }
 
-        public void Dispose()
+        /// <summary>
+        /// Count the number of documents from index
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        private int GetCorpusSize(string path)
         {
-            vocabReader?.Dispose();
-            postingReader?.Dispose();
-            docWeightsReader?.Dispose();
+            int max = 0;
+            List<List<Posting>> result = onDiskPostingMap.GetValues(path, "Postings").ToList();
+            foreach (List<Posting> postingList in result)
+            {
+                foreach (Posting p in postingList)
+                {
+                    max = (p.DocumentId > max) ? p.DocumentId + 1 : max;
+                }
+            }
+            return max;
 
-            Console.WriteLine("Disposed(Closed) all binary files at '"+dirPath+"'");
         }
-
     }
-
 }

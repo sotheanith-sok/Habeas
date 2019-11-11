@@ -29,6 +29,12 @@ namespace Search.Query
             mTerms.AddRange(phrase.Split(' '));
         }
 
+        /// <summary>
+        /// Get Postings
+        /// </summary>
+        /// <param name="index">Index</param>
+        /// <param name="processor">Tokene processor</param>
+        /// <returns></returns>
         public IList<Posting> GetPostings(IIndex index, ITokenProcessor processor)
         {
             //A list of posting lists (postings for each term in the phrase)
@@ -44,7 +50,10 @@ namespace Search.Query
             return Merge.PositionalMerge(postingLists);
         }
 
-
+        /// <summary>
+        /// Convert this query componenet to string
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return "\"" + string.Join(" ", mTerms) + "\"";

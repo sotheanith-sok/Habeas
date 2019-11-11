@@ -54,7 +54,12 @@ namespace Search.Document
             return new StringReader(content);
         }
 
-
+        /// <summary>
+        /// Create JsonFileDocument
+        /// </summary>
+        /// <param name="absoluteFilePath">path to file</param>
+        /// <param name="documentId">document ID</param>
+        /// <returns></returns>
         public static JsonFileDocument CreateJsonFileDocument(string absoluteFilePath, int documentId)
         {
             return new JsonFileDocument(documentId, absoluteFilePath);

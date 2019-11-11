@@ -36,14 +36,12 @@ namespace Search.Index
                 Indexer.path = pathToIndex;
                 bool doesOnDiskIndexExist = Directory.Exists(pathToIndex);
                 // bool doesOnDiskIndexExist = Directory.Exists(pathToIndex) && (Directory.GetFiles(pathToIndex).Length != 0);
-
+                //make corpus out of the selected directory path
                 corpus = DirectoryCorpus.LoadTextDirectory(path);
-                Indexer.corpusSize= corpus.CorpusSize;
-
                 if (doesOnDiskIndexExist)
                 {
                     Console.WriteLine("[Index] The on-disk index exists! Reading the on-disk index.");
-                    index = new SpecialIndex(pathToIndex);
+                    index = new DiskPositionalIndex(pathToIndex);
                 }
                 else
                 {
@@ -69,9 +67,6 @@ namespace Search.Index
             {
                 //Generate directory if we need to index corpus.
                 Directory.CreateDirectory(Path.Join(path, "/index/"));
-
-                //make corpus out of the selected directory path
-                // corpus = DirectoryCorpus.LoadTextDirectory(path);
 
                 //if the corpus contains content
                 if (corpus != null && corpus.CorpusSize != 0)
@@ -106,7 +101,7 @@ namespace Search.Index
             try
             {
                 //get a list of postings given the name
-                IList<Posting> postings = new SoundEx(Indexer.path).GetPostings(name);
+                IList<Posting> postings = new DiskSoundEx(Indexer.path).GetPostings(name);
                 //if the query returns any results
                 if (postings.Count > 0)
                 {
@@ -151,7 +146,8 @@ namespace Search.Index
                 List<String> results = new List<string>();
                 if (mode == false)
                 {
-                    if(query.Contains('*')){
+                    if (query.Contains('*'))
+                    {
                         return new List<string>();
                     }
                     IList<MaxPriorityQueue.InvertedIndex> topTenDocs;
@@ -159,22 +155,22 @@ namespace Search.Index
                     List<List<string>> processedTerms = new List<List<string>>();
 
                     ITokenProcessor processor = new StemmingTokenProcesor();
-             
-                    foreach(string term in terms)
+
+                    foreach (string term in terms)
                     {
                         processedTerms.Add(processor.ProcessToken(term));
                     }
-                    
+
                     List<string> finalTerms = new List<string>();
-                    foreach(List<string> term in processedTerms)
+                    foreach (List<string> term in processedTerms)
                     {
-                        foreach(string independentTerm in term)
+                        foreach (string independentTerm in term)
                         {
                             finalTerms.Add(independentTerm);
                         }
                     }
 
-                    
+
                     topTenDocs = index.GetRankedDocuments(finalTerms);
                     if (topTenDocs.Count > 0)
                     {
@@ -187,10 +183,10 @@ namespace Search.Index
                             //use the document id to access the document
                             IDocument doc = corpus.GetDocument(p.GetDocumentId());
                             //add the title to the list of strings to be returned
-                            results.Add("#"+numberRank+": ("+Math.Round(p.GetRank(), 5).ToString()+") "+doc.Title);
+                            results.Add("#" + numberRank + ": (" + Math.Round(p.GetRank(), 5).ToString() + ") " + doc.Title);
                             //add the document id to the list of strings to be returned 
                             results.Add(doc.DocumentId.ToString());
-                            Console.WriteLine(p.GetDocumentId()+""+doc.Title);
+                            Console.WriteLine(p.GetDocumentId() + "" + doc.Title);
                             numberRank++;
                         }
                     }
