@@ -187,6 +187,7 @@ namespace Search.Index
                             results.Add("#"+numberRank+": ("+Math.Round(p.GetRank(), 5).ToString()+") "+doc.Title);
                             //add the document id to the list of strings to be returned 
                             results.Add(doc.DocumentId.ToString());
+                            Console.WriteLine(p.GetDocumentId()+""+doc.Title);
                             numberRank++;
                         }
                     }
