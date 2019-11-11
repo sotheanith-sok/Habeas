@@ -364,17 +364,8 @@ namespace Search.Index
         /// <returns></returns>
         private int GetCorpusSize(string path)
         {
-            int max = 0;
-            List<List<Posting>> result = onDiskPostingMap.GetValues(path, "Postings").ToList();
-            foreach (List<Posting> postingList in result)
-            {
-                foreach (Posting p in postingList)
-                {
-                    max = (p.DocumentId > max) ? p.DocumentId + 1 : max;
-                }
-            }
-            return max;
-
+            string filePath = Indexer.path + "docWeights.bin";
+            return (int)(new FileInfo(filePath).Length / 8f);
         }
     }
 }
