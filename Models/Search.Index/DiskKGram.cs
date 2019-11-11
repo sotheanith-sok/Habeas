@@ -8,7 +8,7 @@ namespace Search.Index
     /// <summary>
     /// K-gram object uses to store and process k-gram requests
     /// </summary>
-    public class KGram
+    public class DiskKGram
     {
         //size of each k-gram terms.
         public int size { get; }
@@ -22,7 +22,7 @@ namespace Search.Index
         /// </summary>
         /// <param name="vocabularies">List of unique vocabularies.false Non stem.</param>
         /// <param name="size">Size of each k-gram term</param>
-        public KGram(string path, int size = 3)
+        public DiskKGram(string path, int size = 3)
         {
             this.size = size;
             this.path = path;
@@ -33,7 +33,7 @@ namespace Search.Index
         /// Build KGram onto disk
         /// </summary>
         /// <param name="vocabularies">List of unique vocabularies</param>
-        public KGram buildKGram(HashSet<string> vocabularies)
+        public DiskKGram buildKGram(HashSet<string> vocabularies)
         {
             Console.WriteLine("Start KGram generating process...");
             Console.WriteLine("Vocbularies' size: " + vocabularies.Count);

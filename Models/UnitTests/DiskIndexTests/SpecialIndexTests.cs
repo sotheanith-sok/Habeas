@@ -41,7 +41,7 @@ namespace UnitTests.DiskIndexTest
             terms.Add("world");
 
             //Testing ranked retrieval AND accumulated values
-            index= new PositionalInvertedIndex(pathToIndex);
+            index= new DiskPositionalIndex(pathToIndex);
             IList<MaxPriorityQueue.InvertedIndex> actual = index.GetRankedDocuments(terms);
             actual[0].GetDocumentId().Should().Be(0); //should be document 1 which is of doc id 0
             actual[0].GetRank().Should().BeApproximately(1.183748156,9); //A_{doccument} = 3.10195041 L_{1} = 2.620447934

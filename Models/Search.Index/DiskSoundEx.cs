@@ -6,7 +6,7 @@ using Search.OnDiskDataStructure;
 
 namespace Search.Index
 {
-    public class SoundEx
+    public class DiskSoundEx
     {
         string path;
 
@@ -14,7 +14,7 @@ namespace Search.Index
         /// <summary>
         /// Constructs SoundExIndex with an empty soundMap
         /// </summary>
-        public SoundEx(string path)
+        public DiskSoundEx(string path)
         {
             this.path = path;
             map = new OnDiskDictionary<string, List<int>>(new StringEncoderDecoder(), new IntListEncoderDecoder());

@@ -26,7 +26,7 @@ namespace Search.Index
             elapsedTime.Start();
 
             // Set the index type and token processor to use
-            PositionalInvertedIndex index = new PositionalInvertedIndex(Indexer.path);
+            DiskPositionalIndex index = new DiskPositionalIndex(Indexer.path);
             ITokenProcessor processor = new StemmingTokenProcesor();
 
             HashSet<string> unstemmedVocabulary = new HashSet<string>();
@@ -67,12 +67,12 @@ namespace Search.Index
                 index.CalculateDocWeight();
 
                 //Add author to SoundEx Index
-                new SoundEx(Indexer.path).AddDocIdByAuthor(doc.Author, doc.DocumentId, soundEx);
+                new DiskSoundEx(Indexer.path).AddDocIdByAuthor(doc.Author, doc.DocumentId, soundEx);
                 stream.Dispose();
 
             }
-            new KGram(Indexer.path).buildKGram(unstemmedVocabulary);
-            new SoundEx(Indexer.path).BuildSoundexIndex(soundEx);
+            new DiskKGram(Indexer.path).buildKGram(unstemmedVocabulary);
+            new DiskSoundEx(Indexer.path).BuildSoundexIndex(soundEx);
             index.Save();
             elapsedTime.Stop();
             Console.WriteLine("[Indexer] Done Indexing! Time Elapsed " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));

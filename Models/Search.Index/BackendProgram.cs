@@ -41,7 +41,7 @@ namespace Search.Index
                 if (doesOnDiskIndexExist)
                 {
                     Console.WriteLine("[Index] The on-disk index exists! Reading the on-disk index.");
-                    index = new PositionalInvertedIndex(pathToIndex);
+                    index = new DiskPositionalIndex(pathToIndex);
                 }
                 else
                 {
@@ -101,7 +101,7 @@ namespace Search.Index
             try
             {
                 //get a list of postings given the name
-                IList<Posting> postings = new SoundEx(Indexer.path).GetPostings(name);
+                IList<Posting> postings = new DiskSoundEx(Indexer.path).GetPostings(name);
                 //if the query returns any results
                 if (postings.Count > 0)
                 {

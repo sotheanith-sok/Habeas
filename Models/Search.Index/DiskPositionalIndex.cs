@@ -6,7 +6,7 @@ using Search.OnDiskDataStructure;
 using System.IO;
 namespace Search.Index
 {
-    public class PositionalInvertedIndex : IIndex
+    public class DiskPositionalIndex : IIndex
     {
         //Hashmap is used to store the index. O(1)
         //Dictionary in C# is equivalent to HashMap in Java.
@@ -34,7 +34,7 @@ namespace Search.Index
         /// <summary>
         /// Constructs a hash table.
         /// </summary>
-        public PositionalInvertedIndex(string path)
+        public DiskPositionalIndex(string path)
         {
             hashMap = new SortedDictionary<string, List<Posting>>();
             termFrequency = new SortedDictionary<string, int>();
