@@ -151,6 +151,9 @@ namespace Search.Index
                 List<String> results = new List<string>();
                 if (mode == false)
                 {
+                    if(query.Contains('*')){
+                        return new List<string>();
+                    }
                     IList<MaxPriorityQueue.InvertedIndex> topTenDocs;
                     string[] terms = query.Split(' ');
                     List<List<string>> processedTerms = new List<List<string>>();
