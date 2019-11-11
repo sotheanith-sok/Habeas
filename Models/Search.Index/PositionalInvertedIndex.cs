@@ -192,10 +192,10 @@ namespace Search.Index
             return calculatedDocWeights;
         }
 
+        //ranked documents for positional inverted index is not needed therefore return empty list
         public IList<MaxPriorityQueue.InvertedIndex> GetRankedDocuments(List<string> query)
         {
-            MaxPriorityQueue temp = new MaxPriorityQueue();
-            return temp.GetPriorityQueue();;
+            return new List<MaxPriorityQueue.InvertedIndex>();  
         }
     
     }

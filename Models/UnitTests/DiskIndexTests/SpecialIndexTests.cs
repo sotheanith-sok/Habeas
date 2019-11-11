@@ -39,6 +39,8 @@ namespace UnitTests.DiskIndexTest
             List<string> terms= new List<string>();
             terms.Add("hello");
             index.GetRankedDocuments(terms);
+
+            
         }
     }
 

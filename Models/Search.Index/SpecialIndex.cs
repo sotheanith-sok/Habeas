@@ -16,15 +16,20 @@ namespace Search.Index
         //HashMap used to store termFrequency of current Document
         private readonly SortedDictionary<string, int> termFrequency;
 
+        //maintains a list of the docWeights to store in the docWeights.bin file
         private static List<double> calculatedDocWeights;
 
+        //maintains the hashmap for the posting list for a specific term
         private OnDiskDictionary<string, List<Posting>> onDiskPostingMap;
 
+        //maintains a hashmap for the termfrequency for a specific term
         private OnDiskDictionary<string, int> onDiskTermFrequencyMap;
 
+        //maintains a hashmap for the document weight for a specific document id
         private OnDiskDictionary<int, int> onDiskDocWeight;
-
-        private Dictionary<int, double> Accumulator; //stores the document id with its corresponding rank  [docId -> A_{docID}]
+        
+        //temporarily stores the document id with its corresponding rank  [docId -> A_{docID}]
+        private Dictionary<int, double> Accumulator; 
 
 
         /// <summary>
@@ -238,6 +243,11 @@ namespace Search.Index
             return startBytes;
         }
 
+        /// <summary>
+        /// Uses the document id to access the docWeights.bin file to retrieve the corresponding L_{d} value
+        /// </summary>
+        /// <param name="docId"></param>
+        /// <returns></returns>
         private double GetDocumentWeight(int docId)
         {
             string filePath = Indexer.path + "docWeights.bin";
@@ -258,7 +268,7 @@ namespace Search.Index
         }
 
         /// <summary>
-
+        /// Method that takes in the query and returns a list of the top ten ranking documents
         /// </summary>
         /// <param name="query"></param>
         /// <returns></returns>
@@ -276,30 +286,43 @@ namespace Search.Index
 
         }
 
+        /// <summary>
+        /// Builds the Accumulator hashmap for the query to retrieve top 10 documents
+        /// </summary>
+        /// <param name="query"></param>
         private void BuildAccumulator(List<string> query)
         {
+            //w_{q,t}
             double query2TermWeight;
+            //w_{d,t}
             double doc2TermWeight;
+            //stores temporary Accumulator value that will be added to the accumulator hashmap
             double docAccumulator;
+            //gets path to access on disk file
             string path = Indexer.path;
 
             //caculate accumulated Value for each relevant document A_{d}
             foreach (string term in query)
             {
-
+                //posting list of a term grabbed from the On Disk file
                 List<Posting> postings = onDiskPostingMap.Get(term, path, "Postings");
 
                 if (postings != default(List<Posting>))
                 {
                     int docFrequency = postings.Count;
 
-                    query2TermWeight = (double)Math.Log(1 + (double)Indexer.corpusSize / docFrequency);
+                    //implements formula for w_{q,t}
+                    query2TermWeight = (double)Math.Log(1 + (double)(Indexer.corpusSize / docFrequency));
 
                     foreach (Posting post in postings)
-                    { 
+                    {
+                        //implements formula for w_{d,t}
                         doc2TermWeight = (double)(1 + (double)Math.Log(post.Positions.Count)); //TermFrequency = post.Positions.Count
+
+                        //the A_{d} value for a specific term in that document
                         docAccumulator = query2TermWeight * doc2TermWeight;
 
+                        //if the A_{d} value exists on the hashmap increase its value else create a new key-value pair
                         if (Accumulator.ContainsKey(post.DocumentId))
                         {
                             Accumulator[post.DocumentId] += docAccumulator;
@@ -312,13 +335,23 @@ namespace Search.Index
                 }
             }
         }
+
+        /// <summary>
+        /// Creates a new priority queue by inserting the rank of the document and document id 
+        /// 
+        /// </summary>
+        /// <returns> a priority queue with max heap property</returns>
         private MaxPriorityQueue BuildPriorityQueue()
         {
-
+            //temporary variable to hold the doc weight
             double tempDocWeight;
+            //temporary variable to hold the final ranking value of that document
             double finalRank;
 
+            //Make a new priority queue
             MaxPriorityQueue priorityQueue = new MaxPriorityQueue();
+
+            //for every key value in the Accumulator divide A_{d} by L_{d}
             foreach (KeyValuePair<int, double> candidate in Accumulator)
             {
                 //get document weight by id from docWeights.bin file
@@ -332,7 +365,6 @@ namespace Search.Index
             }
 
             return priorityQueue;
-
 
         }
     }
