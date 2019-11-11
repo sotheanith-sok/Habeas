@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System;
 using System.IO;
 using Search.Query;
+using Search.Document;
 
 namespace Search.Index
 {
@@ -15,6 +16,9 @@ namespace Search.Index
         private BinaryReader postingReader;
         private long[] vocabTable;  // [t1Start, p1Start, t2Start, p2Start, ...]
         private BinaryReader docWeightsReader;
+
+        private Dictionary<int, double> Accumulator; //stores the document id with its corresponding rank  [docId -> A_{docID}]
+
 
         /// <summary>
         /// Opens an on-disk positional inverted index that was constructed in the given path
@@ -39,6 +43,8 @@ namespace Search.Index
 
                 Console.WriteLine("Open docWeights.bin");
                 docWeightsReader = new BinaryReader(File.OpenRead(dirPath + "docWeights.bin"));
+
+                Accumulator = new Dictionary<int, double>();
                 
             }
             catch (FileNotFoundException ex)
@@ -302,6 +308,96 @@ namespace Search.Index
         /// <summary>
         /// Dispose all binary readers
         /// </summary>
+
+
+        public IList<MaxPriorityQueue.InvertedIndex> GetRankedDocuments(List<string> query)
+        {
+
+            //Build the Accumulator Hashmap
+            BuildAccumulator(query);
+
+            //Build Priority Queue using the Accumulator divided by L_{d}  
+            MaxPriorityQueue pq = BuildPriorityQueue();
+
+            //Retrieve Top Ten Documents and Return to Back End
+            return pq.RetrieveTopTen();
+
+        }
+        private void BuildAccumulator(List<string> query)
+        {
+            double query2TermWeight;
+            double doc2TermWeight;
+            double docAccumulator;
+
+            //caculate accumulated Value for each relevant document A_{d}
+            foreach (string term in query)
+            {
+                long startByte = BinarySearchVocabulary(term);
+
+                //0. Jump to the starting byte
+                postingReader.BaseStream.Seek(startByte, SeekOrigin.Begin);
+
+
+
+                //1. Read document frequency
+                int docFrequency = postingReader.ReadInt32();
+                query2TermWeight = Math.Log(1 + Indexer.corpusSize / docFrequency);
+
+                int prevDocID = 0;
+                for (int i = 0; i < docFrequency; i++)         //for each posting
+                {
+                    //2. Read documentID using gap
+                    int docID = prevDocID + postingReader.ReadInt32();
+
+                    //3. Read term frequency
+                    int termFrequency = postingReader.ReadInt32();
+
+                    doc2TermWeight = 1 + Math.Log(termFrequency);
+                    docAccumulator = query2TermWeight * doc2TermWeight;
+
+                    if (Accumulator.ContainsKey(docID))
+                    {
+                        Accumulator[docID] += docAccumulator;
+                    }
+                    else
+                    {
+                        Accumulator.Add(docID, docAccumulator);
+                    }
+
+                    //Skip the positions
+                    postingReader.BaseStream.Seek(termFrequency * sizeof(int), SeekOrigin.Current);
+
+                    prevDocID = docID;  //update prevDocID
+                }
+            }
+        }
+        private MaxPriorityQueue BuildPriorityQueue()
+        {
+
+            double tempDocWeight;
+            double finalRank;
+            int documentID;
+
+            MaxPriorityQueue priorityQueue = new MaxPriorityQueue();
+            foreach (KeyValuePair<int, double> candidate in Accumulator)
+            {
+                //get document weight by id from docWeights.bin file
+                tempDocWeight = GetDocumentWeight(candidate.Key);
+
+                // divide Accumulated Value A_{d} by L_{d} 
+                finalRank = (double) candidate.Value / tempDocWeight;
+
+                //TO-DO implement binary heap priority queue
+                //get docID
+                documentID = candidate.Key;
+
+                //add to list to perform priority queue on 
+                priorityQueue.MaxHeapInsert(finalRank, documentID);
+            }
+
+            return priorityQueue;
+        }
+
         public void Dispose()
         {
             vocabReader?.Dispose();

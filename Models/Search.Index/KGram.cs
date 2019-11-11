@@ -145,6 +145,7 @@ namespace Search.Index
                     {
                         candidates.Add(item);
                     }
+
                 }
 
                 return candidates.ToList();

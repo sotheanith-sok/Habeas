@@ -20,7 +20,6 @@ namespace Search.Index
         private readonly Dictionary<string, int> termFrequency;
 
 
-
         private static List<double> calculatedDocWeights;
 
 
@@ -192,6 +191,13 @@ namespace Search.Index
         {
             return calculatedDocWeights;
         }
+
+        //ranked documents for positional inverted index is not needed therefore return empty list
+        public IList<MaxPriorityQueue.InvertedIndex> GetRankedDocuments(List<string> query)
+        {
+            return new List<MaxPriorityQueue.InvertedIndex>();  
+        }
+    
     }
 
 }

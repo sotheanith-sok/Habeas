@@ -31,13 +31,14 @@ namespace UnitTests.OnDiskIndexTests
             File.Exists(pathToIndex + "docWeights.bin").Should().BeTrue();
 
             // int expectedVocabLength = 0; //??
-            // File.ReadAllBytes(pathToIndex+"vocab.bin").Length.Should().Be(expectedVocabLength);
+            // File.ReadAllBytes(corpusDir+"vocab.bin").Length.Should().Be(expectedVocabLength);
             int expectedPostingsLength = (13 + 34 + 75) * 4;   // (# of documentFrequencies + # of docIDs + # of termFrequencies + # of positions) * byteSize
             File.ReadAllBytes(pathToIndex + "Postings_Value.bin").Length.Should().Be(expectedPostingsLength);
             int expectedVocabTableLength = 13 * 2 * 8;
             File.ReadAllBytes(pathToIndex + "Postings_Table.bin").Length.Should().Be(expectedVocabTableLength);
             int expectedDocWeightsLength = 5 * 8;
             File.ReadAllBytes(pathToIndex + "docWeights.bin").Length.Should().Be(expectedDocWeightsLength);
+
 
         }
 
