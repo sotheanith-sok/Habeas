@@ -57,8 +57,8 @@ namespace Search.Document
 
             File temp;
             files.TryGetValue(path, out temp);
-            temp.timeStamp=DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            files.TryUpdate(path,temp, temp);
+            temp.timeStamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            files.TryUpdate(path, temp, temp);
 
             return temp.GetMemoryMappedFile().CreateViewStream();
         }
@@ -86,7 +86,7 @@ namespace Search.Document
             foreach (string path in filesToBeRemove)
             {
                 File file;
-                files.TryRemove(path,out file);
+                files.TryRemove(path, out file);
                 file.Dispose();
             }
         }

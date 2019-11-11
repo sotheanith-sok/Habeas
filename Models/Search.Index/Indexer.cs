@@ -13,8 +13,6 @@ namespace Search.Index
     {
 
         public static string path = "./";
-        public static int corpusSize = 0;
-
 
         /// <summary>
         /// Constructs an index from a corpus of documents
@@ -28,7 +26,7 @@ namespace Search.Index
             elapsedTime.Start();
 
             // Set the index type and token processor to use
-            SpecialIndex index = new SpecialIndex(Indexer.path);
+            PositionalInvertedIndex index = new PositionalInvertedIndex(Indexer.path);
             ITokenProcessor processor = new StemmingTokenProcesor();
 
             HashSet<string> unstemmedVocabulary = new HashSet<string>();
@@ -51,10 +49,8 @@ namespace Search.Index
                     {
                         if (term.Length > 0)
                         {
-                            Console.WriteLine(position + ":" + term);
                             index.AddTerm(term, doc.DocumentId, position);
                             termsIsAdded = true;
-                            // Console.WriteLine("¾"); //This thing will print out as _. So index is correct.
                         }
                     }
                     //Increase the position num

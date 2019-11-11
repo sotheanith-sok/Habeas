@@ -40,10 +40,15 @@ namespace Search.Index
         }
 
 
+        /// <summary>
+        /// Write soundex to disk
+        /// </summary>
+        /// <param name="SoundMap">soundex</param>
         public void BuildSoundexIndex(SortedDictionary<string, List<int>> SoundMap)
         {
             this.map.Save(SoundMap, this.path, "SoundEx");
         }
+
         /// <summary>
         /// Adds docID to the soundexIndex(hashmap) by the sound code of author name as a key
         /// </summary>

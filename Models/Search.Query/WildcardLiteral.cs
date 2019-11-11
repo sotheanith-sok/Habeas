@@ -135,7 +135,7 @@ namespace Search.Query
             {
                 stemmedFinalCandidates.Add(stemmer.Stem(s).Value);
             }
-            
+
             return index.GetPostings(stemmedFinalCandidates.ToList());
         }
 

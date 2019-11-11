@@ -19,8 +19,6 @@ namespace UnitTests.IndexTests
         {
             //Arrange
             string term = "sun";
-            // System.Console.WriteLine("PositionalIndexTest_OnePosition: ");
-            // System.Console.Write($"Set expected postings of \'{term}\'");
             IList<Posting> expected = UnitTest.GeneratePostings("(3,[3])");
 
             //Act
@@ -38,8 +36,6 @@ namespace UnitTests.IndexTests
         {
             //Arrange
             string term = "hello";
-            // System.Console.WriteLine("PositionalIndexTest_MultiplePositions: ");
-            // System.Console.Write($"Set expected postings of \'{term}\'");
             IList<Posting> expected;
             // expected = UnitTest.GeneratePostings("(0,[0,1]), (2,[0,2,3])");  //this not work for macOS yet
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))

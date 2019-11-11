@@ -18,6 +18,12 @@ namespace Search.Query
             Term = term;
         }
 
+        /// <summary>
+        /// Get Postings
+        /// </summary>
+        /// <param name="index">Index</param>
+        /// <param name="processor">Tokene processor</param>
+        /// <returns></returns>
         public IList<Posting> GetPostings(IIndex index, ITokenProcessor processor)
         {
             //Process the term
@@ -26,6 +32,10 @@ namespace Search.Query
             return index.GetPostings(processedTerms);
         }
 
+        /// <summary>
+        /// Convert this query componenet to string
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return Term;
