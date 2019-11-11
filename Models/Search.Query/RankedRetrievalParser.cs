@@ -21,13 +21,38 @@ namespace Search.Query
     {
 
         /// <summary>
-        /// Parses a Boolean search query to produce an IQueryComponent for that query.
-        /// </summary>
+        /// Parses a search query to produce an IQueryComponent for Ranked Retrieval.
         /// <param name="query">query to be parsed to a query component</param>
         /// <returns>a query component</returns>
         public List<String> ParseQuery(String query)
         {
-            return new List<String>();
+
+
+            if (query.Contains('*'))
+            {
+                return new List<string>();
+            }
+
+            string[] terms = query.Split(' ');
+            List<List<string>> processedTerms = new List<List<string>>();
+
+            ITokenProcessor processor = new StemmingTokenProcesor();
+
+            foreach (string term in terms)
+            {
+                processedTerms.Add(processor.ProcessToken(term));
+            }
+
+            List<string> finalTerms = new List<string>();
+            foreach (List<string> term in processedTerms)
+            {
+                foreach (string independentTerm in term)
+                {
+                    finalTerms.Add(independentTerm);
+                }
+            }
+            
+            return finalTerms;
         }
 
     }
