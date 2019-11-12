@@ -11,16 +11,28 @@ namespace Search.OnDiskDataStructure
     /// <typeparam name="TValue">Type of Value</typeparam>
     public class OnDiskDictionary<TKey, TValue> : IOnDiskDictionary<TKey, TValue> where TKey : IComparable
     {
+        private string path; //path to the index where this on-disk dictionary is stored.
+        private string dictName;    //name of the dictionary
+        private string keyBinPath;
+        private string valueBinPath;
+        private string tableBinPath;
         private IEncoderDecoder<TKey> keyEncoderDecoder;
         private IEncoderDecoder<TValue> valueEncoderDecoder;
 
         /// <summary>
-        /// Construct a new on-disk dictionary
+        /// Constructs a new on-disk dictionary
         /// </summary>
+        /// <param name="path">Path to where the dictionary is stored</param>
+        /// <param name="dictName">Name of this dictionary</param>
         /// <param name="keyEncoderDecoder">Encoder/Decoder for key</param>
         /// <param name="valueEncoderDecoder">Encoder/Decoder for value</param>
-        public OnDiskDictionary(IEncoderDecoder<TKey> keyEncoderDecoder, IEncoderDecoder<TValue> valueEncoderDecoder)
+        public OnDiskDictionary(string path, string dictName, IEncoderDecoder<TKey> keyEncoderDecoder, IEncoderDecoder<TValue> valueEncoderDecoder)
         {
+            this.path = Path.GetFullPath(path);
+            this.dictName = dictName;
+            this.keyBinPath = Path.Join(this.path, dictName+"_Key.bin");
+            this.valueBinPath = Path.Join(this.path, dictName+"_Value.bin");
+            this.tableBinPath = Path.Join(this.path, dictName+"_Table.bin");
             this.keyEncoderDecoder = keyEncoderDecoder;
             this.valueEncoderDecoder = valueEncoderDecoder;
         }
@@ -29,28 +41,17 @@ namespace Search.OnDiskDataStructure
         /// Save a dictionary onto disk
         /// </summary>
         /// <param name="map">Dictionary</param>
-        /// <param name="path">Path to save disk to</param>
-        /// <param name="dictName">Name of dictionary</param>
-        public void Save(SortedDictionary<TKey, TValue> map, string path, string dictName)
+        public void Save(SortedDictionary<TKey, TValue> map)
         {
-            path = Path.GetFullPath(path);
-            string keyFileName = dictName + "_Key.bin";
-            string valueFileName = dictName + "_Value.bin";
-            string tableFileName = dictName + "_Table.bin";
-            string keyBin = Path.Join(path, keyFileName);
-            string valueBin = Path.Join(path, valueFileName);
-            string tableBin = Path.Join(path, tableFileName);
-
-            long[] keyPositions = this.WriteKeyBin(map.Keys.ToList(), keyBin);
-            long[] valuePositions = this.WriteValueBin(map.Values.ToList(), valueBin);
-            this.WriteTableBin(keyPositions, valuePositions, tableBin);
+            long[] keyPositions = this.WriteKeyBin(map.Keys.ToList(), keyBinPath);
+            long[] valuePositions = this.WriteValueBin(map.Values.ToList(), valueBinPath);
+            this.WriteTableBin(keyPositions, valuePositions, tableBinPath);
 
             Console.WriteLine($"\nSaved On-Disk '{dictName}'");
-            Console.WriteLine($"∙ {keyFileName}     {new FileInfo(keyBin).Length} bytes");
-            Console.WriteLine($"∙ {valueFileName}   {new FileInfo(valueBin).Length} bytes");
-            Console.WriteLine($"∙ {tableFileName}   {new FileInfo(tableBin).Length} bytes");
+            Console.WriteLine($"∙ {Path.GetFileName(keyBinPath)}     {new FileInfo(keyBinPath).Length} bytes");
+            Console.WriteLine($"∙ {Path.GetFileName(valueBinPath)}   {new FileInfo(valueBinPath).Length} bytes");
+            Console.WriteLine($"∙ {Path.GetFileName(tableBinPath)}   {new FileInfo(tableBinPath).Length} bytes");
             
-
         }
 
 
@@ -58,21 +59,29 @@ namespace Search.OnDiskDataStructure
         /// Get value for a given key
         /// </summary>
         /// <param name="key">Key to search for</param>
-        /// <param name="path">Path to save disk to</param>
-        /// <param name="dictName">Name of dictionary</param>
         /// <returns>Value related to a given key</returns>
-        public TValue Get(TKey key, string path, string dictName)
+        public TValue Get(TKey key)
         {
-            path = Path.GetFullPath(path);
-            string keyBin = Path.Join(path, dictName + "_Key.bin");
-            string valueBin = Path.Join(path, dictName + "_Value.bin");
-            string tableBin = Path.Join(path, dictName + "_Table.bin");
-
-            long[] table = this.ReadTableBin(tableBin);
-            int index = this.ReadKeyBin(table, keyBin, key);
-            TValue value = this.ReadValueBin(table, index, valueBin);
+            long[] table = this.ReadTableBin();
+            int index = this.ReadKeyBin(table, key);
+            TValue value = this.ReadValueBin(table, index);
 
             return value;
+        }
+
+        /// <summary>
+        /// Get List of value for a list of key
+        /// </summary>
+        /// <param name="keys">Keys to search for</param>
+        /// <returns>Value related to a given key</returns>
+        public List<TValue> Get(List<TKey> keys)
+        {
+            List<TValue> values = new List<TValue>();
+            foreach(TKey key in keys) {
+                values.Add(this.Get(key));
+            }
+
+            return values;
         }
 
 
@@ -136,34 +145,32 @@ namespace Search.OnDiskDataStructure
 
 
         /// <summary>
-        /// Read table from bin files
+        /// Read table of byte positions of where a key and a value start
         /// </summary>
-        /// <param name="path">Path to table bin</param>
-        /// <returns>Array of positions</returns>
-        private long[] ReadTableBin(string path)
+        /// <returns>Array of start bytes</returns>
+        private long[] ReadTableBin()
         {
-            List<long> tableBin = new List<long>();
-            using (BinaryReader reader = new BinaryReader(File.Open(path, FileMode.Open)))
+            List<long> table = new List<long>();
+            using (BinaryReader reader = new BinaryReader(File.Open(tableBinPath, FileMode.Open)))
             {
                 while (reader.BaseStream.Position != reader.BaseStream.Length)
                 {
-                    tableBin.Add(reader.ReadInt64());
-                    tableBin.Add(reader.ReadInt64());
+                    table.Add(reader.ReadInt64());
+                    table.Add(reader.ReadInt64());
                 }
             }
-            return tableBin.ToArray();
+            return table.ToArray();
         }
 
         /// <summary>
         /// Search for key in key bin
         /// </summary>
         /// <param name="table">Array of positions</param>
-        /// <param name="path">Path to key bin</param>
         /// <param name="term">term to search for</param>
         /// <returns>index in table where key is located</returns>
-        private int ReadKeyBin(long[] table, string path, TKey term)
+        private int ReadKeyBin(long[] table, TKey term)
         {
-            using (FileStream file = File.Open(path, FileMode.Open))
+            using (FileStream file = File.Open(keyBinPath, FileMode.Open))
             using (BinaryReader binaryReader = new BinaryReader(file))
             {
                 int i = 0;
@@ -201,9 +208,8 @@ namespace Search.OnDiskDataStructure
         /// </summary>
         /// <param name="table">Array of positions</param>
         /// <param name="index">Index where key was found</param>
-        /// <param name="path">Path to value bin</param>
         /// <returns>Value</returns>
-        private TValue ReadValueBin(long[] table, int index, string path)
+        private TValue ReadValueBin(long[] table, int index)
         {
             if (index == -1)
             {
@@ -212,7 +218,7 @@ namespace Search.OnDiskDataStructure
             }
             else
             {
-                using (FileStream file = File.Open(path, FileMode.Open))
+                using (FileStream file = File.Open(valueBinPath, FileMode.Open))
                 using (BinaryReader reader = new BinaryReader(file))
                 {
                     long startByte = table[index];
@@ -230,17 +236,13 @@ namespace Search.OnDiskDataStructure
         /// <param name="path">Path to keys bin</param>
         /// <param name="fileName">Name of keys bin</param>
         /// <returns>Array of Keys</returns>
-        public TKey[] GetKeys(string path, string fileName)
+        public TKey[] GetKeys()
         {
-            path = Path.GetFullPath(path);
-            string keyBin = Path.Join(path, fileName + "_Key.bin");
-            string valueBin = Path.Join(path, fileName + "_Value.bin");
-            string tableBin = Path.Join(path, fileName + "_Table.bin");
 
-            long[] table = this.ReadTableBin(tableBin);
+            long[] table = this.ReadTableBin();
             List<TKey> keys = new List<TKey>();
 
-            using (FileStream file = File.Open(keyBin, FileMode.Open))
+            using (FileStream file = File.Open(keyBinPath, FileMode.Open))
             using (BinaryReader reader = new BinaryReader(file))
             {
                 long previous = -1;
@@ -266,151 +268,73 @@ namespace Search.OnDiskDataStructure
             return keys.ToArray();
         }
 
-        /// <summary>
-        /// Get all values from values bin
-        /// </summary>
-        /// <param name="path">Path to values bin</param>
-        /// <param name="fileName">Name of values bin</param>
-        /// <returns></returns>
-        public TValue[] GetValues(string path, string fileName)
-        {
-            path = Path.GetFullPath(path);
-            string keyBin = Path.Join(path, fileName + "_Key.bin");
-            string valueBin = Path.Join(path, fileName + "_Value.bin");
-            string tableBin = Path.Join(path, fileName + "_Table.bin");
+        // /// <summary>
+        // /// Get all values from values bin
+        // /// </summary>
+        // /// <returns>value array</returns>
+        // public TValue[] GetValues()
+        // {
+        //     long[] table = this.ReadTableBin(tableBinPath);
+        //     List<TValue> keys = new List<TValue>();
 
-            long[] table = this.ReadTableBin(tableBin);
-            List<TValue> keys = new List<TValue>();
+        //     using (FileStream file = File.Open(valueBinPath, FileMode.Open))
+        //     using (BinaryReader reader = new BinaryReader(file))
+        //     {
+        //         long previous = -1;
+        //         long current = -1;
+        //         for (int i = 1; i < table.Length; i += 2)
+        //         {
 
-            using (FileStream file = File.Open(valueBin, FileMode.Open))
-            using (BinaryReader reader = new BinaryReader(file))
-            {
-                long previous = -1;
-                long current = -1;
-                for (int i = 1; i < table.Length; i += 2)
-                {
-
-                    if (current == -1)
-                    {
-                        current = i;
-                    }
-                    else
-                    {
-                        previous = current;
-                        current = i;
-                        reader.BaseStream.Position = table[previous];
-                        keys.Add(valueEncoderDecoder.Decoding(reader.ReadBytes((int)(table[current] - table[previous]))));
-                    }
-                }
-                reader.BaseStream.Position = table[current];
-                keys.Add(valueEncoderDecoder.Decoding(reader.ReadBytes((int)(reader.BaseStream.Length - table[current]))));
-            }
-            return keys.ToArray();
-        }
+        //             if (current == -1)
+        //             {
+        //                 current = i;
+        //             }
+        //             else
+        //             {
+        //                 previous = current;
+        //                 current = i;
+        //                 reader.BaseStream.Position = table[previous];
+        //                 keys.Add(valueEncoderDecoder.Decoding(reader.ReadBytes((int)(table[current] - table[previous]))));
+        //             }
+        //         }
+        //         reader.BaseStream.Position = table[current];
+        //         keys.Add(valueEncoderDecoder.Decoding(reader.ReadBytes((int)(reader.BaseStream.Length - table[current]))));
+        //     }
+        //     return keys.ToArray();
+        // }
 
 
-        /// <summary>
-        /// Search for key bin for a list of term positions
-        /// </summary>
-        /// <param name="table">Array of positions</param>
-        /// <param name="path">Path to key bin</param>
-        /// <param name="term">term to search for</param>
-        /// <returns>index in table where key is located</returns>
-        private List<int> ReadKeyBin(long[] table, string path, List<TKey> terms)
-        {
-            List<int> result = new List<int>();
-            using (FileStream file = File.Open(path, FileMode.Open))
-            using (BinaryReader binaryReader = new BinaryReader(file))
-            {
-                foreach (TKey term in terms)
-                {
-                    int i = 0;
-                    int j = table.Length / 2 - 1;
-                    while (i <= j)
-                    {
-                        int m = (i + j) / 2;
-                        long termStartByte = table[m * 2];
+        // /// <summary>
+        // /// Get all values for a list of keys
+        // /// </summary>
+        // /// <param name="path">Path to values bin</param>
+        // /// <param name="fileName">Name of values bin</param>
+        // /// <returns></returns>
+        // private List<TValue> ReadValueBin(long[] table, List<int> indexes, string path)
+        // {
+        //     List<TValue> results = new List<TValue>();
 
-                        long length = m * 2 < table.Length - 2 ? table[m * 2 + 2] - table[m * 2] : file.Length - table[m * 2];
-                        binaryReader.BaseStream.Position = termStartByte;
-                        TKey termFromFile = keyEncoderDecoder.Decoding((binaryReader.ReadBytes((int)(length))));
+        //     using (FileStream file = File.Open(path, FileMode.Open))
+        //     using (BinaryReader reader = new BinaryReader(file))
+        //     {
+        //         foreach (int index in indexes)
+        //         {
+        //             if (index == -1)
+        //             {
+        //                 results.Add(default(TValue));
+        //             }
+        //             else
+        //             {
+        //                 long startByte = table[index];
+        //                 long length = index < table.Length - 2 ? table[index + 2] - table[index] : file.Length - table[index];
+        //                 reader.BaseStream.Position = startByte;
+        //                 TValue result = valueEncoderDecoder.Decoding(reader.ReadBytes((int)(length)));
+        //                 results.Add(result);
+        //             }
+        //         }
+        //     }
+        //     return results;
+        // }
 
-                        int compareValue = term.CompareTo(termFromFile);
-                        if (compareValue == 0)
-                        {
-                            // found it!
-                            result.Add(m * 2 + 1);
-                            break;
-                        }
-                        else if (compareValue < 0)
-                        {
-                            j = m - 1;
-                        }
-                        else
-                        {
-                            i = m + 1;
-                        }
-                    }
-                    result.Add(-1);
-                }
-
-            }
-            return result;
-
-        }
-
-
-        /// <summary>
-        /// Get all values for a list of keys
-        /// </summary>
-        /// <param name="path">Path to values bin</param>
-        /// <param name="fileName">Name of values bin</param>
-        /// <returns></returns>
-        private List<TValue> ReadValueBin(long[] table, List<int> indexes, string path)
-        {
-            List<TValue> results = new List<TValue>();
-
-            using (FileStream file = File.Open(path, FileMode.Open))
-            using (BinaryReader reader = new BinaryReader(file))
-            {
-                foreach (int index in indexes)
-                {
-                    if (index == -1)
-                    {
-                        results.Add(default(TValue));
-                    }
-                    else
-                    {
-                        long startByte = table[index];
-                        long length = index < table.Length - 2 ? table[index + 2] - table[index] : file.Length - table[index];
-                        reader.BaseStream.Position = startByte;
-                        TValue result = valueEncoderDecoder.Decoding(reader.ReadBytes((int)(length)));
-                        results.Add(result);
-                    }
-                }
-            }
-            return results;
-        }
-
-        /// <summary>
-        /// Get List of value for a list of key
-        /// </summary>
-        /// <param name="key">Key to search for</param>
-        /// <param name="path">Path to save disk to</param>
-        /// <param name="fileName">Filename of dictionary</param>
-        /// <returns>Value related to a given key</returns>
-        public List<TValue> Get(List<TKey> key, string path, string fileName)
-        {
-            path = Path.GetFullPath(path);
-            string keyBin = Path.Join(path, fileName + "_Key.bin");
-            string valueBin = Path.Join(path, fileName + "_Value.bin");
-            string tableBin = Path.Join(path, fileName + "_Table.bin");
-
-            long[] table = this.ReadTableBin(tableBin);
-            List<int> indexes = this.ReadKeyBin(table, keyBin, key);
-            List<TValue> values = this.ReadValueBin(table, indexes, valueBin);
-
-            return values;
-        }
     }
 }

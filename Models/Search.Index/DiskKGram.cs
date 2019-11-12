@@ -16,6 +16,7 @@ namespace Search.Index
         //Path to kGrame
         private string path;
         private OnDiskDictionary<string, List<string>> map;
+        private OnDiskDictionary<string, List<string>> miniMap;
 
         /// <summary>
         /// Constructor
@@ -26,7 +27,8 @@ namespace Search.Index
         {
             this.size = size;
             this.path = path;
-            this.map = new OnDiskDictionary<string, List<string>>(new StringEncoderDecoder(), new StringListEncoderDecoder());
+            this.map = new OnDiskDictionary<string, List<string>>(path, "KGram", new StringEncoderDecoder(), new StringListEncoderDecoder());
+            this.miniMap = new OnDiskDictionary<string, List<string>>(path, "MiniKGram", new StringEncoderDecoder(), new StringListEncoderDecoder());
         }
 
         /// <summary>
@@ -98,8 +100,8 @@ namespace Search.Index
             Console.WriteLine("Write K-Gram to disk...");
             // Console.WriteLine("Path:" + Path.GetFullPath(this.path));
 
-            this.map.Save(map, path, "KGram");
-            this.map.Save(miniMap, path, "MiniKGram");
+            this.map.Save(map);
+            this.miniMap.Save(miniMap);
             Console.WriteLine("Complete KGram generating process");
             return this;
         }
@@ -116,13 +118,13 @@ namespace Search.Index
             {
                 HashSet<string> candidates = new HashSet<string>();
 
-                List<string> possibleKGram = this.map.Get(kGram, this.path, "MiniKGram");
+                List<string> possibleKGram = this.miniMap.Get(kGram);
                 if (possibleKGram == default(List<string>))
                 {
                     return new List<string>();
                 }
 
-                List<List<string>> KGramLists = new List<List<string>>(this.map.Get(possibleKGram, this.path, "KGram"));
+                List<List<string>> KGramLists = new List<List<string>>(this.map.Get(possibleKGram));
                 KGramLists.RemoveAll(item => item == null);
 
                 foreach (List<string> k in KGramLists)
@@ -138,7 +140,7 @@ namespace Search.Index
             }
             else
             {
-                List<string> result = this.map.Get(kGram, this.path, "KGram");
+                List<string> result = this.map.Get(kGram);
                 return default(List<string>) == result ? new List<string>() : result;
             }
         }
