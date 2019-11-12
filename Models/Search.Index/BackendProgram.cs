@@ -19,6 +19,8 @@ namespace Search.Index
         //if mode is false, it's in ranked retrieval mode
         private static Boolean mode = true;
 
+        private static int RankVariant = 0;
+
         /// <summary>
         /// Gets a corpus
         /// </summary>

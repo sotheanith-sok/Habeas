@@ -290,6 +290,11 @@ namespace Search.Index
             //gets path to access on disk file
             string path = Indexer.path;
 
+            //getCorpusSize
+            int N = this.GetCorpusSize(path);
+
+
+
             //caculate accumulated Value for each relevant document A_{d}
             foreach (string term in query)
             {
@@ -301,7 +306,7 @@ namespace Search.Index
                     int docFrequency = postings.Count;
 
                     //implements formula for w_{q,t}
-                    query2TermWeight = (double)Math.Log(1 + (double)(this.GetCorpusSize(path) / docFrequency));
+                    query2TermWeight = (double)Math.Log(1 + (double)(N / docFrequency));
 
                     foreach (Posting post in postings)
                     {
