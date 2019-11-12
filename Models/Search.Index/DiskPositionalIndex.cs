@@ -106,6 +106,17 @@ namespace Search.Index
 
         }
 
+        public List<PostingDocWeight> GetPostingDocWeights()
+        {
+            List<int> documents = onDiskDocWeight.GetKeys().ToList();
+            List<PostingDocWeight> finalList = new List<PostingDocWeight>();
+            foreach(int documentID in documents)
+            {
+                finalList.Add(GetPostingDocWeight(documentID));
+            }
+
+            return finalList;
+        }
 
         public PostingDocWeight GetPostingDocWeight(int docID)
         {

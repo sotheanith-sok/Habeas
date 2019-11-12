@@ -153,8 +153,8 @@ namespace Search.Index
                     //parser to parse the query 
                     RankedRetrievalParser parser = new RankedRetrievalParser();
 
-                    //gets the list of independent terms
-                    List<String> finalTerms = parser.ParseQuery(query);
+                    
+                    List<string> finalTerms = parser.ParseQuery(query);
 
                     //retrieves the top ten documents of the normalized tokens
                     RankingVariant rv = new RankingVariant(corpus);
