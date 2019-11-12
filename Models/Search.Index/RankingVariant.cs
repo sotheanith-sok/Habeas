@@ -20,7 +20,7 @@ namespace Search.Index
 
         private int corpusSize;
 
-        private double averageDocLength;
+    
 
         private IDocumentCorpus corpus;
 
@@ -30,7 +30,7 @@ namespace Search.Index
             doc2termWeight = new int();
             accumulator = new Dictionary<int, double>();
 
-            averageDocLength = new double();
+      
             this.corpus = corpus;
         }
 
@@ -47,7 +47,7 @@ namespace Search.Index
             BuildAccumulator(query, RankedRetrievalMode, index);
 
             //Build Priority Queue using the Accumulator divided by L_{d}  
-            MaxPriorityQueue pq = BuildPriorityQueue(RankedRetrievalMode);
+            MaxPriorityQueue pq = BuildPriorityQueue(RankedRetrievalMode, index);
 
             accumulator.Clear();
 
@@ -117,7 +117,7 @@ namespace Search.Index
         /// Creates a new priority queue by inserting the rank of the document and document id 
         /// </summary>
         /// <returns> a priority queue with max heap property</returns>
-        private MaxPriorityQueue BuildPriorityQueue(string RankedRetrievalMode)
+        private MaxPriorityQueue BuildPriorityQueue(string RankedRetrievalMode, IIndex index)
         {
 
             //temporary variable to hold the doc weight
@@ -132,7 +132,7 @@ namespace Search.Index
             foreach (KeyValuePair<int, double> candidate in this.accumulator)
             {
                 //get corresponding L_{d} value according to ranking system
-                normalizer = GetDocumentWeight(candidate.Key, RankedRetrievalMode);
+                normalizer = GetDocumentWeight(candidate.Key, RankedRetrievalMode, index);
 
                 // divide Accumulated Value A_{d} by L_{d} 
                 finalRank = (double)candidate.Value / normalizer;
@@ -203,20 +203,19 @@ namespace Search.Index
         public double calculateDoc2TermWeight(int termFrequency, string RankedRetrievalMode, int docID, IIndex index)
         {
             int N = this.corpusSize;
+            DiskPositionalIndex.PostingDocWeight temp = index.GetPostingDocWeight(docID);
             switch (RankedRetrievalMode)
             {
                 case "Tf-idf":
                     return (double)termFrequency;
 
                 case "Okapi":
-                    int documentLength = Indexer.tokensPerDocument[docID];
-                    calculateAverageDocLength();
-
-                    double OkapiWdtValue = (double)(2.2 * termFrequency) / (1.2 * (0.25 + 0.75 * (double)documentLength / this.averageDocLength) + termFrequency);
+                    int documentLength = temp.GetDocTokenCount();
+                    double OkapiWdtValue = (double)(2.2 * termFrequency) / (1.2 * (0.25 + 0.75 * (double)documentLength / Indexer.averageDocLength) + termFrequency);
                     return OkapiWdtValue;
 
                 case "Wacky":
-                    double avDocTermFreq = index.GetAverageTermFreq(docID);
+                    double avDocTermFreq = temp.GetDocAveTermFreq();
                     double WackyWdtValue = (double)(1 + Math.Log(termFrequency)) / (1 + Math.Log(avDocTermFreq));
                     return WackyWdtValue;
                 default:
@@ -230,45 +229,30 @@ namespace Search.Index
         /// </summary>
         /// <param name="docId"></param>
         /// <returns></returns>
-        private double GetDocumentWeight(int docId, string RankedRetrievalMode)
+        private double GetDocumentWeight(int docID, string RankedRetrievalMode, IIndex index)
         {
-            string filePath = Indexer.path + "docWeights.bin";
             double docWeight;
+            DiskPositionalIndex.PostingDocWeight temp = index.GetPostingDocWeight(docID);
             switch (RankedRetrievalMode)
             {
                 case "Tf-idf":
-                    using (BinaryReader docWeightsReader = new BinaryReader(File.Open(filePath, FileMode.Open)))
-                    {
-                        int startByte = docId * 8;
 
-                        //Jump to the starting byte
-                        docWeightsReader.BaseStream.Seek(startByte, SeekOrigin.Begin);
-                        //Read a document weight and convert it
-                        docWeight = BitConverter.Int64BitsToDouble(docWeightsReader.ReadInt64());
-                    }
+                    docWeight = temp.GetDocWeight();
                     return docWeight;
 
                 case "Okapi":
                     return 1.0;
                 case "Wacky":
-                    IDocument doc = this.corpus.GetDocument(docId);
-                    string docFilePath = doc.FilePath;
-                    int fileSizeInByte = (int)(new FileInfo(filePath).Length / 8f);
+
+                    int fileSizeInByte = temp.GetDocByteSize();
                     double WackyLd = (double)(Math.Sqrt(fileSizeInByte));
                     Console.WriteLine(WackyLd);
                     return WackyLd;
 
                 default:
-                    using (BinaryReader docWeightsReader = new BinaryReader(File.Open(filePath, FileMode.Open)))
-                    {
-                        int startByte = docId * 8;
-
-                        //Jump to the starting byte
-                        docWeightsReader.BaseStream.Seek(startByte, SeekOrigin.Begin);
-                        //Read a document weight and convert it
-                        docWeight = BitConverter.Int64BitsToDouble(docWeightsReader.ReadInt64());
-                    }
+                    docWeight = temp.GetDocWeight();
                     return docWeight;
+
             }
 
         }
@@ -280,24 +264,11 @@ namespace Search.Index
         /// <returns></returns>
         private int GetCorpusSize(string path)
         {
-            string filePath = Indexer.path + "docWeights.bin";
-            return (int)(new FileInfo(filePath).Length / 8f);
+            string filePath = Indexer.path + "docWeights_Key.bin";
+            return (int)(new FileInfo(filePath).Length / 4f);
         }
 
-        /// <summary>
-        /// calcuates the average token frequency of a particulat document
-        /// </summary>
-        private void calculateAverageDocLength()
-        {
-            double average = 0;
-            foreach (KeyValuePair<int, int> docTokens in Indexer.tokensPerDocument)
-            {
-                average = average + docTokens.Value;
-            }
-            average = (double)average / Indexer.tokensPerDocument.Count;
 
-            this.averageDocLength = average;
-        }
     }
 
 }

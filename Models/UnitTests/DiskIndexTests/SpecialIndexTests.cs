@@ -72,16 +72,14 @@ namespace UnitTests.DiskIndexTest
 
             //tests Wacky 
             IList<MaxPriorityQueue.InvertedIndex> actual3 = rv.GetRankedDocuments(index, terms, "Wacky");     
-            actual3[0].GetDocumentId().Should().Be(2);
+            actual3[0].GetDocumentId().Should().Be(0);
             actual3[0].GetRank().Should().BeApproximately(0.284824391, 9);
-            actual3[1].GetDocumentId().Should().Be(0);
+            actual3[1].GetDocumentId().Should().Be(2);
             actual3[1].GetRank().Should().BeApproximately(0.259673474, 9);
             actual3[2].GetDocumentId().Should().Be(1);
             actual3[2].GetRank().Should().Be(0.0);
             actual3[3].GetDocumentId().Should().Be(4);
             actual3[3].GetRank().Should().Be(0.0);
-          
-
 
         }
     }

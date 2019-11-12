@@ -41,12 +41,9 @@ namespace Search.Index
         /// </summary>
         IReadOnlyList<string> GetVocabulary();
 
-        IList<double> GetAllDocWeights();
+        DiskPositionalIndex.PostingDocWeight GetPostingDocWeight(int docID);
 
-         double GetAverageTermFreq(int docID);
 
-  
-       
     }
 }
 

@@ -14,9 +14,9 @@ namespace Search.Index
     {
 
         public static string path = "./";
-        public static Dictionary<int, int> tokensPerDocument = new Dictionary<int, int>();
 
-        public static Dictionary<int, byte> byteSizeOfDocs = new Dictionary<int, byte>();
+        public static double averageDocLength;
+
 
         /// <summary>
         /// Constructs an index from a corpus of documents
@@ -77,13 +77,22 @@ namespace Search.Index
                 }
 
                 //Add token count per document
-                tokensPerDocument.Add(doc.DocumentId, tokenCount);
+                index.AddTokensPerDocument(doc.DocumentId, tokenCount);
 
-                // //calculates Average term Frequency for a specific document
-                index.calcAveTermFreq(doc.DocumentId);
+                
+                //get number of bytes in file 
+                string docFilePath = doc.FilePath;
+                int fileSizeInByte = (int)(new FileInfo(docFilePath).Length / 8f);
+                index.AddByteSize(doc.DocumentId, fileSizeInByte);
+
+
+                //calculates Average term Frequency for a specific document
+                index.CalcAveTermFreq(doc.DocumentId);
 
                 //calculate L_{d} for the document and store it index so that we can write it to disk later
-                index.CalculateDocWeight();
+                index.CalculateDocWeight(doc.DocumentId);
+
+                Indexer.averageDocLength = index.calculateAverageDocLength();
 
                 //Add author to SoundEx Index
                 new DiskSoundEx(Indexer.path).AddDocIdByAuthor(doc.Author, doc.DocumentId, soundEx);
