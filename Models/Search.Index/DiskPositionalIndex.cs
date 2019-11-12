@@ -102,14 +102,25 @@ namespace Search.Index
             docWeigthsHashMap = new SortedDictionary<int, PostingDocWeight>();
 
             onDiskPostingMap = new OnDiskDictionary<string, List<Posting>>(path, "InvertedIndex", new StringEncoderDecoder(), new PostingListEncoderDecoder());
-
+            onDiskDocWeight = new OnDiskDictionary<int, PostingDocWeight>(path,"docWeights",new IntEncoderDecoder(),new PostingDocWeightEncoderDecoder());
 
         }
 
+        public List<PostingDocWeight> GetPostingDocWeights()
+        {
+            List<int> documents = onDiskDocWeight.GetKeys().ToList();
+            List<PostingDocWeight> finalList = new List<PostingDocWeight>();
+            foreach(int documentID in documents)
+            {
+                finalList.Add(GetPostingDocWeight(documentID));
+            }
+
+            return finalList;
+        }
 
         public PostingDocWeight GetPostingDocWeight(int docID)
         {
-            PostingDocWeight result = onDiskDocWeight.Get(docID, Indexer.path, "docWeights");
+            PostingDocWeight result = onDiskDocWeight.Get(docID);
             if (default(PostingDocWeight) == result)
             {
                 return new PostingDocWeight(0.0, 0, 0, 0.0);
@@ -290,7 +301,7 @@ namespace Search.Index
         {
             onDiskPostingMap.Save(hashMap);
             this.WriteDocWeights();
-            onDiskDocWeight.Save(docWeigthsHashMap, Indexer.path, "docWeights");
+            onDiskDocWeight.Save(docWeigthsHashMap);
 
 
             hashMap.Clear();

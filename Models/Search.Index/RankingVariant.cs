@@ -18,10 +18,13 @@ namespace Search.Index
         //temporarily stores the document id with its corresponding rank  [docId -> A_{docID}]
         private Dictionary<int, double> accumulator;
 
+        //used to calculate the queryToTermWeight
         private int corpusSize;
 
-    
-
+        //list of document weight according to id number
+        private List<DiskPositionalIndex.PostingDocWeight> queryDocWeights;
+        
+        //saves instance of the corpus to access corpus path
         private IDocumentCorpus corpus;
 
         public RankingVariant(IDocumentCorpus corpus)
@@ -29,7 +32,7 @@ namespace Search.Index
             query2termWeight = new int();
             doc2termWeight = new int();
             accumulator = new Dictionary<int, double>();
-
+            queryDocWeights = new List<DiskPositionalIndex.PostingDocWeight>();
       
             this.corpus = corpus;
         }
@@ -42,6 +45,9 @@ namespace Search.Index
         /// <returns></returns>
         public IList<MaxPriorityQueue.InvertedIndex> GetRankedDocuments(IIndex index, List<string> query, string RankedRetrievalMode)
         {
+            //grab document weighs from disk
+            this.queryDocWeights = index.GetPostingDocWeights();
+
 
             //Build the Accumulator Hashmap
             BuildAccumulator(query, RankedRetrievalMode, index);
@@ -185,7 +191,7 @@ namespace Search.Index
 
 
                 default:
-                    return Math.Log(1 + (double)N / docFrequency);
+                    return Math.Log(1 + (double) N / docFrequency);
             }
 
         }
@@ -203,20 +209,24 @@ namespace Search.Index
         public double calculateDoc2TermWeight(int termFrequency, string RankedRetrievalMode, int docID, IIndex index)
         {
             int N = this.corpusSize;
-            DiskPositionalIndex.PostingDocWeight temp = index.GetPostingDocWeight(docID);
+            DiskPositionalIndex.PostingDocWeight temp = this.queryDocWeights[docID];
             switch (RankedRetrievalMode)
             {
                 case "Tf-idf":
-                    return (double)termFrequency;
+                    return termFrequency;
 
                 case "Okapi":
                     int documentLength = temp.GetDocTokenCount();
-                    double OkapiWdtValue = (double)(2.2 * termFrequency) / (1.2 * (0.25 + 0.75 * (double)documentLength / Indexer.averageDocLength) + termFrequency);
+                    double numeratorO = 2.2 * termFrequency;
+                    double denominatorO =  1.2 * (0.25 + 0.75 * (double) (documentLength /  Indexer.averageDocLength )) + termFrequency;
+                    double OkapiWdtValue = (double) numeratorO/ denominatorO ;
                     return OkapiWdtValue;
 
                 case "Wacky":
                     double avDocTermFreq = temp.GetDocAveTermFreq();
-                    double WackyWdtValue = (double)(1 + Math.Log(termFrequency)) / (1 + Math.Log(avDocTermFreq));
+                    double numeratorW =  (double) 1 + Math.Log(termFrequency);
+                    double denominatorW = (double) 1 + Math.Log(avDocTermFreq);
+                    double WackyWdtValue = (double) numeratorW / denominatorW;
                     return WackyWdtValue;
                 default:
                     return (double)(1 + Math.Log(termFrequency));
@@ -225,14 +235,14 @@ namespace Search.Index
         }
 
         /// <summary>
-        /// Uses the document id to access the docWeights.bin file to retrieve the corresponding L_{d} value using the current ranking system
+        /// Uses the document id to access the queryDocWeights.bin file to retrieve the corresponding L_{d} value using the current ranking system
         /// </summary>
         /// <param name="docId"></param>
         /// <returns></returns>
         private double GetDocumentWeight(int docID, string RankedRetrievalMode, IIndex index)
         {
             double docWeight;
-            DiskPositionalIndex.PostingDocWeight temp = index.GetPostingDocWeight(docID);
+            DiskPositionalIndex.PostingDocWeight temp = this.queryDocWeights[docID];
             switch (RankedRetrievalMode)
             {
                 case "Tf-idf":
