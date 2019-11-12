@@ -18,6 +18,7 @@ namespace Search.Index
         //if mode is true, the search engine is in boolean mode
         //if mode is false, it's in ranked retrieval mode
         private static Boolean mode = true;
+        private static String RankedRetrievalMode = "Default";
 
         /// <summary>
         /// Gets a corpus
@@ -146,6 +147,17 @@ namespace Search.Index
 
                 if (mode == false)
                 {
+                    switch (RankedRetrievalMode)
+                    {
+                        case "Default":
+                        break;
+                        case "Tf-idf":
+                        break;
+                        case "Okapi":
+                        break;
+                        case "Wacky":
+                        break;
+                    }
                     //parser to parse the query 
                     RankedRetrievalParser parser = new RankedRetrievalParser();
 
@@ -294,6 +306,20 @@ namespace Search.Index
                 mode = true;
                 Console.WriteLine(mode);
             }
+        }
+
+
+        public void selectRetrieval(string retrieval)
+        {
+            try
+            {
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            RankedRetrievalMode = retrieval;
         }
 
         /// <summary>
