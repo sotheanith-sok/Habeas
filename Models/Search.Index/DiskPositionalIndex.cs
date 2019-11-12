@@ -79,6 +79,9 @@ namespace Search.Index
         {
             List<List<Posting>> postingLists = onDiskPostingMap.Get(terms, Indexer.path, "Postings");
             postingLists.RemoveAll(item => item == default(List<Posting>));
+            if(postingLists.Count==0){
+                return new List<Posting>();
+            }
             return Merge.OrMerge(new List<IList<Posting>>(postingLists));
         }
 
