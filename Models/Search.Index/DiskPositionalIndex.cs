@@ -21,8 +21,6 @@ namespace Search.Index
         //maintains the hashmap for the posting list for a specific term
         private OnDiskDictionary<string, List<Posting>> onDiskPostingMap;
 
-        //maintains a hashmap for the termfrequency for a specific term
-        private OnDiskDictionary<string, int> onDiskTermFrequencyMap;
 
         //maintains a hashmap for the document weight for a specific document id
         private OnDiskDictionary<int, int> onDiskDocWeight;
@@ -41,7 +39,6 @@ namespace Search.Index
             calculatedDocWeights = new List<double>();
 
             onDiskPostingMap = new OnDiskDictionary<string, List<Posting>>(new StringEncoderDecoder(), new PostingListEncoderDecoder());
-            onDiskTermFrequencyMap = new OnDiskDictionary<string, int>(new StringEncoderDecoder(), new IntEncoderDecoder());
             onDiskDocWeight = new OnDiskDictionary<int, int>(new IntEncoderDecoder(), new IntEncoderDecoder());
 
             Accumulator = new Dictionary<int, double>();
@@ -201,7 +198,6 @@ namespace Search.Index
         public void Save()
         {
             onDiskPostingMap.Save(hashMap, Indexer.path, "Postings");
-            onDiskTermFrequencyMap.Save(termFrequency, Indexer.path, "TermFrequency");
             this.WriteDocWeights();
             hashMap.Clear();
             termFrequency.Clear();
