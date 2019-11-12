@@ -4,6 +4,7 @@ using Search.Text;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.IO;
 using System.Timers;
 
@@ -13,6 +14,9 @@ namespace Search.Index
     {
 
         public static string path = "./";
+        public static Dictionary<int, int> tokensPerDocument = new Dictionary<int, int>();
+
+        public static Dictionary<int, byte> byteSizeOfDocs = new Dictionary<int, byte>();
 
         /// <summary>
         /// Constructs an index from a corpus of documents
@@ -32,12 +36,19 @@ namespace Search.Index
             HashSet<string> unstemmedVocabulary = new HashSet<string>();
             SortedDictionary<string, List<int>> soundEx = new SortedDictionary<string, List<int>>();
 
+            
             // Index the document
             foreach (IDocument doc in corpus.GetDocuments())
             {
                 //Tokenize the documents
                 ITokenStream stream = new EnglishTokenStream(doc.GetContent());
                 IEnumerable<string> tokens = stream.GetTokens();
+                
+                //keeptrack of tokens per document 
+                tokensPerDocument.Add(doc.DocumentId, tokens.Count());
+
+                //keep track of file size 
+
                 int position = 0;
                 foreach (string token in tokens)
                 {
@@ -62,6 +73,9 @@ namespace Search.Index
                         unstemmedVocabulary.Add(term);
                     }
                 }
+
+                // //calculates Average term Frequency for a specific document
+                // index.calcAveTermFreq(doc.DocumentId);
 
                 //calculate L_{d} for the document and store it index so that we can write it to disk later
                 index.CalculateDocWeight();

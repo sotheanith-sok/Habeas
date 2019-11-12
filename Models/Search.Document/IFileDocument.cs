@@ -8,7 +8,7 @@
         /// <summary>
         /// The absolute path to the file for the document.
         /// </summary>
-        string FilePath { get; }
+        new string FilePath { get; }
 
         /// <summary>
         /// Name of  the file including extension
