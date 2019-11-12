@@ -30,31 +30,38 @@ namespace Search.Index
         /// <param name="path">the path to the selected corpus</param>
         public void GetIndex(string path)
         {
+            Console.WriteLine("\n-------------------------------------------------------------------------------");
+            Console.WriteLine($"Path: {path}");
+                
             try
             {
                 string pathToIndex = Path.Join(path, "/index/");
                 Indexer.path = pathToIndex;
+
                 bool doesOnDiskIndexExist = Directory.Exists(pathToIndex);
                 // bool doesOnDiskIndexExist = Directory.Exists(pathToIndex) && (Directory.GetFiles(pathToIndex).Length != 0);
+                
                 //make corpus out of the selected directory path
                 corpus = DirectoryCorpus.LoadTextDirectory(path);
                 if (doesOnDiskIndexExist)
                 {
-                    Console.WriteLine("[Index] The on-disk index exists! Reading the on-disk index.");
+                    Console.WriteLine("Reading the existing on-disk index.");
                     index = new DiskPositionalIndex(pathToIndex);
                 }
                 else
                 {
-                    Console.WriteLine("[Index] Generating new index.");
+                    Console.WriteLine("Generating new index.");
                     GenerateIndex(path);
                 }
-
 
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
             }
+            
+            Console.WriteLine("Ready to go!");
+            Console.WriteLine("-------------------------------------------------------------------------------");
         }
 
         /// <summary>

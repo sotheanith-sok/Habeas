@@ -22,13 +22,13 @@ namespace UnitTests
             testValues.Add("C", "Cat");
             testValues.Add("D", "Dog");
             testValues.Add("E", "Eye");
-            OnDiskDictionary<string, string> dic = new OnDiskDictionary<string, string>(new StringEncoderDecoder(), new StringEncoderDecoder());
-            dic.Save(testValues, "./", "TestAlphabet");
-            Assert.Equal("Apple", dic.Get("A", "./", "TestAlphabet"));
-            Assert.Equal("Eye", dic.Get("E", "./", "TestAlphabet"));
-            Assert.Equal("Banana", dic.Get("B", "./", "TestAlphabet"));
-            Assert.Equal("Dog", dic.Get("D", "./", "TestAlphabet"));
-            Assert.Equal("Cat", dic.Get("C", "./", "TestAlphabet"));
+            OnDiskDictionary<string, string> dic = new OnDiskDictionary<string, string>("./", "TestAlphabet", new StringEncoderDecoder(), new StringEncoderDecoder());
+            dic.Save(testValues);
+            Assert.Equal("Apple", dic.Get("A"));
+            Assert.Equal("Eye", dic.Get("E"));
+            Assert.Equal("Banana", dic.Get("B"));
+            Assert.Equal("Dog", dic.Get("D"));
+            Assert.Equal("Cat", dic.Get("C"));
         }
     }
 }

@@ -17,7 +17,7 @@ namespace Search.Index
         public DiskSoundEx(string path)
         {
             this.path = path;
-            map = new OnDiskDictionary<string, List<int>>(new StringEncoderDecoder(), new IntListEncoderDecoder());
+            map = new OnDiskDictionary<string, List<int>>(path, "SoundEx", new StringEncoderDecoder(), new IntListEncoderDecoder());
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace Search.Index
                 }
                 AddDocIdByAuthor(d.Author, d.DocumentId, SoundMap);
             }
-            this.map.Save(SoundMap, this.path, "SoundEx");
+            this.map.Save(SoundMap);
         }
 
 
@@ -46,7 +46,7 @@ namespace Search.Index
         /// <param name="SoundMap">soundex</param>
         public void BuildSoundexIndex(SortedDictionary<string, List<int>> SoundMap)
         {
-            this.map.Save(SoundMap, this.path, "SoundEx");
+            this.map.Save(SoundMap);
         }
 
         /// <summary>
@@ -180,7 +180,7 @@ namespace Search.Index
                 List<int> docIDs;
                 try
                 {
-                    List<int> temp = this.map.Get(soundCode, this.path, "SoundEx");
+                    List<int> temp = this.map.Get(soundCode);
                     docIDs = temp == default(List<int>) ? new List<int>() : temp;
                 }
                 catch (KeyNotFoundException)
@@ -207,19 +207,19 @@ namespace Search.Index
         /// <returns>a sorted list of soundex</returns>
         public List<string> GetSoundexVocab()
         {
-            List<string> soundexVocab = this.map.GetKeys(this.path, "SoundEx").ToList();
+            List<string> soundexVocab = this.map.GetKeys().ToList();
             soundexVocab.Sort();
             return soundexVocab;
         }
 
         public int GetCount()
         {
-            return this.map.GetKeys(this.path, "SoundEx").Length;
+            return this.map.GetKeys().Length;
         }
 
         public List<int> Get(string key)
         {
-            List<int> result = this.map.Get(key, this.path, "SoundEx");
+            List<int> result = this.map.Get(key);
             return (result == default(List<int>) ? new List<int>() : result);
         }
     }
