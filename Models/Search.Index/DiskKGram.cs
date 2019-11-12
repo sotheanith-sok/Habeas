@@ -96,8 +96,7 @@ namespace Search.Index
 
             //WriteKGramToDisk
             Console.WriteLine("Write K-Gram to disk...");
-            Console.WriteLine("Path:" + Path.GetFullPath(this.path));
-
+            // Console.WriteLine("Path:" + Path.GetFullPath(this.path));
 
             this.map.Save(map, path, "KGram");
             this.map.Save(miniMap, path, "MiniKGram");

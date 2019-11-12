@@ -197,7 +197,7 @@ namespace Search.Index
         /// </summary>
         public void Save()
         {
-            onDiskPostingMap.Save(hashMap, Indexer.path, "Postings");
+            onDiskPostingMap.Save(hashMap, Indexer.path, "InvertedIndex");
             this.WriteDocWeights();
             hashMap.Clear();
             termFrequency.Clear();

@@ -28,19 +28,28 @@ namespace Search.OnDiskDataStructure
         /// <summary>
         /// Save a dictionary onto disk
         /// </summary>
-        /// <param name="valuePairs">Dictionary</param>
+        /// <param name="map">Dictionary</param>
         /// <param name="path">Path to save disk to</param>
-        /// <param name="fileName">Filename of dictionary</param>
-        public void Save(SortedDictionary<TKey, TValue> valuePairs, string path, string fileName)
+        /// <param name="dictName">Name of dictionary</param>
+        public void Save(SortedDictionary<TKey, TValue> map, string path, string dictName)
         {
             path = Path.GetFullPath(path);
-            string keyBin = Path.Join(path, fileName + "_Key.bin");
-            string valueBin = Path.Join(path, fileName + "_Value.bin");
-            string tableBin = Path.Join(path, fileName + "_Table.bin");
+            string keyFileName = dictName + "_Key.bin";
+            string valueFileName = dictName + "_Value.bin";
+            string tableFileName = dictName + "_Table.bin";
+            string keyBin = Path.Join(path, keyFileName);
+            string valueBin = Path.Join(path, valueFileName);
+            string tableBin = Path.Join(path, tableFileName);
 
-            long[] keyPositions = this.WriteKeyBin(valuePairs.Keys.ToList(), keyBin);
-            long[] valuePositions = this.WriteValueBin(valuePairs.Values.ToList(), valueBin);
+            long[] keyPositions = this.WriteKeyBin(map.Keys.ToList(), keyBin);
+            long[] valuePositions = this.WriteValueBin(map.Values.ToList(), valueBin);
             this.WriteTableBin(keyPositions, valuePositions, tableBin);
+
+            Console.WriteLine($"\nSaved On-Disk '{dictName}'");
+            Console.WriteLine($"∙ {keyFileName}     {new FileInfo(keyBin).Length} bytes");
+            Console.WriteLine($"∙ {valueFileName}   {new FileInfo(valueBin).Length} bytes");
+            Console.WriteLine($"∙ {tableFileName}   {new FileInfo(tableBin).Length} bytes");
+            
 
         }
 
@@ -50,14 +59,14 @@ namespace Search.OnDiskDataStructure
         /// </summary>
         /// <param name="key">Key to search for</param>
         /// <param name="path">Path to save disk to</param>
-        /// <param name="fileName">Filename of dictionary</param>
+        /// <param name="dictName">Name of dictionary</param>
         /// <returns>Value related to a given key</returns>
-        public TValue Get(TKey key, string path, string fileName)
+        public TValue Get(TKey key, string path, string dictName)
         {
             path = Path.GetFullPath(path);
-            string keyBin = Path.Join(path, fileName + "_Key.bin");
-            string valueBin = Path.Join(path, fileName + "_Value.bin");
-            string tableBin = Path.Join(path, fileName + "_Table.bin");
+            string keyBin = Path.Join(path, dictName + "_Key.bin");
+            string valueBin = Path.Join(path, dictName + "_Value.bin");
+            string tableBin = Path.Join(path, dictName + "_Table.bin");
 
             long[] table = this.ReadTableBin(tableBin);
             int index = this.ReadKeyBin(table, keyBin, key);
