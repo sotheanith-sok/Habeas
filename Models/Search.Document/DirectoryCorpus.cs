@@ -82,8 +82,8 @@ namespace Search.Document
         /// </summary>
         private Dictionary<int, IFileDocument> ReadDocuments()
         {
-            int approxCorpusSize = Directory.GetFiles(DirectoryPath, "*.*", SearchOption.TopDirectoryOnly).Length;
-            Console.WriteLine($"[Corpus] Read {approxCorpusSize} documents...");
+            int approxCorpusSize = Directory.GetFiles(DirectoryPath, "*.*", SearchOption.TopDirectoryOnly).Length - 1;
+            Console.WriteLine($"[Corpus] Reading {approxCorpusSize} documents...");
 
             // Build the mapping from 0-based document ID to each file in the directory path.
 

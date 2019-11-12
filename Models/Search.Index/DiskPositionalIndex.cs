@@ -39,8 +39,6 @@ namespace Search.Index
         //maintains the hashmap for the posting list for a specific term
         private OnDiskDictionary<string, List<Posting>> onDiskPostingMap;
 
-        //maintains a hashmap for the termfrequency for a specific term
-        private OnDiskDictionary<string, int> onDiskTermFrequencyMap;
 
         //maintains a hashmap for the document weight for a specific document id
         private OnDiskDictionary<int, PostingDocWeight> onDiskDocWeight;
@@ -103,9 +101,7 @@ namespace Search.Index
             hashMap = new SortedDictionary<string, List<Posting>>();
             docWeigthsHashMap = new SortedDictionary<int, PostingDocWeight>();
 
-            onDiskPostingMap = new OnDiskDictionary<string, List<Posting>>(new StringEncoderDecoder(), new PostingListEncoderDecoder());
-            onDiskTermFrequencyMap = new OnDiskDictionary<string, int>(new StringEncoderDecoder(), new IntEncoderDecoder());
-            onDiskDocWeight = new OnDiskDictionary<int, PostingDocWeight>(new IntEncoderDecoder(), new PostingDocWeightEncoderDecoder());
+            onDiskPostingMap = new OnDiskDictionary<string, List<Posting>>(path, "InvertedIndex", new StringEncoderDecoder(), new PostingListEncoderDecoder());
 
 
         }
@@ -131,7 +127,7 @@ namespace Search.Index
         public IList<Posting> GetPostings(string term)
         {
 
-            List<Posting> result = onDiskPostingMap.Get(term, Indexer.path, "Postings");
+            List<Posting> result = onDiskPostingMap.Get(term);
             if (default(List<Posting>) == result)
             {
                 return new List<Posting>();
@@ -150,7 +146,7 @@ namespace Search.Index
         /// <return>a or-merged posting list</return>
         public IList<Posting> GetPostings(List<string> terms)
         {
-            List<List<Posting>> postingLists = onDiskPostingMap.Get(terms, Indexer.path, "Postings");
+            List<List<Posting>> postingLists = onDiskPostingMap.Get(terms);
             postingLists.RemoveAll(item => item == default(List<Posting>));
             if (postingLists.Count == 0)
             {
@@ -185,7 +181,7 @@ namespace Search.Index
         /// </summary>
         public IReadOnlyList<string> GetVocabulary()
         {
-            List<string> vocabulary = onDiskPostingMap.GetKeys(Indexer.path, "Postings").ToList();
+            List<string> vocabulary = onDiskPostingMap.GetKeys().ToList();
             vocabulary.Sort();
             return vocabulary;
         }
@@ -292,8 +288,7 @@ namespace Search.Index
         /// </summary>
         public void Save()
         {
-            onDiskPostingMap.Save(hashMap, Indexer.path, "Postings");
-            onDiskTermFrequencyMap.Save(termFrequency, Indexer.path, "TermFrequency");
+            onDiskPostingMap.Save(hashMap);
             this.WriteDocWeights();
             onDiskDocWeight.Save(docWeigthsHashMap, Indexer.path, "docWeights");
 
@@ -349,7 +344,10 @@ namespace Search.Index
 
         public void AddTokensPerDocument(int docId, int tokenCount)
         {
+
             tokensPerDocument.Add(docId, tokenCount);
+
+       
         }
 
         public void AddByteSize(int docID, int fileSizeInBytes)
