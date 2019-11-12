@@ -12,90 +12,88 @@ namespace Search.OnDiskDataStructure
         /// <summary>
         /// Encode list of integers to bytes
         /// </summary>
-        /// <param name="value">List of integers</param>
-        /// <returns>bytes array</returns>
-        public byte[] Encoding(List<Posting> value)
+        /// <param name="postings">a posting list</param>
+        /// <returns>encoded bytes stream</returns>
+        public byte[] Encoding(List<Posting> postings)
         {
-            List<byte[]> byteList = new List<byte[]>();
+            List<int> concat = new List<int>();
 
             //1. Write document frequency
-            byteList.Add(BitConverter.GetBytes(value.Count));
+            concat.Add(postings.Count);
 
             int previousDocID = 0;
-            foreach (Posting p in value)
+            foreach (Posting p in postings)
             {
                 //2. Write docID using gap
-                byteList.Add(BitConverter.GetBytes(p.DocumentId - previousDocID)); //4byte integer per docID
+                concat.Add(p.DocumentId - previousDocID); //4byte integer per docID
 
                 List<int> positions = p.Positions;
 
                 //3. Write term frequency (# of positions)
-                byteList.Add(BitConverter.GetBytes(positions.Count));              //4byte integer per term frequency
-
+                concat.Add(positions.Count);              //4byte integer per term frequency
 
                 //4. Write positions using gap
                 int previousPos = 0;
                 foreach (int pos in positions)
                 {
-                    byteList.Add(BitConverter.GetBytes(pos - previousPos));        //4byte integer per position
+                    concat.Add(pos - previousPos);        //4byte integer per position
                     previousPos = pos;
-
                 }
 
                 previousDocID = p.DocumentId;
             }
 
-            return Compressor.Compress(byteList);
+            return VariableBytes.Encode(concat);
         }
 
         /// <summary>
-        /// Decode bytes to list of integers
+        /// Converts an byte array to a list of postings for a term.
+        /// The byte array should follow the form 
+        /// < df, (docID tf p1 p2 p3), (doc2 tf p1 p2), ... >
         /// </summary>
-        /// <param name="value">Bytes</param>
-        /// <returns>List of integers</returns>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public List<Posting> Decoding(byte[] value)
         {
-            List<Posting> postingList = new List<Posting>();
+            var bytes = new VariableBytes.EncodedByteStream(value);
+
+            // Read and construct a posting list from bytes from postings.bin
+            // < df, (docID tf p1 p2 p3), (doc2 tf p1 p2), ... >
+            // docIDs and positions are written as gap)
             
-            List<byte[]> byteList = Compressor.Decompress(value);
+            List<Posting> postings = new List<Posting>();
 
-            int previousDocID = 0;
+            //1. Read document frequency
+            int docFrequency = bytes.ReadDecodedInt();
 
-            //Skip 1 to disregard document frequence
-            int i = 1;
-
-            while (i < byteList.Count)
+            int prevDocID = 0;
+            for (int i = 0; i < docFrequency; i++)         //for each posting
             {
+                //2. Read documentID using gap
+                int docID = prevDocID + bytes.ReadDecodedInt();
+
                 List<int> positions = new List<int>();
-                //Get docID 
-                byte[] intStorage = new byte[4];
-                byteList[i].CopyTo(intStorage, 0);
-                int docID = BitConverter.ToInt32(intStorage) + previousDocID;
-                i += 1;
 
-                //Get term frequence
-                intStorage = new byte[4];
-                byteList[i].CopyTo(intStorage, 0);
-                int tf = BitConverter.ToInt32(intStorage);
-                i += 1;
-                int previousPos = 0;
+                //3. Read term frequency
+                int termFrequency = bytes.ReadDecodedInt();
 
-                while (tf > 0)
+                //4. Read positions using gap
+                int prevPos = 0;
+                for (int j = 0; j < termFrequency; j++)    //for each position
                 {
-                    intStorage = new byte[4];
-                    byteList[i].CopyTo(intStorage, 0);
-                    int pos = BitConverter.ToInt32(intStorage) + previousPos;
+                    int pos = prevPos + bytes.ReadDecodedInt();
                     positions.Add(pos);
-                    previousPos = pos;
-                    tf -= 1;
-                    i += 1;
+                    prevPos = pos;  //update prevPos
                 }
-                previousDocID = docID;
 
-                postingList.Add(new Posting(docID, positions));
+                //Insert a posting to the posting list
+                postings.Add(new Posting(docID, positions));
+
+                prevDocID = docID;  //update prevDocID
             }
 
-            return postingList;
+            return postings;
         }
+
     }
 }
