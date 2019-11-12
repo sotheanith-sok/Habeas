@@ -110,26 +110,24 @@ namespace Search.Index
         {
             List<int> documents = onDiskDocWeight.GetKeys().ToList();
             List<PostingDocWeight> finalList = new List<PostingDocWeight>();
-            foreach(int documentID in documents)
-            {
-                finalList.Add(GetPostingDocWeight(documentID));
-            }
-
+            finalList = onDiskDocWeight.Get(documents);
             return finalList;
         }
 
-        public PostingDocWeight GetPostingDocWeight(int docID)
-        {
-            PostingDocWeight result = onDiskDocWeight.Get(docID);
-            if (default(PostingDocWeight) == result)
-            {
-                return new PostingDocWeight(0.0, 0, 0, 0.0);
-            }
-            else
-            {
-                return result;
-            }
-        }
+        // public PostingDocWeight GetPostingDocWeight(int docID)
+        // {
+        //     PostingDocWeight result = onDiskDocWeight.Get(docID);
+        //     if (default(PostingDocWeight) == result)
+        //     {
+        //         return new PostingDocWeight(0.0, 0, 0, 0.0);
+        //     }
+        //     else
+        //     {
+        //         return result;
+        //     }
+        // }
+
+        
         /// <summary>
         /// Gets Postings of a given term from in-memory index.
         /// </summary>
