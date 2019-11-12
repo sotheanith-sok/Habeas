@@ -42,16 +42,17 @@ namespace Search.Index
             {
                 //Tokenize the documents
                 ITokenStream stream = new EnglishTokenStream(doc.GetContent());
+
                 IEnumerable<string> tokens = stream.GetTokens();
                 
                 //keeptrack of tokens per document 
-                tokensPerDocument.Add(doc.DocumentId, tokens.Count());
+                int count =0;
 
                 //keep track of file size 
-
                 int position = 0;
                 foreach (string token in tokens)
                 {
+                    count++;
                     //Process token to term
                     List<string> terms = processor.ProcessToken(token);
                     //Add term to the index
@@ -73,6 +74,9 @@ namespace Search.Index
                         unstemmedVocabulary.Add(term);
                     }
                 }
+
+                //Add token count per document
+                tokensPerDocument.Add(doc.DocumentId, count);
 
                 // //calculates Average term Frequency for a specific document
                 // index.calcAveTermFreq(doc.DocumentId);
