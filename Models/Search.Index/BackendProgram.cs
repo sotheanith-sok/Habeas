@@ -20,13 +20,6 @@ namespace Search.Index
         private static Boolean mode = true;
         private static String RankedRetrievalMode = "Default";
 
-        private static int RankVariant = 0;
-
-        /// <summary>
-        /// Gets a corpus
-        /// </summary>
-        /// <param name="path">the selected directory path</param>
-
         /// <summary>
         /// Gets on-disk index or generate a new index out of the selected corpus
         /// </summary>
