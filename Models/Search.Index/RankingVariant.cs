@@ -25,7 +25,7 @@ namespace Search.Index
         private IDocumentCorpus corpus;
 
 
-        public RankingVariant(IIndex index, IDocumentCorpus corpus)
+        public RankingVariant( IDocumentCorpus corpus)
         {
             query2termWeight = new int();
             doc2termWeight = new int();

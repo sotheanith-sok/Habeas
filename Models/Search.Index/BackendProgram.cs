@@ -155,7 +155,7 @@ namespace Search.Index
                     List<String> finalTerms = parser.ParseQuery(query);
 
                     //retrieves the top ten documents of the normalized tokens
-                    RankingVariant rv = new RankingVariant(index, corpus);
+                    RankingVariant rv = new RankingVariant(corpus);
                     IList<MaxPriorityQueue.InvertedIndex> topTenDocs = rv.GetRankedDocuments(index, finalTerms, RankVariant);
 
                     //collect the top ten documents

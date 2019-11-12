@@ -42,7 +42,7 @@ namespace UnitTests.DiskIndexTest
 
             //Testing ranked retrieval AND accumulated values
             index = new DiskPositionalIndex(pathToIndex);
-            RankingVariant rv = new RankingVariant(index, corpus);
+            RankingVariant rv = new RankingVariant(corpus);
             IList<MaxPriorityQueue.InvertedIndex> actual = rv.GetRankedDocuments(index, terms, 0);
             actual[0].GetDocumentId().Should().Be(0); //should be document 1 which is of doc id 0
             actual[0].GetRank().Should().BeApproximately(1.183748156, 9); //A_{doccument} = 3.10195041 L_{1} = 2.620447934
