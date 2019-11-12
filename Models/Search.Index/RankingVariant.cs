@@ -95,10 +95,10 @@ namespace Search.Index
 
 
                         //implements formula for w_{d,t}
-                        doc2termWeight = calculateDoc2TermWeight(termFrequency, RankVariant, post.DocumentId, index);
+                        this.doc2termWeight = calculateDoc2TermWeight(termFrequency, RankVariant, post.DocumentId, index);
 
                         //the A_{d} value for a specific term in that document
-                        docAccumulator = this.query2termWeight * doc2termWeight;
+                        docAccumulator = this.query2termWeight * this.doc2termWeight;
 
                         //if the A_{d} value exists on the hashmap increase its value else create a new key-value pair
                         if (accumulator.ContainsKey(post.DocumentId))
@@ -162,9 +162,9 @@ namespace Search.Index
             switch (RankVariant)
             {
                 case 1:
-                    return (double)Math.Log((double)(N / docFrequency));
+                    return Math.Log((double) N / docFrequency);
                 case 2:
-                    double OkapiWqtValue = (double)Math.Log((double)((N - docFrequency + 0.5) / (docFrequency + 0.5)));
+                    double OkapiWqtValue = Math.Log((double) (N - docFrequency + 0.5) / (docFrequency + 0.5));
                     if (0.1 > OkapiWqtValue)
                     {
                         return 0.1;
@@ -172,7 +172,7 @@ namespace Search.Index
                     else
                         return OkapiWqtValue;
                 case 3:
-                    double WackyWqtValue = (double)Math.Log((double)((N - docFrequency) / docFrequency));
+                    double WackyWqtValue = Math.Log((double)(N - docFrequency) / docFrequency);
                     if (WackyWqtValue > 0)
                     {
                         return WackyWqtValue;
@@ -182,7 +182,7 @@ namespace Search.Index
                         return 0.0;
                     }
                 default:
-                    return (double)Math.Log(1 + (double)(N / docFrequency));
+                    return Math.Log(1 + (double) N / docFrequency);
             }
 
         }
@@ -203,7 +203,7 @@ namespace Search.Index
             switch (RankVariant)
             {
                 case 1:
-                    return termFrequency;
+                    return (double) termFrequency;
 
                 case 2:
                     int documentLength = Indexer.tokensPerDocument[docID];
@@ -213,8 +213,7 @@ namespace Search.Index
                     return OkapiWdtValue;
 
                 case 3:
-                    
-                    
+
                     double avDocTermFreq = index.GetAverageTermFreq(docID);
                     double WackyWdtValue = (double) (1 + Math.Log(termFrequency)) / (1 + Math.Log(avDocTermFreq));
                     return WackyWdtValue;
@@ -289,7 +288,7 @@ namespace Search.Index
             {
                 average = average + docTokens.Value;
             }
-            average = (double)(average / Indexer.tokensPerDocument.Count);
+            average = (double) average / Indexer.tokensPerDocument.Count;
 
             this.averageDocLength = average;
         }
