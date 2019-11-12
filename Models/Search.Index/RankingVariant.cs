@@ -98,7 +98,7 @@ namespace Search.Index
                         doc2termWeight = calculateDoc2TermWeight(termFrequency, RankVariant, post.DocumentId, index);
 
                         //the A_{d} value for a specific term in that document
-                        docAccumulator = query2termWeight * doc2termWeight;
+                        docAccumulator = this.query2termWeight * doc2termWeight;
 
                         //if the A_{d} value exists on the hashmap increase its value else create a new key-value pair
                         if (accumulator.ContainsKey(post.DocumentId))
@@ -209,15 +209,17 @@ namespace Search.Index
                     int documentLength = Indexer.tokensPerDocument[docID];
                     calculateAverageDocLength();
 
-                    double OkapiWdtValue = (double)((double)(2.2 * termFrequency) / (1.2 * (0.25 + 0.75 * (double)(documentLength / this.averageDocLength)) + termFrequency));
+                    double OkapiWdtValue = (double) (2.2 * termFrequency) / (1.2 * (0.25 + 0.75 * (double) documentLength / this.averageDocLength) + termFrequency);
                     return OkapiWdtValue;
 
                 case 3:
-
-                    double WakcyWdtValue = (double)((1 + Math.Log(termFrequency)) / (1 + Math.Log(index.GetAverageTermFreq()[docID])));
-                    return 0.0;
+                    
+                    
+                    double avDocTermFreq = index.GetAverageTermFreq(docID);
+                    double WackyWdtValue = (double) (1 + Math.Log(termFrequency)) / (1 + Math.Log(avDocTermFreq));
+                    return WackyWdtValue;
                 default:
-                    return (double)(1 + (double)Math.Log(termFrequency));
+                    return (double)(1 + Math.Log(termFrequency));
             }
 
         }

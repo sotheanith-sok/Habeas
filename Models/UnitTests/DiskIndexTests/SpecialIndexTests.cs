@@ -47,6 +47,15 @@ namespace UnitTests.DiskIndexTest
             actual[0].GetDocumentId().Should().Be(0); //should be document 1 which is of doc id 0
             actual[0].GetRank().Should().BeApproximately(1.183748156, 9); //A_{doccument} = 3.10195041 L_{1} = 2.620447934
 
+            IList<MaxPriorityQueue.InvertedIndex> actual1 = rv.GetRankedDocuments(index, terms, 1);
+            
+
+            IList<MaxPriorityQueue.InvertedIndex> actual2 = rv.GetRankedDocuments(index, terms, 2);
+
+            IList<MaxPriorityQueue.InvertedIndex> actual3 = rv.GetRankedDocuments(index, terms, 3);
+
+
+
 
         }
     }

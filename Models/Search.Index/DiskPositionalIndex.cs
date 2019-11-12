@@ -17,6 +17,9 @@ namespace Search.Index
 
         //maintains a list of the docWeights to store in the docWeights.bin file
         private static List<double> calculatedDocWeights;
+        
+        //maintains a hashmap to store average term frequency of current document
+        private SortedDictionary<int, double> averageTermFreqPerDoc;
 
         //maintains the hashmap for the posting list for a specific term
         private OnDiskDictionary<string, List<Posting>> onDiskPostingMap;
@@ -27,8 +30,9 @@ namespace Search.Index
         //maintains a hashmap for the document weight for a specific document id
         private OnDiskDictionary<int, int> onDiskDocWeight;
 
+
         //maintains a hashmap for the average term frequency of a specific document using its document it
-        private Dictionary<int, double> averageTermFreqPerDoc;
+        private OnDiskDictionary<int, double> onDiskAverageTermFreqPerDoc;
 
 
 
@@ -41,12 +45,13 @@ namespace Search.Index
             hashMap = new SortedDictionary<string, List<Posting>>();
             termFrequency = new SortedDictionary<string, int>();
             calculatedDocWeights = new List<double>();
+            averageTermFreqPerDoc= new SortedDictionary<int, double>();
 
             onDiskPostingMap = new OnDiskDictionary<string, List<Posting>>(new StringEncoderDecoder(), new PostingListEncoderDecoder());
             onDiskTermFrequencyMap = new OnDiskDictionary<string, int>(new StringEncoderDecoder(), new IntEncoderDecoder());
             onDiskDocWeight = new OnDiskDictionary<int, int>(new IntEncoderDecoder(), new IntEncoderDecoder());
 
-            averageTermFreqPerDoc = new Dictionary<int, double>();
+            onDiskAverageTermFreqPerDoc = new OnDiskDictionary<int, double>(new IntEncoderDecoder(), new DoubleEncoderDecoder());
 
         }
 
@@ -79,7 +84,8 @@ namespace Search.Index
         {
             List<List<Posting>> postingLists = onDiskPostingMap.Get(terms, Indexer.path, "Postings");
             postingLists.RemoveAll(item => item == default(List<Posting>));
-            if(postingLists.Count==0){
+            if (postingLists.Count == 0)
+            {
                 return new List<Posting>();
             }
             return Merge.OrMerge(new List<IList<Posting>>(postingLists));
@@ -212,6 +218,8 @@ namespace Search.Index
         {
             onDiskPostingMap.Save(hashMap, Indexer.path, "Postings");
             onDiskTermFrequencyMap.Save(termFrequency, Indexer.path, "TermFrequency");
+            onDiskAverageTermFreqPerDoc.Save(averageTermFreqPerDoc, Indexer.path, "AverageTermFrequencyPerDoc");
+
             this.WriteDocWeights();
             hashMap.Clear();
             termFrequency.Clear();
@@ -250,17 +258,20 @@ namespace Search.Index
             {
                 sum = sum + termFreq;
             }
-            Console.WriteLine(sum);
-            double averageTermFreq = (double)(sum / this.termFrequency.Count());
+
+            double averageTermFreq = (double)sum / this.termFrequency.Count;
 
             averageTermFreqPerDoc.Add(docID, averageTermFreq);
 
         }
-
-        public Dictionary<int, double> GetAverageTermFreq()
+        public double GetAverageTermFreq(int docID)
         {
-            return this.averageTermFreqPerDoc;
+
+            double averageDocFreq = onDiskAverageTermFreqPerDoc.Get(docID, Indexer.path, "AverageTermFrequencyPerDoc");
+            return averageDocFreq;
+
         }
+
 
     }
 
@@ -268,7 +279,7 @@ namespace Search.Index
 
 
 
-        
 
-    
+
+
 

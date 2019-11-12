@@ -53,7 +53,7 @@ namespace Search.Index
              
                 foreach (string token in tokens)
                 {
-                    count++;
+                    tokenCount++;
                     //Process token to term
                     List<string> terms = processor.ProcessToken(token);
                     //Add term to the index
@@ -80,7 +80,7 @@ namespace Search.Index
                 tokensPerDocument.Add(doc.DocumentId, tokenCount);
 
                 // //calculates Average term Frequency for a specific document
-                // index.calcAveTermFreq(doc.DocumentId);
+                index.calcAveTermFreq(doc.DocumentId);
 
                 //calculate L_{d} for the document and store it index so that we can write it to disk later
                 index.CalculateDocWeight();

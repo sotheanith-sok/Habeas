@@ -43,8 +43,9 @@ namespace Search.Index
 
         IList<double> GetAllDocWeights();
 
-        Dictionary<int,double> GetAverageTermFreq();
+         double GetAverageTermFreq(int docID);
 
+  
        
     }
 }
