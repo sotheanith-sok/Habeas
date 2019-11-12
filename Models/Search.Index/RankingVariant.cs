@@ -24,7 +24,7 @@ namespace Search.Index
 
         private IDocumentCorpus corpus;
 
-        public RankingVariant( IDocumentCorpus corpus)
+        public RankingVariant(IDocumentCorpus corpus)
         {
             query2termWeight = new int();
             doc2termWeight = new int();
@@ -161,27 +161,31 @@ namespace Search.Index
             switch (RankedRetrievalMode)
             {
                 case "Tf-idf":
-                    return Math.Log((double) N / docFrequency);
+                    return Math.Log((double)N / docFrequency);
                 case "Okapi":
-                    double OkapiWqtValue = Math.Log((double) (N - docFrequency + 0.5) / (docFrequency + 0.5));
+                    double OkapiWqtValue = Math.Log((double)(N - docFrequency + 0.5) / (docFrequency + 0.5));
                     if (0.1 > OkapiWqtValue)
                     {
                         return 0.1;
                     }
                     else
                         return OkapiWqtValue;
+
                 case "Wacky":
-                    double WackyWqtValue = Math.Log((double)(N - docFrequency) / docFrequency);
-                    if (WackyWqtValue > 0)
+                    int numerator = N - docFrequency;
+                    double division = (double)numerator / docFrequency;
+                    if (division > 1)
                     {
+                        double WackyWqtValue = Math.Log(division);
                         return WackyWqtValue;
+
                     }
                     else
-                    {
                         return 0.0;
-                    }
+
+
                 default:
-                    return Math.Log(1 + (double) N / docFrequency);
+                    return Math.Log(1 + (double)N / docFrequency);
             }
 
         }
@@ -202,18 +206,18 @@ namespace Search.Index
             switch (RankedRetrievalMode)
             {
                 case "Tf-idf":
-                    return (double) termFrequency;
+                    return (double)termFrequency;
 
                 case "Okapi":
                     int documentLength = Indexer.tokensPerDocument[docID];
                     calculateAverageDocLength();
 
-                    double OkapiWdtValue = (double) (2.2 * termFrequency) / (1.2 * (0.25 + 0.75 * (double) documentLength / this.averageDocLength) + termFrequency);
+                    double OkapiWdtValue = (double)(2.2 * termFrequency) / (1.2 * (0.25 + 0.75 * (double)documentLength / this.averageDocLength) + termFrequency);
                     return OkapiWdtValue;
 
                 case "Wacky":
                     double avDocTermFreq = index.GetAverageTermFreq(docID);
-                    double WackyWdtValue = (double) (1 + Math.Log(termFrequency)) / (1 + Math.Log(avDocTermFreq));
+                    double WackyWdtValue = (double)(1 + Math.Log(termFrequency)) / (1 + Math.Log(avDocTermFreq));
                     return WackyWdtValue;
                 default:
                     return (double)(1 + Math.Log(termFrequency));
@@ -253,8 +257,8 @@ namespace Search.Index
                     double WackyLd = (double)(Math.Sqrt(fileSizeInByte));
                     Console.WriteLine(WackyLd);
                     return WackyLd;
-                default:
 
+                default:
                     using (BinaryReader docWeightsReader = new BinaryReader(File.Open(filePath, FileMode.Open)))
                     {
                         int startByte = docId * 8;
@@ -290,7 +294,7 @@ namespace Search.Index
             {
                 average = average + docTokens.Value;
             }
-            average = (double) average / Indexer.tokensPerDocument.Count;
+            average = (double)average / Indexer.tokensPerDocument.Count;
 
             this.averageDocLength = average;
         }
