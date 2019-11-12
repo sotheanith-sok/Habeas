@@ -43,7 +43,10 @@ namespace Search.Index
 
         IList<double> GetAllDocWeights();
 
-        IList<MaxPriorityQueue.InvertedIndex> GetRankedDocuments(List<string> query);
+         double GetAverageTermFreq(int docID);
+
+  
+       
     }
 }
 

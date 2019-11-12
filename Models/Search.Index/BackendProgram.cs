@@ -20,6 +20,8 @@ namespace Search.Index
         private static Boolean mode = true;
         private static String RankedRetrievalMode = "Default";
 
+        private static int RankVariant = 0;
+
         /// <summary>
         /// Gets a corpus
         /// </summary>
@@ -165,7 +167,8 @@ namespace Search.Index
                     List<String> finalTerms = parser.ParseQuery(query);
 
                     //retrieves the top ten documents of the normalized tokens
-                    IList<MaxPriorityQueue.InvertedIndex> topTenDocs = index.GetRankedDocuments(finalTerms);
+                    RankingVariant rv = new RankingVariant(corpus);
+                    IList<MaxPriorityQueue.InvertedIndex> topTenDocs = rv.GetRankedDocuments(index, finalTerms, RankVariant);
 
                     //collect the top ten documents
                     if (topTenDocs.Count > 0)
