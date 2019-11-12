@@ -149,17 +149,7 @@ namespace Search.Index
 
                 if (mode == false)
                 {
-                    switch (RankedRetrievalMode)
-                    {
-                        case "Default":
-                        break;
-                        case "Tf-idf":
-                        break;
-                        case "Okapi":
-                        break;
-                        case "Wacky":
-                        break;
-                    }
+                  
                     //parser to parse the query 
                     RankedRetrievalParser parser = new RankedRetrievalParser();
 
@@ -168,7 +158,7 @@ namespace Search.Index
 
                     //retrieves the top ten documents of the normalized tokens
                     RankingVariant rv = new RankingVariant(corpus);
-                    IList<MaxPriorityQueue.InvertedIndex> topTenDocs = rv.GetRankedDocuments(index, finalTerms, RankVariant);
+                    IList<MaxPriorityQueue.InvertedIndex> topTenDocs = rv.GetRankedDocuments(index, finalTerms, RankedRetrievalMode);
 
                     //collect the top ten documents
                     if (topTenDocs.Count > 0)
