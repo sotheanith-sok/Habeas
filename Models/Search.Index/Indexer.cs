@@ -46,11 +46,11 @@ namespace Search.Index
                 IEnumerable<string> tokens = stream.GetTokens();
                 
                 //keeptrack of tokens per document 
-                int count =0;
+                int tokenCount =0;
 
                 //keep track of file size 
                 int position = 0;
-                int tokenCount= 0;
+             
                 foreach (string token in tokens)
                 {
                     count++;
@@ -77,7 +77,7 @@ namespace Search.Index
                 }
 
                 //Add token count per document
-                tokensPerDocument.Add(doc.DocumentId, count);
+                tokensPerDocument.Add(doc.DocumentId, tokenCount);
 
                 // //calculates Average term Frequency for a specific document
                 // index.calcAveTermFreq(doc.DocumentId);
