@@ -24,7 +24,6 @@ namespace Search.Index
 
         private IDocumentCorpus corpus;
 
-
         public RankingVariant( IDocumentCorpus corpus)
         {
             query2termWeight = new int();
@@ -281,6 +280,10 @@ namespace Search.Index
             string filePath = Indexer.path + "docWeights.bin";
             return (int)(new FileInfo(filePath).Length / 8f);
         }
+
+        /// <summary>
+        /// calcuates the average token frequency of a particulat document
+        /// </summary>
         private void calculateAverageDocLength()
         {
             double average = 0;
