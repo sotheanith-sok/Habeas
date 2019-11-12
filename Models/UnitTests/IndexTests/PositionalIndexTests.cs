@@ -130,26 +130,28 @@ namespace UnitTests.IndexTests
         //     // Assert.True(index.GetPosting("world",1).Positions.Contains(2));
         // }
 
-        [Fact]
-        public void DocumentWeightTest()
-        {
-            //Arrange
-            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
-            IIndex index = Indexer.IndexCorpus(corpus);
+        
 
-            //Act
-            var actual = index.GetAllDocWeights();
-            var expected = new List<double>{
-                2.620447934, 3.377006594, 2.898995264, 2.828427125, 3.377006594
-            };
+        // [Fact]
+        // public void DocumentWeightTest()
+        // {
+        //     //Arrange
+        //     IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(directory);
+        //     IIndex index = Indexer.IndexCorpus(corpus);
 
-            //Assert
-            actual.Count.Should().Be(5);
-            for(int i=0; i<actual.Count; i++) {
-                actual[i].Should().BeApproximately(expected[i], 9);
-            }
+        //     //Act
+        //     var actual = index.GetAllDocWeights();
+        //     var expected = new List<double>{
+        //         2.620447934, 3.377006594, 2.898995264, 2.828427125, 3.377006594
+        //     };
 
-        }
+        //     //Assert
+        //     actual.Count.Should().Be(5);
+        //     for(int i=0; i<actual.Count; i++) {
+        //         actual[i].Should().BeApproximately(expected[i], 9);
+        //     }
+
+        // }
 
 
     }

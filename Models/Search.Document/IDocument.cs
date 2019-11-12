@@ -22,6 +22,8 @@ namespace Search.Document
         /// </summary>
         string Author { get; }
 
+        string FilePath{get;}
+
         /// <summary>
         /// Gets a stream over the content of the document.
         /// </summary>

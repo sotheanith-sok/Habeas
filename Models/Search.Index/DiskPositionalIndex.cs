@@ -12,37 +12,113 @@ namespace Search.Index
         //Dictionary in C# is equivalent to HashMap in Java.
         private readonly SortedDictionary<string, List<Posting>> hashMap;
 
+        //hashmap for docweights posting type list
+
+        private readonly SortedDictionary<int, PostingDocWeight> docWeigthsHashMap;
+
+
+
+
         //HashMap used to store termFrequency of current Document
         private readonly SortedDictionary<string, int> termFrequency;
 
         //maintains a list of the docWeights to store in the docWeights.bin file
-        private static List<double> calculatedDocWeights;
+        private readonly SortedDictionary<int, double> calculatedDocWeights;
+
+        //maintains a hashmap to store average term frequency of current document
+        private readonly SortedDictionary<int, double> averageTermFreqPerDoc;
+
+        private readonly SortedDictionary<int, int> tokensPerDocument;
+
+        private readonly SortedDictionary<int, int> docByteSize;
+
+
+
+
 
         //maintains the hashmap for the posting list for a specific term
         private OnDiskDictionary<string, List<Posting>> onDiskPostingMap;
 
 
         //maintains a hashmap for the document weight for a specific document id
-        private OnDiskDictionary<int, int> onDiskDocWeight;
+        private OnDiskDictionary<int, PostingDocWeight> onDiskDocWeight;
 
-        //temporarily stores the document id with its corresponding rank  [docId -> A_{docID}]
-        private Dictionary<int, double> Accumulator;
 
+        private double averageDocLength;
+
+
+
+
+        public class PostingDocWeight
+        {
+
+            private double docWeights { get; set; }
+            private int docLength { get; set; }
+            private int docByteSize { get; set; }
+            private double averageTermFreq { get; set; }
+
+            public PostingDocWeight(double docWeight, int docLength, int docByteSize, double averageTermFreq)
+            {
+                this.docWeights = docWeight;
+                this.docLength = docLength;
+                this.docByteSize = docByteSize;
+                this.averageTermFreq = averageTermFreq;
+            }
+
+            public double GetDocWeight()
+            {
+                return this.docWeights;
+            }
+
+            public int GetDocTokenCount()
+            {
+                return this.docLength;
+            }
+
+            public int GetDocByteSize()
+            {
+                return this.docByteSize;
+            }
+            public double GetDocAveTermFreq()
+            {
+                return this.averageTermFreq;
+            }
+
+        }
 
         /// <summary>
         /// Constructs a hash table.
         /// </summary>
         public DiskPositionalIndex(string path)
         {
-            hashMap = new SortedDictionary<string, List<Posting>>();
+
             termFrequency = new SortedDictionary<string, int>();
-            calculatedDocWeights = new List<double>();
+            tokensPerDocument = new SortedDictionary<int, int>();
+            docByteSize = new SortedDictionary<int, int>();
+            calculatedDocWeights = new SortedDictionary<int, double>();
+            averageTermFreqPerDoc = new SortedDictionary<int, double>();
+
+            hashMap = new SortedDictionary<string, List<Posting>>();
+            docWeigthsHashMap = new SortedDictionary<int, PostingDocWeight>();
 
             onDiskPostingMap = new OnDiskDictionary<string, List<Posting>>(path, "InvertedIndex", new StringEncoderDecoder(), new PostingListEncoderDecoder());
 
-            Accumulator = new Dictionary<int, double>();
+
         }
 
+
+        public PostingDocWeight GetPostingDocWeight(int docID)
+        {
+            PostingDocWeight result = onDiskDocWeight.Get(docID, Indexer.path, "docWeights");
+            if (default(PostingDocWeight) == result)
+            {
+                return new PostingDocWeight(0.0, 0, 0, 0.0);
+            }
+            else
+            {
+                return result;
+            }
+        }
         /// <summary>
         /// Gets Postings of a given term from in-memory index.
         /// </summary>
@@ -72,6 +148,10 @@ namespace Search.Index
         {
             List<List<Posting>> postingLists = onDiskPostingMap.Get(terms);
             postingLists.RemoveAll(item => item == default(List<Posting>));
+            if (postingLists.Count == 0)
+            {
+                return new List<Posting>();
+            }
             return Merge.OrMerge(new List<IList<Posting>>(postingLists));
         }
 
@@ -145,6 +225,7 @@ namespace Search.Index
 
             }
 
+
         }
 
         /// <summary>
@@ -168,27 +249,38 @@ namespace Search.Index
         /// <summary>
         /// Applies the mathematical rule that we are using to calculate the document weight
         /// </summary>
-        public void CalculateDocWeight()
+        public void CalculateDocWeight(int docID)
         {
             double temp = 0;
             foreach (int value in termFrequency.Values)
             {
                 temp = temp + Math.Pow((1 + Math.Log(value)), 2);
             }
-            calculatedDocWeights.Add(Math.Sqrt(temp));
+
+            //adds to list of doc weights to save later onto disk
+            calculatedDocWeights.Add(docID, Math.Sqrt(temp));
+
             //clear frequency map for next iteration of document
             termFrequency.Clear();
         }
 
 
         /// <summary>
-        /// Gets all the document weights saved in memory
+        /// calcuates the average token frequency of a particulat document
         /// </summary>
-        /// <returns></returns>
-        public IList<double> GetAllDocWeights()
+        public double calculateAverageDocLength()
         {
-            return calculatedDocWeights;
+            double average = 0;
+            foreach (KeyValuePair<int, int> docTokens in tokensPerDocument)
+            {
+                average = average + docTokens.Value;
+            }
+            average = (double)average / tokensPerDocument.Count;
+
+            this.averageDocLength = average;
+            return average;
         }
+
 
 
         /// <summary>
@@ -198,8 +290,16 @@ namespace Search.Index
         {
             onDiskPostingMap.Save(hashMap);
             this.WriteDocWeights();
+            onDiskDocWeight.Save(docWeigthsHashMap, Indexer.path, "docWeights");
+
+
             hashMap.Clear();
+            docWeigthsHashMap.Clear();
             termFrequency.Clear();
+            calculatedDocWeights.Clear();
+            docByteSize.Clear();
+            tokensPerDocument.Clear();
+            averageTermFreqPerDoc.Clear();
         }
 
         ///<sumary>
@@ -208,159 +308,60 @@ namespace Search.Index
         /// <param name="index">the index to write</param>
         /// <param name="dirPath">the absolute path to a directory where 'docWeights.bin' be saved</param>
         /// <returns>the list of starting byte positions of each doc weight in docWeights.bin</returns>
-        public List<long> WriteDocWeights()
+        public void WriteDocWeights()
         {
-            string filePath = Indexer.path + "docWeights.bin";
-            File.Create(filePath).Dispose();
-            List<long> startBytes = new List<long>();
-
-            using (BinaryWriter writer = new BinaryWriter(File.Open(filePath, FileMode.Append)))
-            {
-                foreach (double weight in this.GetAllDocWeights())
-                {
-                    startBytes.Add(writer.BaseStream.Length);
-                    writer.Write(BitConverter.DoubleToInt64Bits(weight));
-                }
-
-                Console.WriteLine($"docWeights.bin  {writer.BaseStream.Length} bytes");
-            }
-
-            return startBytes;
-        }
-
-        /// <summary>
-        /// Uses the document id to access the docWeights.bin file to retrieve the corresponding L_{d} value
-        /// </summary>
-        /// <param name="docId"></param>
-        /// <returns></returns>
-        private double GetDocumentWeight(int docId)
-        {
-            string filePath = Indexer.path + "docWeights.bin";
-
-
-            using (BinaryReader docWeightsReader = new BinaryReader(File.Open(filePath, FileMode.Open)))
-            {
-                int startByte = docId * 8;
-
-                //Jump to the starting byte
-                docWeightsReader.BaseStream.Seek(startByte, SeekOrigin.Begin);
-                //Read a document weight and convert it
-                double docWeight = BitConverter.Int64BitsToDouble(docWeightsReader.ReadInt64());
-
-                return docWeight;
-            }
-        }
-
-        /// <summary>
-        /// Method that takes in the query and returns a list of the top ten ranking documents
-        /// </summary>
-        /// <param name="query"></param>
-        /// <returns></returns>
-        public IList<MaxPriorityQueue.InvertedIndex> GetRankedDocuments(List<string> query)
-        {
-
-            //Build the Accumulator Hashmap
-            BuildAccumulator(query);
-
-            //Build Priority Queue using the Accumulator divided by L_{d}  
-            MaxPriorityQueue pq = BuildPriorityQueue();
-            Accumulator.Clear();
-            //Retrieve Top Ten Documents and Return to Back End
-            return pq.RetrieveTopTen();
-
-        }
-
-        /// <summary>
-        /// Builds the Accumulator hashmap for the query to retrieve top 10 documents
-        /// </summary>
-        /// <param name="query"></param>
-        private void BuildAccumulator(List<string> query)
-        {
-            //w_{q,t}
-            double query2TermWeight;
-            //w_{d,t}
-            double doc2TermWeight;
-            //stores temporary Accumulator value that will be added to the accumulator hashmap
-            double docAccumulator;
-            //gets path to access on disk file
-            string path = Indexer.path;
-
-            //caculate accumulated Value for each relevant document A_{d}
-            foreach (string term in query)
-            {
-                //posting list of a term grabbed from the On Disk file
-                List<Posting> postings = onDiskPostingMap.Get(term);
-
-                if (postings != default(List<Posting>))
-                {
-                    int docFrequency = postings.Count;
-
-                    //implements formula for w_{q,t}
-                    query2TermWeight = (double)Math.Log(1 + (double)(this.GetCorpusSize(path) / docFrequency));
-
-                    foreach (Posting post in postings)
-                    {
-                        //implements formula for w_{d,t}
-                        doc2TermWeight = (double)(1 + (double)Math.Log(post.Positions.Count)); //TermFrequency = post.Positions.Count
-
-                        //the A_{d} value for a specific term in that document
-                        docAccumulator = query2TermWeight * doc2TermWeight;
-
-                        //if the A_{d} value exists on the hashmap increase its value else create a new key-value pair
-                        if (Accumulator.ContainsKey(post.DocumentId))
-                        {
-                            Accumulator[post.DocumentId] += docAccumulator;
-                        }
-                        else
-                        {
-                            Accumulator.Add(post.DocumentId, docAccumulator);
-                        }
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Creates a new priority queue by inserting the rank of the document and document id 
-        /// 
-        /// </summary>
-        /// <returns> a priority queue with max heap property</returns>
-        private MaxPriorityQueue BuildPriorityQueue()
-        {
-            //temporary variable to hold the doc weight
             double tempDocWeight;
-            //temporary variable to hold the final ranking value of that document
-            double finalRank;
-
-            //Make a new priority queue
-            MaxPriorityQueue priorityQueue = new MaxPriorityQueue();
-
-            //for every key value in the Accumulator divide A_{d} by L_{d}
-            foreach (KeyValuePair<int, double> candidate in Accumulator)
+            int tempDocLength;
+            double tempAverTermFreq;
+            foreach (KeyValuePair<int, int> doc in docByteSize)
             {
-                //get document weight by id from docWeights.bin file
-                tempDocWeight = GetDocumentWeight(candidate.Key);
 
-                // divide Accumulated Value A_{d} by L_{d} 
-                finalRank = (double)candidate.Value / tempDocWeight;
+                tempDocWeight = calculatedDocWeights[doc.Key];
+                tempDocLength = tokensPerDocument[doc.Key];
+                tempAverTermFreq = averageTermFreqPerDoc[doc.Key];
 
-                //add to list to perform priority queue on 
-                priorityQueue.MaxHeapInsert(finalRank, candidate.Key);
+                PostingDocWeight tempPostDocWeight = new PostingDocWeight(tempDocWeight, tempDocLength, doc.Value, tempAverTermFreq);
+
+                docWeigthsHashMap.Add(doc.Key, tempPostDocWeight);
+
             }
 
-            return priorityQueue;
-
         }
 
-        /// <summary>
-        /// Count the number of documents from index
-        /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        private int GetCorpusSize(string path)
+        public void CalcAveTermFreq(int docID)
         {
-            string filePath = Indexer.path + "docWeights.bin";
-            return (int)(new FileInfo(filePath).Length / 8f);
+            int sum = 0;
+            foreach (int termFreq in this.termFrequency.Values)
+            {
+                sum = sum + termFreq;
+            }
+
+            double averageTermFreq = (double)sum / this.termFrequency.Count;
+
+            averageTermFreqPerDoc.Add(docID, averageTermFreq);
+
         }
+
+        public void AddTokensPerDocument(int docId, int tokenCount)
+        {
+
+            tokensPerDocument.Add(docId, tokenCount);
+
+       
+        }
+
+        public void AddByteSize(int docID, int fileSizeInBytes)
+        {
+            docByteSize.Add(docID, fileSizeInBytes);
+        }
+
     }
+
 }
+
+
+
+
+
+
+

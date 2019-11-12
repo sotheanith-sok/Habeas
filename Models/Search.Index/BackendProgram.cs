@@ -18,11 +18,7 @@ namespace Search.Index
         //if mode is true, the search engine is in boolean mode
         //if mode is false, it's in ranked retrieval mode
         private static Boolean mode = true;
-
-        /// <summary>
-        /// Gets a corpus
-        /// </summary>
-        /// <param name="path">the selected directory path</param>
+        private static String RankedRetrievalMode = "Default";
 
         /// <summary>
         /// Gets on-disk index or generate a new index out of the selected corpus
@@ -153,6 +149,7 @@ namespace Search.Index
 
                 if (mode == false)
                 {
+                  
                     //parser to parse the query 
                     RankedRetrievalParser parser = new RankedRetrievalParser();
 
@@ -160,7 +157,8 @@ namespace Search.Index
                     List<String> finalTerms = parser.ParseQuery(query);
 
                     //retrieves the top ten documents of the normalized tokens
-                    IList<MaxPriorityQueue.InvertedIndex> topTenDocs = index.GetRankedDocuments(finalTerms);
+                    RankingVariant rv = new RankingVariant(corpus);
+                    IList<MaxPriorityQueue.InvertedIndex> topTenDocs = rv.GetRankedDocuments(index, finalTerms, RankedRetrievalMode);
 
                     //collect the top ten documents
                     if (topTenDocs.Count > 0)
@@ -301,6 +299,20 @@ namespace Search.Index
                 mode = true;
                 Console.WriteLine(mode);
             }
+        }
+
+
+        public void selectRetrieval(string retrieval)
+        {
+            try
+            {
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            RankedRetrievalMode = retrieval;
         }
 
         /// <summary>

@@ -134,6 +134,38 @@ namespace Habeas.Controllers
                         Electron.IpcMain.Send(mainWindow, "soundexText", Postings);
                     });
 
+                    //
+                    Electron.IpcMain.On("RetType", async (args) =>
+                    {
+                        //set details of message box
+                        var options = new MessageBoxOptions
+                            (
+                                "Select Ranked Retrieval type" + Environment.NewLine
+                            )
+                        {
+                            Type = MessageBoxType.info,
+                            Title = "RetrievalType",
+                            Buttons = new string[] { "Default", "Tf-Idf", "Okapi", "Wacky" }
+                        };
+                        //creates message box from options
+                        var result = await Electron.Dialog.ShowMessageBoxAsync(options);
+                        switch (result.Response)
+                        {
+                            case 0:
+                                BEP.selectRetrieval("Default");
+                                break;
+                            case 1:
+                                BEP.selectRetrieval("Tf-idf");
+                                break;
+                            case 2:
+                                BEP.selectRetrieval("Okapi");
+                                break;
+                            case 3:
+                                BEP.selectRetrieval("Wacky");
+                                break;
+                        }
+                    });
+
                     //Responds to user attempting to read a document
                     Electron.IpcMain.On("readDoc", (args) =>
                     {
