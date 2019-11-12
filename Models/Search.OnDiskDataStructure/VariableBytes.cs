@@ -1,13 +1,8 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace Search.OnDiskDataStructure
 {
-    
-    /// <summary>
-    /// VariableBytes represents multiple variable-byte-encoded numbers in byte[].
-    /// </summary>
     public class VariableBytes
     {
 
@@ -112,6 +107,9 @@ namespace Search.OnDiskDataStructure
 
        
 
+        /// <summary>
+        /// EncodedByteStream represents multiple variable-byte-encoded numbers in byte[].
+        /// </summary>
         public class EncodedByteStream
         {
             private byte[] value;   //bytes of multiple varialbe-byte-encoded numbers
