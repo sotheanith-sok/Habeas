@@ -15,7 +15,7 @@ namespace Search.OnDiskDataStructure
         /// <returns>bytes array</returns>
         public byte[] Encoding(int value)
         {
-            return BitConverter.GetBytes(value);
+            return Compressor.Compress(new List<byte[]> { BitConverter.GetBytes(value) });
         }
 
         /// <summary>
@@ -25,7 +25,9 @@ namespace Search.OnDiskDataStructure
         /// <returns>integers</returns>
         public int Decoding(byte[] value)
         {
-            return BitConverter.ToInt32(value);
+            byte[] intStorage = new byte[4];
+            Compressor.Decompress(value)[0].CopyTo(intStorage, 0);
+            return BitConverter.ToInt32(intStorage);
         }
     }
 }

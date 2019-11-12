@@ -29,6 +29,7 @@ namespace Search.OnDiskDataStructure
         /// <returns>Comprressed bytes</returns>
         public static byte[] Compress(List<byte[]> values)
         {
+            
             List<bool> finalResult = new List<bool>();
             foreach (byte[] bytes in values)
             {
@@ -41,7 +42,6 @@ namespace Search.OnDiskDataStructure
                 {
                     boolList.Add(bitArray.Get(i));
                 }
-
                 //Switch from big to small eden
                 boolList.Reverse();
 
@@ -80,7 +80,6 @@ namespace Search.OnDiskDataStructure
                     finalResult.AddRange(temp[i]);
                 }
             }
-
             return ToBytes(finalResult);
         }
 
