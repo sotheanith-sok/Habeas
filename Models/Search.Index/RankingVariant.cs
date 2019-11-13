@@ -275,7 +275,7 @@ namespace Search.Index
         private int GetCorpusSize(string path)
         {
             string filePath = Indexer.path + "docWeights_Key.bin";
-            return (int)(new FileInfo(filePath).Length / 4f);
+            return (int)(new FileInfo(filePath).Length );
         }
 
 

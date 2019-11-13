@@ -79,7 +79,6 @@ namespace Search.Index
                 //Add token count per document
                 index.AddTokensPerDocument(doc.DocumentId, tokenCount);
 
-                
                 //get number of bytes in file 
                 string docFilePath = doc.FilePath;
                 int fileSizeInByte = (int)(new FileInfo(docFilePath).Length / 8f);
