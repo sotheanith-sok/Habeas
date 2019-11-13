@@ -18,7 +18,8 @@ namespace Search.OnDiskDataStructure
         {
             List<byte> byteValue = new List<byte>();
 
-            //1.Write the document weight
+
+            //Write the document weight
             byteValue.AddRange(BitConverter.GetBytes(value.GetDocWeight()));
 
             byteValue.AddRange(BitConverter.GetBytes(value.GetDocTokenCount()));
@@ -41,15 +42,15 @@ namespace Search.OnDiskDataStructure
 
             List<Byte> byteList = new List<byte>(value);
 
-            double docWeight = BitConverter.ToDouble(byteList.GetRange(0,8).ToArray());
-            int docLength = BitConverter.ToInt32(byteList.GetRange(8,4).ToArray());
+            double docWeight = BitConverter.ToDouble(byteList.GetRange(0, 8).ToArray());
+            int docLength = BitConverter.ToInt32(byteList.GetRange(8, 4).ToArray());
             int docByteSize = BitConverter.ToInt32(byteList.GetRange(12, 4).ToArray());
-            double docAveTermFreq= BitConverter.ToDouble(byteList.GetRange(16, 8).ToArray());
+            double docAveTermFreq = BitConverter.ToDouble(byteList.GetRange(16, 8).ToArray());
 
 
 
 
-            DiskPositionalIndex.PostingDocWeight postingDocWeight = new DiskPositionalIndex.PostingDocWeight( docWeight, docLength, docByteSize, docAveTermFreq);
+            DiskPositionalIndex.PostingDocWeight postingDocWeight = new DiskPositionalIndex.PostingDocWeight(docWeight, docLength, docByteSize, docAveTermFreq);
             return postingDocWeight;
         }
     }

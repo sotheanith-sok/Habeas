@@ -44,7 +44,7 @@ namespace Search.Index
         /// </summary>
         IReadOnlyList<string> GetVocabulary();
 
-        // DiskPositionalIndex.PostingDocWeight GetPostingDocWeight(int docID);
+        List<int> GetDocWeightsIds();
 
 
     }

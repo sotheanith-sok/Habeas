@@ -23,9 +23,11 @@ namespace Search.Index
 
         //list of document weight according to id number
         private List<DiskPositionalIndex.PostingDocWeight> queryDocWeights;
-        
+
         //saves instance of the corpus to access corpus path
         private IDocumentCorpus corpus;
+
+        private List<int> documentIds;
 
         public RankingVariant(IDocumentCorpus corpus)
         {
@@ -33,7 +35,8 @@ namespace Search.Index
             doc2termWeight = new int();
             accumulator = new Dictionary<int, double>();
             queryDocWeights = new List<DiskPositionalIndex.PostingDocWeight>();
-      
+            documentIds = new List<int>();
+
             this.corpus = corpus;
         }
 
@@ -46,9 +49,13 @@ namespace Search.Index
         public IList<MaxPriorityQueue.InvertedIndex> GetRankedDocuments(IIndex index, List<string> query, string RankedRetrievalMode)
         {
 
-            
+
             //grab document weighs from disk
             this.queryDocWeights = index.GetPostingDocWeights(query);
+
+            Console.WriteLine(queryDocWeights);
+
+           
 
 
             //Build the Accumulator Hashmap
@@ -193,7 +200,7 @@ namespace Search.Index
 
 
                 default:
-                    return Math.Log(1 + (double) N / docFrequency);
+                    return Math.Log(1 + (double)N / docFrequency);
             }
 
         }
@@ -211,7 +218,10 @@ namespace Search.Index
         public double calculateDoc2TermWeight(int termFrequency, string RankedRetrievalMode, int docID, IIndex index)
         {
             int N = this.corpusSize;
+
+            
             DiskPositionalIndex.PostingDocWeight temp = this.queryDocWeights[docID];
+
             switch (RankedRetrievalMode)
             {
                 case "Tf-idf":
@@ -220,15 +230,15 @@ namespace Search.Index
                 case "Okapi":
                     int documentLength = temp.GetDocTokenCount();
                     double numeratorO = 2.2 * termFrequency;
-                    double denominatorO =  1.2 * (0.25 + 0.75 * (double) (documentLength /  Indexer.averageDocLength )) + termFrequency;
-                    double OkapiWdtValue = (double) numeratorO/ denominatorO ;
+                    double denominatorO = 1.2 * (0.25 + 0.75 * (double)(documentLength / Indexer.averageDocLength)) + termFrequency;
+                    double OkapiWdtValue = (double)numeratorO / denominatorO;
                     return OkapiWdtValue;
 
                 case "Wacky":
                     double avDocTermFreq = temp.GetDocAveTermFreq();
-                    double numeratorW =  (double) 1 + Math.Log(termFrequency);
-                    double denominatorW = (double) 1 + Math.Log(avDocTermFreq);
-                    double WackyWdtValue = (double) numeratorW / denominatorW;
+                    double numeratorW = (double)1 + Math.Log(termFrequency);
+                    double denominatorW = (double)1 + Math.Log(avDocTermFreq);
+                    double WackyWdtValue = (double)numeratorW / denominatorW;
                     return WackyWdtValue;
                 default:
                     return (double)(1 + Math.Log(termFrequency));
@@ -277,7 +287,7 @@ namespace Search.Index
         private int GetCorpusSize(string path)
         {
             string filePath = Indexer.path + "docWeights_Key.bin";
-            return (int)(new FileInfo(filePath).Length );
+            return (int)(new FileInfo(filePath).Length);
         }
 
 

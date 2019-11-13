@@ -51,6 +51,7 @@ namespace Search.Index
 
         public class PostingDocWeight
         {
+           
 
             private double docWeights { get; set; }
             private int docLength { get; set; }
@@ -64,7 +65,6 @@ namespace Search.Index
                 this.docByteSize = docByteSize;
                 this.averageTermFreq = averageTermFreq;
             }
-
             public double GetDocWeight()
             {
                 return this.docWeights;
@@ -106,19 +106,18 @@ namespace Search.Index
 
         }
 
+        public List<int> GetDocWeightsIds()
+        {
+            List<int> documentIds = onDiskDocWeight.GetKeys().ToList();
+            return documentIds;
+        }
         public List<PostingDocWeight> GetPostingDocWeights(List<string> query)
         {
-            //how to find only the docids of a given query
-            IList<Posting> postings = GetPostings(query);
-
-            List<int> documentIds = new List<int>();
-            foreach(Posting p in postings)
-            {
-                documentIds.Add(p.DocumentId);
-            }
-
+            //retrieve the corresponding posting of doc weight 
+            List<int> documentIds= onDiskDocWeight.GetKeys().ToList();
             List<PostingDocWeight> finalList = new List<PostingDocWeight>();
             finalList = onDiskDocWeight.Get(documentIds);
+
             return finalList;
         }
 

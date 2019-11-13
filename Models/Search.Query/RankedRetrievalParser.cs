@@ -24,7 +24,7 @@ namespace Search.Query
         /// Parses a search query to produce an IQueryComponent for Ranked Retrieval.
         /// <param name="query">query to be parsed to a query component</param>
         /// <returns>a query component</returns>
-        public List<String> ParseQuery(String query)
+        public List<string> ParseQuery(string query)
         {
 
 
