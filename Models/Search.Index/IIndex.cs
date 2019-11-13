@@ -37,7 +37,7 @@ namespace Search.Index
         IList<Posting> GetPositionalPostings(List<string> term);
 
 
-        List<DiskPositionalIndex.PostingDocWeight> GetPostingDocWeights();
+        List<DiskPositionalIndex.PostingDocWeight> GetPostingDocWeights(List<string> query);
 
         /// <summary>
         /// A (sorted) list of all terms in the index vocabulary.

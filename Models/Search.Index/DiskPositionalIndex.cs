@@ -102,32 +102,27 @@ namespace Search.Index
             docWeigthsHashMap = new SortedDictionary<int, PostingDocWeight>();
 
             onDiskPostingMap = new OnDiskDictionary<string, List<Posting>>(path, "InvertedIndex", new StringEncoderDecoder(), new PostingListEncoderDecoder());
-            onDiskDocWeight = new OnDiskDictionary<int, PostingDocWeight>(path,"docWeights",new IntEncoderDecoder(),new PostingDocWeightEncoderDecoder());
+            onDiskDocWeight = new OnDiskDictionary<int, PostingDocWeight>(path, "docWeights", new IntEncoderDecoder(), new PostingDocWeightEncoderDecoder());
 
         }
 
-        public List<PostingDocWeight> GetPostingDocWeights()
+        public List<PostingDocWeight> GetPostingDocWeights(List<string> query)
         {
-            List<int> documents = onDiskDocWeight.GetKeys().ToList();
+            //how to find only the docids of a given query
+            IList<Posting> postings = GetPostings(query);
+
+            List<int> documentIds = new List<int>();
+            foreach(Posting p in postings)
+            {
+                documentIds.Add(p.DocumentId);
+            }
+
             List<PostingDocWeight> finalList = new List<PostingDocWeight>();
-            finalList = onDiskDocWeight.Get(documents);
+            finalList = onDiskDocWeight.Get(documentIds);
             return finalList;
         }
 
-        // public PostingDocWeight GetPostingDocWeight(int docID)
-        // {
-        //     PostingDocWeight result = onDiskDocWeight.Get(docID);
-        //     if (default(PostingDocWeight) == result)
-        //     {
-        //         return new PostingDocWeight(0.0, 0, 0, 0.0);
-        //     }
-        //     else
-        //     {
-        //         return result;
-        //     }
-        // }
 
-        
         /// <summary>
         /// Gets Postings of a given term from in-memory index.
         /// </summary>
@@ -356,7 +351,7 @@ namespace Search.Index
 
             tokensPerDocument.Add(docId, tokenCount);
 
-       
+
         }
 
         public void AddByteSize(int docID, int fileSizeInBytes)
@@ -364,6 +359,25 @@ namespace Search.Index
             docByteSize.Add(docID, fileSizeInBytes);
         }
 
+
+
+
+        /// <summary>
+        /// Gets Postings of a given list of terms from in-memory index.
+        /// This and-merge the all the results from the multiple terms
+        /// </summary>
+        /// <param name="terms">a list of processed strings</param>
+        /// <return>a and-merged posting list</return>
+        public IList<Posting> GetPostingsUsingAndMerge(List<string> terms)
+        {
+            List<List<Posting>> postingLists = onDiskPostingMap.Get(terms);
+            postingLists.RemoveAll(item => item == default(List<Posting>));
+            if (postingLists.Count == 0)
+            {
+                return new List<Posting>();
+            }
+            return Merge.AndMerge(new List<IList<Posting>>(postingLists));
+        }
     }
 
 }

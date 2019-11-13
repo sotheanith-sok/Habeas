@@ -45,8 +45,10 @@ namespace Search.Index
         /// <returns></returns>
         public IList<MaxPriorityQueue.InvertedIndex> GetRankedDocuments(IIndex index, List<string> query, string RankedRetrievalMode)
         {
+
+            
             //grab document weighs from disk
-            this.queryDocWeights = index.GetPostingDocWeights();
+            this.queryDocWeights = index.GetPostingDocWeights(query);
 
 
             //Build the Accumulator Hashmap
