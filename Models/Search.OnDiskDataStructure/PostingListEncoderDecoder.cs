@@ -43,7 +43,7 @@ namespace Search.OnDiskDataStructure
                 previousDocID = p.DocumentId;
             }
 
-            return VariableBytes.Encode(concat);
+            return VariableBytes.Compress(concat);
         }
 
         /// <summary>
@@ -55,33 +55,33 @@ namespace Search.OnDiskDataStructure
         /// <returns></returns>
         public List<Posting> Decoding(byte[] value)
         {
-            var bytes = new VariableBytes.EncodedByteStream(value);
-
+            List<int> integers = VariableBytes.DecompressToInts(value);
+            Console.WriteLine(string.Join(" ", integers));
             // Read and construct a posting list from bytes from postings.bin
             // < df, (docID tf p1 p2 p3), (doc2 tf p1 p2), ... >
             // docIDs and positions are written as gap)
-            
-            List<Posting> postings = new List<Posting>();
 
+            List<Posting> postings = new List<Posting>();
+            int index = 0;
             //1. Read document frequency
-            int docFrequency = bytes.ReadDecodedInt();
+            int docFrequency = integers[index++];
 
             int prevDocID = 0;
             for (int i = 0; i < docFrequency; i++)         //for each posting
             {
                 //2. Read documentID using gap
-                int docID = prevDocID + bytes.ReadDecodedInt();
+                int docID = prevDocID + integers[index++];
 
                 List<int> positions = new List<int>();
 
                 //3. Read term frequency
-                int termFrequency = bytes.ReadDecodedInt();
+                int termFrequency = integers[index++];
 
                 //4. Read positions using gap
                 int prevPos = 0;
                 for (int j = 0; j < termFrequency; j++)    //for each position
                 {
-                    int pos = prevPos + bytes.ReadDecodedInt();
+                    int pos = prevPos + integers[index++];
                     positions.Add(pos);
                     prevPos = pos;  //update prevPos
                 }
