@@ -28,7 +28,7 @@ namespace Search.Index
         {
             Console.WriteLine("\n-------------------------------------------------------------------------------");
             Console.WriteLine($"Path: {path}");
-                
+
             try
             {
                 string pathToIndex = Path.Join(path, "/index/");
@@ -36,7 +36,7 @@ namespace Search.Index
 
                 bool doesOnDiskIndexExist = Directory.Exists(pathToIndex);
                 // bool doesOnDiskIndexExist = Directory.Exists(pathToIndex) && (Directory.GetFiles(pathToIndex).Length != 0);
-                
+
                 //make corpus out of the selected directory path
                 corpus = DirectoryCorpus.LoadTextDirectory(path);
                 if (doesOnDiskIndexExist)
@@ -55,7 +55,7 @@ namespace Search.Index
             {
                 Console.WriteLine(e);
             }
-            
+
             Console.WriteLine("Ready to go!");
             Console.WriteLine("-------------------------------------------------------------------------------");
         }
@@ -147,13 +147,15 @@ namespace Search.Index
                 //the list of strings to return 
                 List<String> results = new List<string>();
 
+                Stopwatch elapsedTime = new Stopwatch();
+
                 if (mode == false)
                 {
-                  
+
                     //parser to parse the query 
                     RankedRetrievalParser parser = new RankedRetrievalParser();
 
-                    
+
                     List<string> finalTerms = parser.ParseQuery(query);
 
                     //retrieves the top ten documents of the normalized tokens
@@ -189,6 +191,9 @@ namespace Search.Index
                         results.Add("0");
                     }
                     //return the list of strings
+                    elapsedTime.Stop();
+                    Console.WriteLine("Search Complete! Time Elapsed " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
+
                     return results;
                 }
 
@@ -230,6 +235,8 @@ namespace Search.Index
                         results.Add("0");
                     }
                     //return the list of strings
+                    elapsedTime.Stop();
+                    Console.WriteLine("Search Complete! Time Elapsed " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
                     return results;
 
                 }
@@ -237,6 +244,8 @@ namespace Search.Index
             catch (Exception e)
             {
                 Console.WriteLine(e);
+                elapsedTime.Stop();
+                Console.WriteLine("Everything is ruined! Search crashed after " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
                 return new List<string>();
             }
             // Console.Write("Corpus size is:");
