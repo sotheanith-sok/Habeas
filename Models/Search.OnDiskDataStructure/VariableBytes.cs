@@ -19,7 +19,7 @@ namespace Search.OnDiskDataStructure
                 //Convert byte[] array to 4 bytes
                 byte[] b = values[i];
                 byte[] temp = new byte[4];
-                Array.Copy(b, temp, b.Length);
+                Buffer.BlockCopy(b, 0, temp, 0, b.Length);
 
                 //Convert to int and encode
                 byte[] encoded = Encode(BitConverter.ToInt32(temp, 0));
@@ -35,7 +35,7 @@ namespace Search.OnDiskDataStructure
             int count = 0;
             foreach (byte[] b in values)
             {
-                Array.Copy(b, 0, result, count, b.Length);
+                Buffer.BlockCopy(b, 0, result, count, b.Length);
                 count += b.Length;
             }
             return result;
@@ -88,7 +88,7 @@ namespace Search.OnDiskDataStructure
             int count = 0;
             foreach (byte[] b in bytes)
             {
-                Array.Copy(b, 0, result, count, b.Length);
+                Buffer.BlockCopy(b, 0, result, count, b.Length);
                 count += b.Length;
             }
             return result;

@@ -56,7 +56,6 @@ namespace Search.OnDiskDataStructure
         public List<Posting> Decoding(byte[] value)
         {
             List<int> integers = VariableBytes.DecompressToInts(value);
-            Console.WriteLine(string.Join(" ", integers));
             // Read and construct a posting list from bytes from postings.bin
             // < df, (docID tf p1 p2 p3), (doc2 tf p1 p2), ... >
             // docIDs and positions are written as gap)
