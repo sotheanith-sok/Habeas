@@ -12,6 +12,6 @@ namespace Search.OnDiskDataStructure
         TValue Get(TKey key);
         List<TValue> Get(List<TKey> key);
         TKey[] GetKeys();
-        // TValue[] GetValues();
+        TValue[] GetValues();
     }
 }
