@@ -15,7 +15,7 @@ namespace Search.OnDiskDataStructure
         /// <returns>bytes array</returns>
         public byte[] Encoding(List<int> value)
         {
-            return VariableBytes.Encode(value);
+            return VariableBytes.Compress(value);
         }
 
         /// <summary>
@@ -25,13 +25,7 @@ namespace Search.OnDiskDataStructure
         /// <returns>List of integers</returns>
         public List<int> Decoding(byte[] value)
         {
-            var byteStream = new VariableBytes.EncodedByteStream(value);
-            var decoded = new List<int>();
-            while(byteStream.Pos < value.Length)
-            {
-                decoded.Add(byteStream.ReadDecodedInt());
-            }
-            return decoded;
+            return VariableBytes.DecompressToInts(value);
 
         }
     }
