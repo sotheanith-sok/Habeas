@@ -59,8 +59,11 @@ namespace Search.OnDiskDataStructure
         public List<TValue> Get(List<TKey> keys)
         {
             long[] table = this.ReadTableBin();
+            Console.WriteLine(string.Join(" ",table));
             List<int> indexes = this.ReadKeyBin(table, keys);
+            Console.WriteLine(string.Join(" ",indexes));
             List<TValue> values = this.ReadValueBin(table, indexes);
+            Console.WriteLine(string.Join(" ",values));
             return values;
         }
 
@@ -272,8 +275,8 @@ namespace Search.OnDiskDataStructure
                             i = m + 1;
                         }
                     }
-                    result.Add(-1);
                 }
+                result.Add(-1);
 
             }
             return result;
