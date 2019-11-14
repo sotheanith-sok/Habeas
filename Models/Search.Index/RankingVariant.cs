@@ -67,7 +67,7 @@ namespace Search.Index
             accumulator.Clear();
 
             //Retrieve Top Ten Documents and Return to Back End
-            return pq.RetrieveTopTen();
+            return pq.RetrieveTopFifty();
 
         }
 

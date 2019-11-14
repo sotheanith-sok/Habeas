@@ -180,6 +180,35 @@ public class MaxPriorityQueue
 
     }
 
+
+    /// <summary>
+    /// extracts from the priority queue the top 50 documents
+    /// </summary>
+    /// <returns>List of (rank, docid) of top 50 documents.</returns>
+    public List<InvertedIndex> RetrieveTopFifty()
+    {
+        List<InvertedIndex> priorityQueue = this.priorityQueue;
+        List<InvertedIndex> topFifty = new List<InvertedIndex>();
+
+        while (topFifty.Count < 50)
+        {
+            if (priorityQueue.Count == 0)
+            {
+                break;
+            }
+            else
+            {
+                InvertedIndex max = ExtractMax(priorityQueue);
+                topFifty.Add(max);
+            }
+        }
+
+        priorityQueue.Clear();
+        return topFifty;
+
+    }
+
+
     /// <summary>
     /// extracts the highest value and then maintains the max heap property
     /// </summary>
