@@ -74,10 +74,16 @@
   				<input type="checkbox" id="modeSwitch">
   				<span class="slider round"></span>
 			</label>
+			<span id="RetType">
 			Ranked Retrieval
+			</span>
 			<script>
 				document.getElementById("modeSwitch").addEventListener("click", () => {
 					ipcRenderer.send("modeSwitch");
+				});
+
+				document.getElementById("RetType").addEventListener("click", () => {
+					ipcRenderer.send("RetType");
 				});
 			</script>
 			</div>

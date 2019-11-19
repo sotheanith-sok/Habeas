@@ -18,13 +18,7 @@ namespace Search.Index
         //if mode is true, the search engine is in boolean mode
         //if mode is false, it's in ranked retrieval mode
         private static Boolean mode = true;
-
-        private static int RankVariant = 0;
-
-        /// <summary>
-        /// Gets a corpus
-        /// </summary>
-        /// <param name="path">the selected directory path</param>
+        private static String RankedRetrievalMode = "Default";
 
         /// <summary>
         /// Gets on-disk index or generate a new index out of the selected corpus
@@ -32,31 +26,38 @@ namespace Search.Index
         /// <param name="path">the path to the selected corpus</param>
         public void GetIndex(string path)
         {
+            Console.WriteLine("\n-------------------------------------------------------------------------------");
+            Console.WriteLine($"Path: {path}");
+                
             try
             {
                 string pathToIndex = Path.Join(path, "/index/");
                 Indexer.path = pathToIndex;
+
                 bool doesOnDiskIndexExist = Directory.Exists(pathToIndex);
                 // bool doesOnDiskIndexExist = Directory.Exists(pathToIndex) && (Directory.GetFiles(pathToIndex).Length != 0);
+                
                 //make corpus out of the selected directory path
                 corpus = DirectoryCorpus.LoadTextDirectory(path);
                 if (doesOnDiskIndexExist)
                 {
-                    Console.WriteLine("[Index] The on-disk index exists! Reading the on-disk index.");
+                    Console.WriteLine("Reading the existing on-disk index.");
                     index = new DiskPositionalIndex(pathToIndex);
                 }
                 else
                 {
-                    Console.WriteLine("[Index] Generating new index.");
+                    Console.WriteLine("Generating new index.");
                     GenerateIndex(path);
                 }
-
 
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
             }
+            
+            Console.WriteLine("Ready to go!");
+            Console.WriteLine("-------------------------------------------------------------------------------");
         }
 
         /// <summary>
@@ -148,15 +149,16 @@ namespace Search.Index
 
                 if (mode == false)
                 {
+                  
                     //parser to parse the query 
                     RankedRetrievalParser parser = new RankedRetrievalParser();
 
-                    //gets the list of independent terms
-                    List<String> finalTerms = parser.ParseQuery(query);
+                    
+                    List<string> finalTerms = parser.ParseQuery(query);
 
                     //retrieves the top ten documents of the normalized tokens
                     RankingVariant rv = new RankingVariant(corpus);
-                    IList<MaxPriorityQueue.InvertedIndex> topTenDocs = rv.GetRankedDocuments(index, finalTerms, RankVariant);
+                    IList<MaxPriorityQueue.InvertedIndex> topTenDocs = rv.GetRankedDocuments(index, finalTerms, RankedRetrievalMode);
 
                     //collect the top ten documents
                     if (topTenDocs.Count > 0)
@@ -297,6 +299,20 @@ namespace Search.Index
                 mode = true;
                 Console.WriteLine(mode);
             }
+        }
+
+
+        public void selectRetrieval(string retrieval)
+        {
+            try
+            {
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            RankedRetrievalMode = retrieval;
         }
 
         /// <summary>

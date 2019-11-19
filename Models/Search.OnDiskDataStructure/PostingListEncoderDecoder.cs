@@ -12,81 +12,87 @@ namespace Search.OnDiskDataStructure
         /// <summary>
         /// Encode list of integers to bytes
         /// </summary>
-        /// <param name="value">List of integers</param>
-        /// <returns>bytes array</returns>
-        public byte[] Encoding(List<Posting> value)
+        /// <param name="postings">a posting list</param>
+        /// <returns>encoded bytes stream</returns>
+        public byte[] Encoding(List<Posting> postings)
         {
-            List<byte> byteValue = new List<byte>();
+            List<int> concat = new List<int>();
 
             //1. Write document frequency
-            byteValue.AddRange(BitConverter.GetBytes(value.Count));
+            concat.Add(postings.Count);
 
             int previousDocID = 0;
-            foreach (Posting p in value)
+            foreach (Posting p in postings)
             {
                 //2. Write docID using gap
-                byteValue.AddRange(BitConverter.GetBytes(p.DocumentId - previousDocID)); //4byte integer per docID
+                concat.Add(p.DocumentId - previousDocID); //4byte integer per docID
 
                 List<int> positions = p.Positions;
 
                 //3. Write term frequency (# of positions)
-                byteValue.AddRange(BitConverter.GetBytes(positions.Count));              //4byte integer per term frequency
+                concat.Add(positions.Count);              //4byte integer per term frequency
 
                 //4. Write positions using gap
                 int previousPos = 0;
                 foreach (int pos in positions)
                 {
-                    byteValue.AddRange(BitConverter.GetBytes(pos - previousPos));        //4byte integer per position
+                    concat.Add(pos - previousPos);        //4byte integer per position
                     previousPos = pos;
                 }
 
                 previousDocID = p.DocumentId;
             }
 
-            return byteValue.ToArray();
+            return VariableBytes.Compress(concat);
         }
 
         /// <summary>
-        /// Decode bytes to list of integers
+        /// Converts an byte array to a list of postings for a term.
+        /// The byte array should follow the form 
+        /// < df, (docID tf p1 p2 p3), (doc2 tf p1 p2), ... >
         /// </summary>
-        /// <param name="value">Bytes</param>
-        /// <returns>List of integers</returns>
+        /// <param name="value"></param>
+        /// <returns></returns>
         public List<Posting> Decoding(byte[] value)
         {
-            List<Posting> postingList = new List<Posting>();
-            List<Byte> byteList = new List<byte>(value);
+            List<int> integers = VariableBytes.DecompressToInts(value);
+            // Read and construct a posting list from bytes from postings.bin
+            // < df, (docID tf p1 p2 p3), (doc2 tf p1 p2), ... >
+            // docIDs and positions are written as gap)
 
-            int previousDocID = 0;
+            List<Posting> postings = new List<Posting>();
+            int index = 0;
+            //1. Read document frequency
+            int docFrequency = integers[index++];
 
-            //Skip 4 to disregard document frequence
-            int i = 4;
-
-            while (i < value.Length)
+            int prevDocID = 0;
+            for (int i = 0; i < docFrequency; i++)         //for each posting
             {
+                //2. Read documentID using gap
+                int docID = prevDocID + integers[index++];
+
                 List<int> positions = new List<int>();
-                //Get docID 
-                int docID = BitConverter.ToInt32(byteList.GetRange(i, 4).ToArray()) + previousDocID;
-                i += 4;
 
-                //Get term frequence
-                int tf = BitConverter.ToInt32(byteList.GetRange(i, 4).ToArray());
-                i += 4;
-                int previousPos = 0;
+                //3. Read term frequency
+                int termFrequency = integers[index++];
 
-                while (tf > 0)
+                //4. Read positions using gap
+                int prevPos = 0;
+                for (int j = 0; j < termFrequency; j++)    //for each position
                 {
-                    int pos = BitConverter.ToInt32(byteList.GetRange(i, 4).ToArray()) + previousPos;
+                    int pos = prevPos + integers[index++];
                     positions.Add(pos);
-                    previousPos = pos;
-                    tf -= 1;
-                    i += 4;
+                    prevPos = pos;  //update prevPos
                 }
-                previousDocID = docID;
 
-                postingList.Add(new Posting(docID, positions));
+                //Insert a posting to the posting list
+                postings.Add(new Posting(docID, positions));
+
+                prevDocID = docID;  //update prevDocID
             }
 
-            return postingList;
+            return postings;
         }
+
     }
 }

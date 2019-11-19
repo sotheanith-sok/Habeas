@@ -36,17 +36,17 @@ namespace Search.Index
         /// <param name="terms">a list of processed strings</param>
         IList<Posting> GetPositionalPostings(List<string> term);
 
+
+        List<DiskPositionalIndex.PostingDocWeight> GetPostingDocWeights(List<string> query);
+
         /// <summary>
         /// A (sorted) list of all terms in the index vocabulary.
         /// </summary>
         IReadOnlyList<string> GetVocabulary();
 
-        IList<double> GetAllDocWeights();
+        List<int> GetDocWeightsIds();
 
-         double GetAverageTermFreq(int docID);
 
-  
-       
     }
 }
 

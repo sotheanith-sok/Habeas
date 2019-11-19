@@ -15,12 +15,7 @@ namespace Search.OnDiskDataStructure
         /// <returns>bytes array</returns>
         public byte[] Encoding(List<int> value)
         {
-            List<byte> byteValue = new List<byte>();
-            foreach (int i in value)
-            {
-                byteValue.AddRange(BitConverter.GetBytes(i));
-            }
-            return byteValue.ToArray();
+            return VariableBytes.Compress(value);
         }
 
         /// <summary>
@@ -30,12 +25,8 @@ namespace Search.OnDiskDataStructure
         /// <returns>List of integers</returns>
         public List<int> Decoding(byte[] value)
         {
-            List<int> intValue = new List<int>();
-            for (int i = 0; i < value.Length; i = i + 4)
-            {
-                intValue.Add(BitConverter.ToInt32(value, i));
-            }
-            return intValue;
+            return VariableBytes.DecompressToInts(value);
+
         }
     }
 }
