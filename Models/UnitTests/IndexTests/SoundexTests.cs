@@ -19,6 +19,7 @@ namespace UnitTests.IndexTests
             DiskSoundEx soundIndex = new DiskSoundEx("./");
             soundIndex.BuildSoundexIndex(corpus);
             soundIndex.GetCount().Should().Be(5);
+            soundIndex.Clear();
         }
 
         [Theory]
@@ -28,8 +29,10 @@ namespace UnitTests.IndexTests
         [InlineData("sok", "S200")]
         public void ParseToSoundexTest(string name, string expected)
         {
-            var actual = new DiskSoundEx("./").ParseToSoundex(name);
+            DiskSoundEx soundEx = new DiskSoundEx("./");
+            var actual = soundEx.ParseToSoundex(name);
             actual.Should().Be(expected);
+            soundEx.Clear();
         }
 
         [Fact]
@@ -37,21 +40,20 @@ namespace UnitTests.IndexTests
         {
             //Arrange
             DiskSoundEx authorIndex = new DiskSoundEx("./");
-
-            SortedDictionary<string, List<int>> dictionary = new SortedDictionary<string, List<int>>();
-
             //Act
-            authorIndex.AddDocIdByAuthor("sella", 1, dictionary);
-            authorIndex.AddDocIdByAuthor("selly", 2, dictionary);
-            authorIndex.AddDocIdByAuthor("yashua", 3, dictionary);
-            authorIndex.AddDocIdByAuthor("yoshi", 4, dictionary);
-            authorIndex.AddDocIdByAuthor("yesh", 5, dictionary);
+            authorIndex.AddDocIdByAuthor("sella", 1);
+            authorIndex.AddDocIdByAuthor("selly", 2);
+            authorIndex.AddDocIdByAuthor("yashua", 3);
+            authorIndex.AddDocIdByAuthor("yoshi", 4);
+            authorIndex.AddDocIdByAuthor("yesh", 5);
+            authorIndex.Save();
 
-            authorIndex.BuildSoundexIndex(dictionary);
             //Assert
             authorIndex.GetSoundexVocab().Should().HaveCount(2);
             authorIndex.Get("S440").Should().HaveCount(2);
             authorIndex.Get("Y200").Should().HaveCount(3);
+
+            authorIndex.Clear();
         }
 
         [Fact]
@@ -60,15 +62,15 @@ namespace UnitTests.IndexTests
             //Arrange
             DiskSoundEx authorIndex = new DiskSoundEx("./");
 
-            SortedDictionary<string, List<int>> dictionary = new SortedDictionary<string, List<int>>();
             //Act
-            authorIndex.AddDocIdByAuthor(" sella", 1, dictionary);
-            authorIndex.AddDocIdByAuthor("sella  ", 2, dictionary);
-            authorIndex.AddDocIdByAuthor("yashua  ovando", 2, dictionary);
-            authorIndex.AddDocIdByAuthor(" yashua     ovando     ", 3, dictionary);
-            authorIndex.BuildSoundexIndex(dictionary);
+            authorIndex.AddDocIdByAuthor(" sella", 1);
+            authorIndex.AddDocIdByAuthor("sella  ", 2);
+            authorIndex.AddDocIdByAuthor("yashua  ovando", 2);
+            authorIndex.AddDocIdByAuthor(" yashua     ovando     ", 3);
+            authorIndex.Save();
             //Assert
             authorIndex.GetSoundexVocab().Should().HaveCount(3);
+            authorIndex.Clear();
         }
 
         [Fact]
@@ -82,6 +84,7 @@ namespace UnitTests.IndexTests
             var actual = authorIndex.GetPostings("yash");
             //Assert
             actual.Should().HaveCount(3);
+            authorIndex.Clear();
         }
 
         [Fact]
@@ -95,6 +98,7 @@ namespace UnitTests.IndexTests
             var actual = authorIndex.GetPostings("yashua ovando");
             //Assert
             actual.Should().HaveCount(2);
+            authorIndex.Clear();
         }
 
         [Fact]
@@ -109,6 +113,7 @@ namespace UnitTests.IndexTests
             var result2 = authorIndex.GetPostings("blacklock");
             //Assert
             result1.Should().BeEquivalentTo(result2);
+            authorIndex.Clear();
         }
 
         [Fact]
@@ -122,6 +127,7 @@ namespace UnitTests.IndexTests
             var actual = authorIndex.GetPostings("hella");
             //Assert
             actual.Should().BeEmpty();
+            authorIndex.Clear();
         }
 
     }

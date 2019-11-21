@@ -21,8 +21,11 @@ namespace UnitTests.IndexTests
             {
                 vocabularies[i] = processor.ProcessToken(vocabularies[i])[0];
             }
-            DiskKGram kGram = new DiskKGram("./").buildKGram(new HashSet<string>(vocabularies));
+
+            DiskKGram kGram = new DiskKGram("./");
+            kGram.buildKGram(new HashSet<string>(vocabularies));
             Assert.Equal(new List<string> { "apple", "appreciation", "approachable" }, kGram.getVocabularies("$ap"));
+            kGram.Clear();
         }
     }
 }

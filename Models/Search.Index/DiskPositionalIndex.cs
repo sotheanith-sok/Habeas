@@ -8,42 +8,33 @@ namespace Search.Index
 {
     public class DiskPositionalIndex : IIndex
     {
-        //Hashmap is used to store the index. O(1)
-        //Dictionary in C# is equivalent to HashMap in Java.
-        private readonly SortedDictionary<string, List<Posting>> hashMap;
-
-        //hashmap for docweights posting type list
-
-        private readonly SortedDictionary<int, PostingDocWeight> docWeigthsHashMap;
-
-
-
-
         //HashMap used to store termFrequency of current Document
-        private readonly SortedDictionary<string, int> termFrequency;
+        private readonly Dictionary<string, int> termFrequency;
 
         //maintains a list of the docWeights to store in the docWeights.bin file
-        private readonly SortedDictionary<int, double> calculatedDocWeights;
+        private readonly Dictionary<int, double> calculatedDocWeights;
 
         //maintains a hashmap to store average term frequency of current document
-        private readonly SortedDictionary<int, double> averageTermFreqPerDoc;
+        private readonly Dictionary<int, double> averageTermFreqPerDoc;
 
-        private readonly SortedDictionary<int, int> tokensPerDocument;
+        private readonly Dictionary<int, int> tokensPerDocument;
 
-        private readonly SortedDictionary<int, int> docByteSize;
+        private readonly Dictionary<int, int> docByteSize;
 
 
 
 
 
         //maintains the hashmap for the posting list for a specific term
-        private OnDiskDictionary<string, List<Posting>> onDiskPostingMap;
+        private OnDiskDictionary<string, List<Posting>> postingMap;
 
 
         //maintains a hashmap for the document weight for a specific document id
-        private OnDiskDictionary<int, PostingDocWeight> onDiskDocWeight;
+        private OnDiskDictionary<int, PostingDocWeight> docWeigthsHashMap;
 
 
+        private Dictionary<string,List<Posting>> tempPostingMap;
+        private Dictionary<int, PostingDocWeight> tempDocWeightsHashMap;
         private double averageDocLength;
 
 
@@ -92,25 +83,24 @@ namespace Search.Index
         public DiskPositionalIndex(string path)
         {
 
-            termFrequency = new SortedDictionary<string, int>();
-            tokensPerDocument = new SortedDictionary<int, int>();
-            docByteSize = new SortedDictionary<int, int>();
-            calculatedDocWeights = new SortedDictionary<int, double>();
-            averageTermFreqPerDoc = new SortedDictionary<int, double>();
+            termFrequency = new Dictionary<string, int>();
+            tokensPerDocument = new Dictionary<int, int>();
+            docByteSize = new Dictionary<int, int>();
+            calculatedDocWeights = new Dictionary<int, double>();
+            averageTermFreqPerDoc = new Dictionary<int, double>();
 
-            hashMap = new SortedDictionary<string, List<Posting>>();
-            docWeigthsHashMap = new SortedDictionary<int, PostingDocWeight>();
-
-            onDiskPostingMap = new OnDiskDictionary<string, List<Posting>>(path, "InvertedIndex", new StringEncoderDecoder(), new PostingListEncoderDecoder());
-            onDiskDocWeight = new OnDiskDictionary<int, PostingDocWeight>(path,"docWeights",new IntEncoderDecoder(),new PostingDocWeightEncoderDecoder());
+            tempPostingMap = new Dictionary<string, List<Posting>>();
+            tempDocWeightsHashMap = new Dictionary<int, PostingDocWeight>();
+            postingMap = new OnDiskDictionary<string, List<Posting>>(path, "InvertedIndex", new StringEncoderDecoder(), new PostingListEncoderDecoder());
+            docWeigthsHashMap = new OnDiskDictionary<int, PostingDocWeight>(path, "docWeights", new IntEncoderDecoder(), new PostingDocWeightEncoderDecoder());
 
         }
 
         public List<PostingDocWeight> GetPostingDocWeights()
         {
-            List<int> documents = onDiskDocWeight.GetKeys().ToList();
+            List<int> documents = docWeigthsHashMap.GetKeys().ToList();
             List<PostingDocWeight> finalList = new List<PostingDocWeight>();
-            foreach(int documentID in documents)
+            foreach (int documentID in documents)
             {
                 finalList.Add(GetPostingDocWeight(documentID));
             }
@@ -120,7 +110,7 @@ namespace Search.Index
 
         public PostingDocWeight GetPostingDocWeight(int docID)
         {
-            PostingDocWeight result = onDiskDocWeight.Get(docID);
+            PostingDocWeight result = docWeigthsHashMap.Get(docID);
             if (default(PostingDocWeight) == result)
             {
                 return new PostingDocWeight(0.0, 0, 0, 0.0);
@@ -138,7 +128,7 @@ namespace Search.Index
         public IList<Posting> GetPostings(string term)
         {
 
-            List<Posting> result = onDiskPostingMap.Get(term);
+            List<Posting> result = postingMap.Get(term);
             if (default(List<Posting>) == result)
             {
                 return new List<Posting>();
@@ -157,8 +147,15 @@ namespace Search.Index
         /// <return>a or-merged posting list</return>
         public IList<Posting> GetPostings(List<string> terms)
         {
-            List<List<Posting>> postingLists = onDiskPostingMap.Get(terms);
-            postingLists.RemoveAll(item => item == default(List<Posting>));
+            List<List<Posting>> postingLists = new List<List<Posting>>();
+            foreach (string term in terms)
+            {
+                List<Posting> result = postingMap.Get(term);
+                if (result != default(List<Posting>))
+                {
+                    postingLists.Add(result);
+                }
+            }
             if (postingLists.Count == 0)
             {
                 return new List<Posting>();
@@ -192,7 +189,7 @@ namespace Search.Index
         /// </summary>
         public IReadOnlyList<string> GetVocabulary()
         {
-            List<string> vocabulary = onDiskPostingMap.GetKeys().ToList();
+            List<string> vocabulary = postingMap.GetKeys().ToList();
             vocabulary.Sort();
             return vocabulary;
         }
@@ -210,10 +207,10 @@ namespace Search.Index
             UpdateTermFrequencyForDoc(term);
 
             //Check if inverted index contains the term (key)
-            if (hashMap.ContainsKey(term))
+            if (tempPostingMap.ContainsKey(term))
             {
                 //Check if the document of the term is in the posting list
-                Posting lastPosting = hashMap[term].Last();
+                Posting lastPosting = tempPostingMap[term].Last();
                 if (lastPosting.DocumentId == docID)
                 {
                     //Add a position to the posting
@@ -222,7 +219,8 @@ namespace Search.Index
                 else
                 {
                     //Create a posting with (docID & position) to the posting list
-                    hashMap[term].Add(new Posting(docID, new List<int> { position }));
+                    tempPostingMap[term].Add(new Posting(docID, new List<int> { position }));
+                    
                 }
 
             }
@@ -232,7 +230,7 @@ namespace Search.Index
                 //Add term and a posting (docID & position) to the hashmap
                 List<Posting> postingList = new List<Posting>();
                 postingList.Add(new Posting(docID, new List<int> { position }));
-                hashMap.Add(term, postingList);
+                tempPostingMap.Add(term,postingList);
 
             }
 
@@ -299,18 +297,16 @@ namespace Search.Index
         /// </summary>
         public void Save()
         {
-            onDiskPostingMap.Save(hashMap);
             this.WriteDocWeights();
-            onDiskDocWeight.Save(docWeigthsHashMap);
-
-
-            hashMap.Clear();
-            docWeigthsHashMap.Clear();
+            postingMap.Replace(tempPostingMap);
+            docWeigthsHashMap.Replace(tempDocWeightsHashMap);
             termFrequency.Clear();
             calculatedDocWeights.Clear();
             docByteSize.Clear();
             tokensPerDocument.Clear();
             averageTermFreqPerDoc.Clear();
+            tempPostingMap.Clear();
+            tempDocWeightsHashMap.Clear();
         }
 
         ///<sumary>
@@ -333,7 +329,7 @@ namespace Search.Index
 
                 PostingDocWeight tempPostDocWeight = new PostingDocWeight(tempDocWeight, tempDocLength, doc.Value, tempAverTermFreq);
 
-                docWeigthsHashMap.Add(doc.Key, tempPostDocWeight);
+                tempDocWeightsHashMap.Add(doc.Key, tempPostDocWeight);
 
             }
 
@@ -358,12 +354,17 @@ namespace Search.Index
 
             tokensPerDocument.Add(docId, tokenCount);
 
-       
+
         }
 
         public void AddByteSize(int docID, int fileSizeInBytes)
         {
             docByteSize.Add(docID, fileSizeInBytes);
+        }
+
+        public void Clear(){
+            postingMap.Clear();
+            docWeigthsHashMap.Clear();
         }
 
     }
