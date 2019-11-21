@@ -108,6 +108,7 @@ namespace Search.Index
             soundEx.Save();
             elapsedTime.Stop();
             Console.WriteLine("[Indexer] Done Indexing! Time Elapsed " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
+            GC.Collect();
             return index;
         }
 
