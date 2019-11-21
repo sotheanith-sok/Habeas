@@ -29,15 +29,33 @@ namespace Search.Index
 
         private List<int> documentIds;
 
-        public RankingVariant(IDocumentCorpus corpus)
+        //set ranked retrieval to default and update when user passes the mode
+        private string RankedRetrievalMode = "Default";
+
+        IIndex index;
+
+        private string currentQuery;
+
+        private MaxPriorityQueue priorityQueue;
+
+        public RankingVariant(IDocumentCorpus corpus, IIndex index, string RankedRetrievalMode)
         {
             query2termWeight = new int();
             doc2termWeight = new int();
             accumulator = new Dictionary<int, double>();
             queryDocWeights = new List<DiskPositionalIndex.PostingDocWeight>();
             documentIds = new List<int>();
+            currentQuery = new String("");
+            priorityQueue = new MaxPriorityQueue();
 
+
+            this.RankedRetrievalMode = RankedRetrievalMode;
+
+            this.index = index;
             this.corpus = corpus;
+
+
+
         }
 
 
@@ -46,28 +64,40 @@ namespace Search.Index
         /// </summary>
         /// <param name="query"></param>
         /// <returns></returns>
-        public IList<MaxPriorityQueue.InvertedIndex> GetRankedDocuments(IIndex index, List<string> query, string RankedRetrievalMode)
+        public IList<MaxPriorityQueue.InvertedIndex> GetRankedDocuments(List<string> query, double percent)
         {
 
-
-            //grab document weighs from disk
-            this.queryDocWeights = index.GetPostingDocWeights(query);
-
+      
+            
             Console.WriteLine(queryDocWeights);
 
-           
+            if(percent == 100)
+            {
+                //Gets the remaining items in the priority queue in unsorted order. don't really care about the order at this point
+                return this.priorityQueue.GetPriorityQueue();
+            }
+
+            //only create a new priority heap if the query doesn't change for the scenario we want the next tier of documents for a query
+            if (!query.Equals("") && !query.Equals(this.currentQuery))
+            {
+                //grab document weighs from disk
+                this.queryDocWeights = this.index.GetPostingDocWeights(query);
+
+                //Build the Accumulator Hashmap
+                BuildAccumulator(query);
+
+                //Build Priority Queue using the Accumulator divided by L_{d}  
+                this.priorityQueue = BuildPriorityQueue();
+            }
+            else
+                return this.priorityQueue.RetrieveTier(percent);
 
 
-            //Build the Accumulator Hashmap
-            BuildAccumulator(query, RankedRetrievalMode, index);
-
-            //Build Priority Queue using the Accumulator divided by L_{d}  
-            MaxPriorityQueue pq = BuildPriorityQueue(RankedRetrievalMode, index);
 
             accumulator.Clear();
 
-            //Retrieve Top Ten Documents and Return to Back End
-            return pq.RetrieveTopFifty();
+            //Retrieve Top Ten Documents according to percent
+            return pq.RetrieveTier(percent);
 
         }
 
@@ -76,7 +106,7 @@ namespace Search.Index
         /// Builds the Accumulator hashmap for the query to retrieve top 10 documents
         /// </summary>
         /// <param name="query"></param>
-        private void BuildAccumulator(List<string> query, string RankedRetrievalMode, IIndex index)
+        private void BuildAccumulator(List<string> query)
         {
 
             //stores temporary Accumulator value that will be added to the accumulator hashmap
@@ -101,7 +131,7 @@ namespace Search.Index
                     int docFrequency = postings.Count;
 
                     //implements formula for w_{q,t}
-                    this.query2termWeight = calculateQuery2TermWeight(docFrequency, RankedRetrievalMode);
+                    this.query2termWeight = calculateQuery2TermWeight(docFrequency);
 
                     foreach (Posting post in postings)
                     {
@@ -109,7 +139,7 @@ namespace Search.Index
 
 
                         //implements formula for w_{d,t}
-                        this.doc2termWeight = calculateDoc2TermWeight(termFrequency, RankedRetrievalMode, post.DocumentId, index);
+                        this.doc2termWeight = calculateDoc2TermWeight(termFrequency, post.DocumentId);
 
                         //the A_{d} value for a specific term in that document
                         docAccumulator = this.query2termWeight * this.doc2termWeight;
@@ -132,7 +162,7 @@ namespace Search.Index
         /// Creates a new priority queue by inserting the rank of the document and document id 
         /// </summary>
         /// <returns> a priority queue with max heap property</returns>
-        private MaxPriorityQueue BuildPriorityQueue(string RankedRetrievalMode, IIndex index)
+        private MaxPriorityQueue BuildPriorityQueue()
         {
 
             //temporary variable to hold the doc weight
@@ -147,7 +177,7 @@ namespace Search.Index
             foreach (KeyValuePair<int, double> candidate in this.accumulator)
             {
                 //get corresponding L_{d} value according to ranking system
-                normalizer = GetDocumentWeight(candidate.Key, RankedRetrievalMode, index);
+                normalizer = GetDocumentWeight(candidate.Key);
 
                 // divide Accumulated Value A_{d} by L_{d} 
                 finalRank = (double)candidate.Value / normalizer;
@@ -170,10 +200,10 @@ namespace Search.Index
         /// <param name="docFrequency"></param>
         /// <param name="RankedRetrievalMode"></param>
         /// <returns></returns>
-        public double calculateQuery2TermWeight(int docFrequency, string RankedRetrievalMode)
+        public double calculateQuery2TermWeight(int docFrequency)
         {
             int N = this.corpusSize;
-            switch (RankedRetrievalMode)
+            switch (this.RankedRetrievalMode)
             {
                 case "Tf-idf":
                     return Math.Log((double)N / docFrequency);
@@ -215,14 +245,13 @@ namespace Search.Index
         /// <param name="termFrequency"></param>
         /// <param name="RankedRetrievalMode"></param>
         /// <returns></returns>
-        public double calculateDoc2TermWeight(int termFrequency, string RankedRetrievalMode, int docID, IIndex index)
+        public double calculateDoc2TermWeight(int termFrequency, int docID)
         {
             int N = this.corpusSize;
 
-            
             DiskPositionalIndex.PostingDocWeight temp = this.queryDocWeights[docID];
 
-            switch (RankedRetrievalMode)
+            switch (this.RankedRetrievalMode)
             {
                 case "Tf-idf":
                     return termFrequency;
@@ -251,11 +280,11 @@ namespace Search.Index
         /// </summary>
         /// <param name="docId"></param>
         /// <returns></returns>
-        private double GetDocumentWeight(int docID, string RankedRetrievalMode, IIndex index)
+        private double GetDocumentWeight(int docID)
         {
             double docWeight;
             DiskPositionalIndex.PostingDocWeight temp = this.queryDocWeights[docID];
-            switch (RankedRetrievalMode)
+            switch (this.RankedRetrievalMode)
             {
                 case "Tf-idf":
 
