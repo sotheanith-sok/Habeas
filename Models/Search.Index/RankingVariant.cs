@@ -34,9 +34,7 @@ namespace Search.Index
 
         IIndex index;
 
-        private string currentQuery;
 
-        private MaxPriorityQueue priorityQueue;
 
         public RankingVariant(IDocumentCorpus corpus, IIndex index, string RankedRetrievalMode)
         {
@@ -45,8 +43,7 @@ namespace Search.Index
             accumulator = new Dictionary<int, double>();
             queryDocWeights = new List<DiskPositionalIndex.PostingDocWeight>();
             documentIds = new List<int>();
-            currentQuery = new String("");
-            priorityQueue = new MaxPriorityQueue();
+
 
 
             this.RankedRetrievalMode = RankedRetrievalMode;
@@ -64,40 +61,24 @@ namespace Search.Index
         /// </summary>
         /// <param name="query"></param>
         /// <returns></returns>
-        public IList<MaxPriorityQueue.InvertedIndex> GetRankedDocuments(List<string> query, double percent)
+        public IList<MaxPriorityQueue.InvertedIndex> GetTopTen(List<string> query)
         {
 
-      
-            
-            Console.WriteLine(queryDocWeights);
+            //grab document weighs from disk
+            this.queryDocWeights = this.index.GetPostingDocWeights(query);
 
-            if(percent == 100)
-            {
-                //Gets the remaining items in the priority queue in unsorted order. don't really care about the order at this point
-                return this.priorityQueue.GetPriorityQueue();
-            }
+            //Build the Accumulator Hashmap
+            BuildAccumulator(query);
 
-            //only create a new priority heap if the query doesn't change for the scenario we want the next tier of documents for a query
-            if (!query.Equals("") && !query.Equals(this.currentQuery))
-            {
-                //grab document weighs from disk
-                this.queryDocWeights = this.index.GetPostingDocWeights(query);
-
-                //Build the Accumulator Hashmap
-                BuildAccumulator(query);
-
-                //Build Priority Queue using the Accumulator divided by L_{d}  
-                this.priorityQueue = BuildPriorityQueue();
-            }
-            else
-                return this.priorityQueue.RetrieveTier(percent);
+            //Build Priority Queue using the Accumulator divided by L_{d}  
+            MaxPriorityQueue priorityQueue = BuildPriorityQueue();
 
 
 
             accumulator.Clear();
 
             //Retrieve Top Ten Documents according to percent
-            return pq.RetrieveTier(percent);
+            return priorityQueue.RetrieveTopTen();
 
         }
 

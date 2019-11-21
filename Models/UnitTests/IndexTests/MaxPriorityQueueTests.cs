@@ -42,7 +42,7 @@ namespace UnitTests.IndexTests
           
 
             // this implements extract max from priority queue. which pulls highest documents continuously and returns a list
-            List<MaxPriorityQueue.InvertedIndex> testList =  testingQueue.RetrieveTopFifty();
+            List<MaxPriorityQueue.InvertedIndex> testList =  testingQueue.RetrieveTopTen();
             testList.Count.Should().Be(10);
 
             // highest value (17.5) in the priority queue 

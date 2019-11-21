@@ -8,6 +8,7 @@ using System.Linq;
 using System.IO;
 using System.Timers;
 
+
 namespace Search.Index
 {
     public class TierIndexer
