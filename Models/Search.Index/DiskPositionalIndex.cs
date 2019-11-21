@@ -199,7 +199,7 @@ namespace Search.Index
 
 
         /// <summary>
-        /// Adds a term into the index with its docId and position.
+        /// Adds a term into the index with its docId and position. 
         /// </summary>
         /// <param name="term">a processed string to be added</param>
         /// <param name="docID">the document id in which the term is coming from</param>

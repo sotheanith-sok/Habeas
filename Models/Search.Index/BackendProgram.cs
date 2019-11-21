@@ -147,6 +147,9 @@ namespace Search.Index
                 //the list of strings to return 
                 List<String> results = new List<string>();
 
+                SpellingChecker spellingChecker = new SpellChecker();
+                List<string> possiblyIncorrectWords = spellingChecker.CheckSpelling(query);
+
                 if (mode == false)
                 {
                   
