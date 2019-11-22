@@ -15,7 +15,7 @@ namespace Search.Index
     {
         public static IIndex CreateTiers(DiskPositionalIndex index)
         {
-            List<string> vocab = index.GetVocabulary();
+            IReadOnlyList<string> vocab = index.GetVocabulary();
             MaxPriorityQueue termQueue = new MaxPriorityQueue();
             //Tier1Hashmap
             //Tier2Hashmap
@@ -25,28 +25,28 @@ namespace Search.Index
             //Tier 3
             foreach (string v in vocab)
             {
-                List<Posting> postings = index.GetPositionalPosting(v);
+                IList<Posting> postings = index.GetPositionalPostings(v);
                 foreach (Posting p in postings)
                 {
-                    int tf = p.Postions.Count();
-                    int docID = p.DocumentID;
+                    int tf = p.Positions.Count();
+                    int docID = p.DocumentId;
                     termQueue.MaxHeapInsert(tf, docID);
                 }
                 List<MaxPriorityQueue.InvertedIndex> Tier1 = termQueue.RetrieveTier(1);
                 List<MaxPriorityQueue.InvertedIndex> Tier2 = termQueue.RetrieveTier(10);
                 List<MaxPriorityQueue.InvertedIndex> Tier3 = termQueue.GetPriorityQueue();
-                foreach ()
-                {
-                    foreach (MaxPriorityQueue.InvertedIndex t in Tier1)
-                    {
-                        int docID = t.GetDocumentId();
-                        //foreach(int p in positions)
-                        //{
-                        //Tier1Hashmap.AddTerm(v, docID, p);
-                        //}
-                    }
-                }
-                termQueue.Clear();
+                // foreach ()
+                // {
+                //     foreach (MaxPriorityQueue.InvertedIndex t in Tier1)
+                //     {
+                //         int docID = t.GetDocumentId();
+                //         //foreach(int p in positions)
+                //         //{
+                //         //Tier1Hashmap.AddTerm(v, docID, p);
+                //         //}
+                //     }
+                // }
+                // termQueue.Clear();
             }
 
         }

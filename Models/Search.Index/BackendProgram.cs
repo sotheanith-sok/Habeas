@@ -161,11 +161,10 @@ namespace Search.Index
                     //retrieves the top ten documents of the normalized tokens
                     RankingVariant rv = new RankingVariant(corpus, index, RankedRetrievalMode);
 
+                    IList<MaxPriorityQueue.InvertedIndex> topTenDocs = rv.GetTopTen(finalTerms);
                     //get tier 1 which is top 10 percent of documents
-                    IList<MaxPriorityQueue.InvertedIndex> tier1 = rv.GetRankedDocuments(finalTerms, 10);
+
                     //get tier 2 which is top 
-                    IList<MaxPriorityQueue.InvertedIndex> tier2 = rv.GetRankedDocuments(finalTerms, 30);
-                    IList<MaxPriorityQueue.InvertedIndex> tier3 = rv.GetRankedDocuments(finalTerms, 100);
 
                     //collect the top ten documents
                     if (topTenDocs.Count > 0)

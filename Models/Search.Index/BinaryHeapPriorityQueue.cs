@@ -192,7 +192,7 @@ public class MaxPriorityQueue
         List<InvertedIndex> topDocuments = new List<InvertedIndex>();
 
         //floor the division so that we don't overestimate... underestimating is okay
-        while (topDocuments.Count < Math.Floor( percentOfDocuments / 100)* this.priorityQueue.Count)
+        while (topDocuments.Count < Math.Floor(percentOfDocuments / 100) * this.priorityQueue.Count)
         {
             if (priorityQueue.Count == 0)
             {
@@ -205,7 +205,11 @@ public class MaxPriorityQueue
             }
         }
 
-        priorityQueue.Clear();
+        //we only want to clear the queue once we have pulled every item from the queue to create the tiers
+        if (priorityQueue.Count == 0)
+        {
+            priorityQueue.Clear();
+        }
         return topDocuments;
 
     }
