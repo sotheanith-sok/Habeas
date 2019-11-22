@@ -189,11 +189,10 @@ public class MaxPriorityQueue
     /// <returns>List of (rank, docid) of top 50 documents.</returns>
     public List<InvertedIndex> RetrieveTier(double percentOfDocuments)
     {
-        List<InvertedIndex> priorityQueue = this.priorityQueue;
         List<InvertedIndex> topDocuments = new List<InvertedIndex>();
 
         //floor the division so that we don't overestimate... underestimating is okay
-        while (topDocuments.Count < Math.Floor( percentOfDocuments / 100)* priorityQueue.Count)
+        while (topDocuments.Count < Math.Floor( percentOfDocuments / 100)* this.priorityQueue.Count)
         {
             if (priorityQueue.Count == 0)
             {
@@ -201,7 +200,7 @@ public class MaxPriorityQueue
             }
             else
             {
-                InvertedIndex max = ExtractMax(priorityQueue);
+                InvertedIndex max = ExtractMax(this.priorityQueue);
                 topDocuments.Add(max);
             }
         }
