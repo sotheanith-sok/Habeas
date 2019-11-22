@@ -27,7 +27,8 @@ namespace Search.Index
         //saves instance of the corpus to access corpus path
         private IDocumentCorpus corpus;
 
-        public RankingVariant(IDocumentCorpus corpus)
+        private int size=0;
+        public RankingVariant(IDocumentCorpus corpus, int size)
         {
             query2termWeight = new int();
             doc2termWeight = new int();
@@ -35,6 +36,7 @@ namespace Search.Index
             queryDocWeights = new List<DiskPositionalIndex.PostingDocWeight>();
       
             this.corpus = corpus;
+            this.size =size;
         }
 
 
@@ -274,7 +276,7 @@ namespace Search.Index
         /// <returns></returns>
         private int GetCorpusSize(string path)
         {
-            return this.corpus.CorpusSize;
+            return size;
         }
 
 

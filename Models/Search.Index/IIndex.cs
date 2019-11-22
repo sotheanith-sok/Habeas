@@ -46,6 +46,7 @@ namespace Search.Index
 
         DiskPositionalIndex.PostingDocWeight GetPostingDocWeight(int docID);
 
+        int GetDocumentsCount();
 
     }
 }

@@ -367,6 +367,10 @@ namespace Search.Index
             docWeigthsHashMap.Clear();
         }
 
+        public int GetDocumentsCount(){
+            return docWeigthsHashMap.GetSize();
+        }
+
     }
 
 }
