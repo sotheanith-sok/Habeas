@@ -19,7 +19,7 @@ namespace Search.Index
             IReadOnlyList<string> vocab = index.GetVocabulary();
             MaxPriorityQueue termQueue = new MaxPriorityQueue();
 
-            //What are these lines about?
+            //What are these lines about? .... Who wrote this ? lmao
             //Tier1Hashmap
             //Tier2Hashmap
             //Tier3Hashmap
@@ -60,7 +60,7 @@ namespace Search.Index
                     }
                 }
                 //
-                termQueue.Clear();
+                termQueue.ClearHeap();
             }
 
         }

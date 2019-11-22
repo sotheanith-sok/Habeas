@@ -248,6 +248,11 @@ public class MaxPriorityQueue
         return this.priorityQueue;
     }
 
+    public void ClearHeap()
+    {
+        this.priorityQueue.Clear();
+    }
+
 
 }
 
