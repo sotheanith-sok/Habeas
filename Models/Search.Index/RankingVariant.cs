@@ -274,8 +274,7 @@ namespace Search.Index
         /// <returns></returns>
         private int GetCorpusSize(string path)
         {
-            string filePath = Indexer.path + "docWeights_Key.bin";
-            return (int)(new FileInfo(filePath).Length / 4f);
+            return corpus.CorpusSize;
         }
 
 

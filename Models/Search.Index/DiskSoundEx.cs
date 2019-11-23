@@ -3,6 +3,7 @@ using Search.Document;
 using Search.Query;
 using System.Linq;
 using Search.OnDiskDataStructure;
+using System;
 
 namespace Search.Index
 {
@@ -10,6 +11,7 @@ namespace Search.Index
     {
         string path;
 
+        private Dictionary<string,List<int>> tempMap;
         private OnDiskDictionary<string, List<int>> map;
         /// <summary>
         /// Constructs SoundExIndex with an empty soundMap
@@ -17,6 +19,7 @@ namespace Search.Index
         public DiskSoundEx(string path)
         {
             this.path = path;
+            tempMap = new Dictionary<string, List<int>>();
             map = new OnDiskDictionary<string, List<int>>(path, "SoundEx", new StringEncoderDecoder(), new IntListEncoderDecoder());
         }
 
@@ -26,7 +29,6 @@ namespace Search.Index
         /// <param name="corpus">the corpus of documents</param>
         public void BuildSoundexIndex(IDocumentCorpus corpus)
         {
-            SortedDictionary<string, List<int>> SoundMap = new SortedDictionary<string, List<int>>();
             foreach (IDocument d in corpus.GetDocuments())
             {
                 //Skip document with no author field
@@ -34,19 +36,14 @@ namespace Search.Index
                 {
                     continue;
                 }
-                AddDocIdByAuthor(d.Author, d.DocumentId, SoundMap);
+                AddDocIdByAuthor(d.Author, d.DocumentId);
             }
-            this.map.Save(SoundMap);
+            Save();
         }
 
-
-        /// <summary>
-        /// Write soundex to disk
-        /// </summary>
-        /// <param name="SoundMap">soundex</param>
-        public void BuildSoundexIndex(SortedDictionary<string, List<int>> SoundMap)
-        {
-            this.map.Save(SoundMap);
+        public void Save(){
+            map.Replace(tempMap);
+            tempMap.Clear();
         }
 
         /// <summary>
@@ -54,7 +51,7 @@ namespace Search.Index
         /// </summary>
         /// <param name="authorName">name to be parsed to sound code and used as key</param>
         /// <param name="docID">document id to be added as value to the hashmap</param>
-        public void AddDocIdByAuthor(string authorName, int docID, SortedDictionary<string, List<int>> SoundMap)
+        public void AddDocIdByAuthor(string authorName, int docID)
         {
             if (authorName == null) { return; }
 
@@ -67,15 +64,14 @@ namespace Search.Index
             {
                 //Get the sound code
                 string soundCode = ParseToSoundex(term);
-
                 //Add docID to soundMap
-                if (SoundMap.ContainsKey(soundCode))
+                if (tempMap.ContainsKey(soundCode))
                 {
-                    SoundMap[soundCode].Add(docID);
+                    tempMap[soundCode].Add(docID);
                 }
                 else
                 {
-                    SoundMap.Add(soundCode, new List<int> { docID });
+                    tempMap.Add(soundCode, new List<int> { docID });
                 }
             }
         }
@@ -221,6 +217,10 @@ namespace Search.Index
         {
             List<int> result = this.map.Get(key);
             return (result == default(List<int>) ? new List<int>() : result);
+        }
+
+        public void Clear(){
+            map.Clear();
         }
     }
 }

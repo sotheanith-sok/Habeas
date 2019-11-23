@@ -8,10 +8,13 @@ namespace Search.OnDiskDataStructure
     /// <typeparam name="TValue">Generic type of value</typeparam>
     public interface IOnDiskDictionary<TKey, TValue>
     {
-        void Save(SortedDictionary<TKey, TValue> valuePairs);
         TValue Get(TKey key);
-        List<TValue> Get(List<TKey> key);
+        void Add(TKey key, TValue value);
         TKey[] GetKeys();
         TValue[] GetValues();
+        void Clear();
+        int GetSize();
+        bool ContainsKey(TKey key);
+        void Replace(Dictionary<TKey,TValue> dictionary);
     }
 }
