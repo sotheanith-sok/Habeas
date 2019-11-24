@@ -17,8 +17,8 @@ namespace Search.Index
         public static IIndex CreateTiers(DiskPositionalIndex index)
         {
             //Collects the vocabulary of the on memory index
-            List<string> vocab = index.GetVocabulary();
-            //creates a priority queue for the purposes
+            IReadOnlyList<string> vocab = index.GetVocabulary();
+            //creates a priority queue for the purposesu
             //of ordering the documents in terms of how frequently the doc contains the term
             MaxPriorityQueue termQueue = new MaxPriorityQueue();
 
@@ -35,14 +35,14 @@ namespace Search.Index
             foreach (string v in vocab)
             {
                 //
-                List<Posting> postings = index.GetPositionalPosting(v);
+                IList<Posting> postings = index.GetPositionalPostings(v);
                 //
                 foreach (Posting p in postings)
                 {
                     //
-                    int tf = p.Postions.Count();
+                    int tf = p.Positions.Count;
                     //
-                    int docID = p.DocumentID;
+                    int docID = p.DocumentId;
                     //
                     termQueue.MaxHeapInsert(tf, docID);
                 }

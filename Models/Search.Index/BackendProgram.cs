@@ -147,8 +147,6 @@ namespace Search.Index
                 //the list of strings to return 
                 List<String> results = new List<string>();
 
-                Stopwatch elapsedTime = new Stopwatch();
-
                 if (mode == false)
                 {
 
@@ -160,45 +158,46 @@ namespace Search.Index
 
                     //retrieves the top ten documents of the normalized tokens
                     RankingVariant rv = new RankingVariant(corpus, index, RankedRetrievalMode);
+                    // temporarily removed
+                    //IList<MaxPriorityQueue.InvertedIndex> topTenDocs = rv.GetRankedDocuments(index, finalTerms, RankedRetrievalMode);
 
-                    //get tier 1 which is top 10 percent of documents
-                    IList<MaxPriorityQueue.InvertedIndex> tier1 = rv.GetRankedDocuments(finalTerms, 10);
-                    //get tier 2 which is top 
-                    IList<MaxPriorityQueue.InvertedIndex> tier2 = rv.GetRankedDocuments(finalTerms, 30);
-                    IList<MaxPriorityQueue.InvertedIndex> tier3 = rv.GetRankedDocuments(finalTerms, 100);
 
-                    //collect the top ten documents
-                    if (topTenDocs.Count > 0)
-                    {
-                        //add the count of the postings to the list of strings to be returned
-                        results.Add(topTenDocs.Count.ToString());
 
-                        //for each posting...
-                        int numberRank = 1;
-                        foreach (MaxPriorityQueue.InvertedIndex p in topTenDocs)
-                        {
-                            //use the document id to access the document
-                            IDocument doc = corpus.GetDocument(p.GetDocumentId());
+                    // The following 30ish lines have been temporarily removed for the
+                    //purpose of working on Milestone 3
+                    //do not delete this code
+                    // //collect the top ten documents
+                    // if (topTenDocs.Count > 0)
+                    // {
+                    //     //add the count of the postings to the list of strings to be returned
+                    //     results.Add(topTenDocs.Count.ToString());
 
-                            //add the title to the list of strings to be returned
-                            results.Add("#" + numberRank + ": (" + Math.Round(p.GetRank(), 5).ToString() + ") " + doc.Title);
+                    //     //for each posting...
+                    //     int numberRank = 1;
+                    //     foreach (MaxPriorityQueue.InvertedIndex p in topTenDocs)
+                    //     {
+                    //         //use the document id to access the document
+                    //         IDocument doc = corpus.GetDocument(p.GetDocumentId());
 
-                            //add the document id to the list of strings to be returned 
-                            results.Add(doc.DocumentId.ToString());
-                            Console.WriteLine(p.GetDocumentId() + "" + doc.Title);
-                            numberRank++;
-                        }
-                    }
-                    //if there aren't any postings...
-                    else
-                    {
-                        //add a zero to the list of strings to be returned
-                        results.Add("0");
-                    }
+                    //         //add the title to the list of strings to be returned
+                    //         results.Add("#" + numberRank + ": (" + Math.Round(p.GetRank(), 5).ToString() + ") " + doc.Title);
+
+                    //         //add the document id to the list of strings to be returned 
+                    //         results.Add(doc.DocumentId.ToString());
+                    //         Console.WriteLine(p.GetDocumentId() + "" + doc.Title);
+                    //         numberRank++;
+                    //     }
+                    // }
+                    // //if there aren't any postings...
+                    // else
+                    // {
+                    //     //add a zero to the list of strings to be returned
+                    //     results.Add("0");
+                    // }
+                    // end of temporarily removed section
+
+
                     //return the list of strings
-                    elapsedTime.Stop();
-                    Console.WriteLine("Search Complete! Time Elapsed " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
-
                     return results;
                 }
 
@@ -240,17 +239,12 @@ namespace Search.Index
                         results.Add("0");
                     }
                     //return the list of strings
-                    elapsedTime.Stop();
-                    Console.WriteLine("Search Complete! Time Elapsed " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
                     return results;
 
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                elapsedTime.Stop();
-                Console.WriteLine("Everything is ruined! Search crashed after " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
                 return new List<string>();
             }
             // Console.Write("Corpus size is:");
