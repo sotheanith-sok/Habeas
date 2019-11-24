@@ -22,7 +22,7 @@ namespace Search.Index
             //of ordering the documents in terms of how frequently the doc contains the term
             MaxPriorityQueue termQueue = new MaxPriorityQueue();
 
-            //What are these lines about?
+            //What are these lines about? 
             //Tier1Hashmap
             //Tier2Hashmap
             //Tier3Hashmap
@@ -52,7 +52,7 @@ namespace Search.Index
                 List<MaxPriorityQueue.InvertedIndex> Tier2 = termQueue.RetrieveTier(10);
                 //
                 List<MaxPriorityQueue.InvertedIndex> Tier3 = termQueue.GetPriorityQueue();
-                //
+           
                 foreach ()
                 {
                     //
@@ -68,7 +68,7 @@ namespace Search.Index
                     }
                 }
                 //
-                termQueue.Clear();
+                termQueue.ClearHeap();
             }
 
         }

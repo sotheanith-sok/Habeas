@@ -161,6 +161,10 @@ namespace Search.Index
                     // temporarily removed
                     //IList<MaxPriorityQueue.InvertedIndex> topTenDocs = rv.GetRankedDocuments(index, finalTerms, RankedRetrievalMode);
 
+                    IList<MaxPriorityQueue.InvertedIndex> topTenDocs = rv.GetTopTen(finalTerms);
+                    //get tier 1 which is top 10 percent of documents
+
+                    //get tier 2 which is top 
 
 
                     // The following 30ish lines have been temporarily removed for the
