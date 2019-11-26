@@ -16,19 +16,19 @@ namespace UnitTests
         [Fact]
         public void TestWriteToDisk()
         {
-            SortedDictionary<string, string> testValues = new SortedDictionary<string, string>();
-            testValues.Add("A", "Apple");
-            testValues.Add("B", "Banana");
-            testValues.Add("C", "Cat");
-            testValues.Add("D", "Dog");
-            testValues.Add("E", "Eye");
             OnDiskDictionary<string, string> dic = new OnDiskDictionary<string, string>("./", "TestAlphabet", new StringEncoderDecoder(), new StringEncoderDecoder());
-            dic.Save(testValues);
+
+            dic.Add("A", "Apple");
+            dic.Add("B", "Banana");
+            dic.Add("C", "Cat");
+            dic.Add("D", "Dog");
+            dic.Add("E", "Eye");
             Assert.Equal("Apple", dic.Get("A"));
             Assert.Equal("Eye", dic.Get("E"));
             Assert.Equal("Banana", dic.Get("B"));
             Assert.Equal("Dog", dic.Get("D"));
             Assert.Equal("Cat", dic.Get("C"));
+            dic.Clear();
         }
     }
 }

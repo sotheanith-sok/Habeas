@@ -31,12 +31,16 @@ namespace Search.Index
 
             // Set the index type and token processor to use
             DiskPositionalIndex index = new DiskPositionalIndex(Indexer.path);
+            DiskSoundEx soundEx = new DiskSoundEx(Indexer.path);
+            DiskKGram kGram = new DiskKGram(Indexer.path);
+
+            index.Clear();
+            soundEx.Clear();
+            kGram.Clear();
+
             ITokenProcessor processor = new StemmingTokenProcesor();
 
             HashSet<string> unstemmedVocabulary = new HashSet<string>();
-            SortedDictionary<string, List<int>> soundEx = new SortedDictionary<string, List<int>>();
-
-            
             // Index the document
             foreach (IDocument doc in corpus.GetDocuments())
             {
@@ -94,15 +98,16 @@ namespace Search.Index
                 Indexer.averageDocLength = index.calculateAverageDocLength();
 
                 //Add author to SoundEx Index
-                new DiskSoundEx(Indexer.path).AddDocIdByAuthor(doc.Author, doc.DocumentId, soundEx);
+                soundEx.AddDocIdByAuthor(doc.Author, doc.DocumentId);
                 stream.Dispose();
 
             }
-            new DiskKGram(Indexer.path).buildKGram(unstemmedVocabulary);
-            new DiskSoundEx(Indexer.path).BuildSoundexIndex(soundEx);
+            kGram.buildKGram(unstemmedVocabulary);
             index.Save();
+            soundEx.Save();
             elapsedTime.Stop();
             Console.WriteLine("[Indexer] Done Indexing! Time Elapsed " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
+            GC.Collect();
             return index;
         }
 

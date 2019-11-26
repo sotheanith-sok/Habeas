@@ -46,6 +46,7 @@ namespace Search.Index
 
         List<int> GetDocWeightsIds();
 
+        int GetDocumentsCount();
 
     }
 }
