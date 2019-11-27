@@ -96,17 +96,19 @@ namespace Search.Index
 
         }
 
-        public List<int> GetDocWeightsIds()
-        {
-            List<int> documents = docWeigthsHashMap.GetKeys().ToList();
-            List<PostingDocWeight> finalList = new List<PostingDocWeight>();
-            foreach (int documentID in documents)
-            {
-                finalList.Add(GetPostingDocWeight(documentID));
-            }
+        // not sure what GetDocWeightsIds is used for  ? but apparently nothing references it so we might not even need it ???
 
-            return finalList;
-        }
+        // public List<int> GetDocWeightsIds()
+        // {
+        //     List<int> documents = docWeigthsHashMap.GetKeys().ToList();
+        //     List<PostingDocWeight> finalList = new List<PostingDocWeight>();
+        //     foreach (int documentID in documents)
+        //     {
+        //         finalList.Add(GetPostingDocWeight(documentID));
+        //     }
+
+        //     return finalList;
+        // }
 
         public PostingDocWeight GetPostingDocWeight(int docID)
         {
