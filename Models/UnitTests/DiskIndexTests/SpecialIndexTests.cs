@@ -42,7 +42,7 @@ namespace UnitTests.DiskIndexTest
 
             //Testing ranked retrieval AND accumulated values
             index = new DiskPositionalIndex(pathToIndex);
-            RankingVariant rv = new RankingVariant(corpus, index, "Default");
+            RankedRetrieval rv = new RankedRetrieval(corpus, index, "Default");
             IList<MaxPriorityQueue.InvertedIndex> actual = rv.GetTopTen(terms);
             actual[0].GetDocumentId().Should().Be(0); //should be document 1 which is of doc id 0
             actual[0].GetRank().Should().BeApproximately(1.183748156, 9); //A_{doccument} = 3.10195041 L_{1} = 2.620447934
@@ -51,7 +51,7 @@ namespace UnitTests.DiskIndexTest
             actual[3].GetDocumentId().Should().Be(4); //
 
             //tests tf-idf
-            rv = new RankingVariant(corpus, index, "Tf-idf");
+            rv = new RankedRetrieval(corpus, index, "Tf-idf");
             IList<MaxPriorityQueue.InvertedIndex> actual1 = rv.GetTopTen(terms);
             actual1[0].GetDocumentId().Should().Be(2);
             actual1[0].GetRank().Should().BeApproximately(0.948215482, 9);
@@ -64,7 +64,7 @@ namespace UnitTests.DiskIndexTest
 
 
             //tests Okapi BM25
-            rv = new RankingVariant(corpus, index, "Okapi");
+            rv = new RankedRetrieval(corpus, index, "Okapi");
             IList<MaxPriorityQueue.InvertedIndex> actual2 = rv.GetTopTen(terms);
             actual2[0].GetDocumentId().Should().Be(0);
             actual2[0].GetRank().Should().BeApproximately(0.66590893, 9);
@@ -77,7 +77,7 @@ namespace UnitTests.DiskIndexTest
 
 
             //tests Wacky 
-            rv = new RankingVariant(corpus, index, "Wacky");
+            rv = new RankedRetrieval(corpus, index, "Wacky");
             IList<MaxPriorityQueue.InvertedIndex> actual3 = rv.GetTopTen(terms);
             actual3[0].GetDocumentId().Should().Be(0);
             actual3[0].GetRank().Should().BeApproximately(0.284824391, 9);

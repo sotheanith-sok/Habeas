@@ -1,14 +1,10 @@
 using System.Collections.Generic;
-using System;
-using System.IO;
-using System.Linq;
-using Search.Text;
 using Search.Document;
-using Search.Query;
+
 
 namespace Search.Index
 {
-    public class RankingVariant
+    public class RankedRetrieval
     {
         //w_{q,t}
         private double query2termWeight;
@@ -30,16 +26,16 @@ namespace Search.Index
 
         IIndex index;
 
-        IRankVariant rankType;
+        IRankVariant rankVariant;
 
-        public RankingVariant(IDocumentCorpus corpus, IIndex index, string RankedRetrievalMode)
+        public RankedRetrieval(IDocumentCorpus corpus, IIndex index, string RankedRetrievalMode)
         {
             query2termWeight = new int();
             doc2termWeight = new int();
             accumulator = new Dictionary<int, double>();
             documentIds = new List<int>();
 
-            this.rankType = SetRankedRetrievalMode(RankedRetrievalMode);
+            this.rankVariant = SetRankedRetrievalMode(RankedRetrievalMode);
             this.index = index;
             this.corpus = corpus;
 
@@ -82,7 +78,7 @@ namespace Search.Index
         /// <returns></returns>
         public IList<MaxPriorityQueue.InvertedIndex> GetTopTen(List<string> query)
         {
-            
+
             //Build the Accumulator Hashmap
             BuildAccumulator(query);
 
@@ -120,7 +116,7 @@ namespace Search.Index
                     int docFrequency = postings.Count;
 
                     //implements formula for w_{q,t}
-                    this.query2termWeight = this.rankType.calculateQuery2TermWeight(docFrequency , this.corpusSize);
+                    this.query2termWeight = this.rankVariant.calculateQuery2TermWeight(docFrequency, this.corpusSize);
 
                     foreach (Posting post in postings)
                     {
@@ -128,7 +124,7 @@ namespace Search.Index
 
 
                         //implements formula for w_{d,t}
-                        this.doc2termWeight = this.rankType.calculateDoc2TermWeight(termFrequency, post.DocumentId, this.corpusSize, this.index);
+                        this.doc2termWeight = this.rankVariant.calculateDoc2TermWeight(termFrequency, post.DocumentId, this.corpusSize, this.index);
 
                         //the A_{d} value for a specific term in that document
                         docAccumulator = this.query2termWeight * this.doc2termWeight;
@@ -166,7 +162,7 @@ namespace Search.Index
             foreach (KeyValuePair<int, double> candidate in this.accumulator)
             {
                 //get corresponding L_{d} value according to ranking system
-                normalizer = this.rankType.GetDocumentWeight(candidate.Key, this.index);
+                normalizer = this.rankVariant.GetDocumentWeight(candidate.Key, this.index);
 
                 // divide Accumulated Value A_{d} by L_{d} 
                 finalRank = (double)candidate.Value / normalizer;
@@ -176,123 +172,6 @@ namespace Search.Index
             }
 
             return priorityQueue;
-
-        }
-    }
-
-
-
-    public class Default : IRankVariant
-    {
-        public double calculateQuery2TermWeight(int docFrequency, int corpusSize)
-        {
-            return Math.Log(1 + (double)corpusSize / docFrequency);
-        }
-
-        public double calculateDoc2TermWeight(int termFrequency, int docID, int corpusSize, IIndex index)
-        {
-            return (double)(1 + Math.Log(termFrequency));
-        }
-
-        public double GetDocumentWeight(int docID, IIndex index)
-        {
-            DiskPositionalIndex.PostingDocWeight temp = index.GetPostingDocWeight(docID);
-            return temp.GetDocWeight();
-        }
-
-    }
-
-
-    public class Tf_Idf : IRankVariant
-    {
-        public double calculateQuery2TermWeight(int docFrequency, int corpusSize)
-        {
-            return Math.Log((double)corpusSize / docFrequency);
-        }
-        public double calculateDoc2TermWeight(int termFrequency, int docID, int corpusSize, IIndex index)
-        {
-            return termFrequency;
-        }
-
-
-        public double GetDocumentWeight(int docID, IIndex index)
-        {
-            double docWeight;
-            DiskPositionalIndex.PostingDocWeight temp = index.GetPostingDocWeight(docID);
-            docWeight = temp.GetDocWeight();
-            return docWeight;
-
-        }
-    }
-
-    public class Okapi : IRankVariant
-    {
-        public double calculateQuery2TermWeight(int docFrequency, int corpusSize)
-        {
-            double OkapiWqtValue = Math.Log((double)(corpusSize - docFrequency + 0.5) / (docFrequency + 0.5));
-            if (0.1 > OkapiWqtValue)
-            {
-                return 0.1;
-            }
-            else
-                return OkapiWqtValue;
-        }
-        public double calculateDoc2TermWeight(int termFrequency, int docID, int corpusSize, IIndex index)
-        {
-
-            DiskPositionalIndex.PostingDocWeight temp = index.GetPostingDocWeight(docID);
-            int documentLength = temp.GetDocTokenCount();
-            double numeratorO = 2.2 * termFrequency;
-            double denominatorO = 1.2 * (0.25 + 0.75 * (double)(documentLength / Indexer.averageDocLength)) + termFrequency;
-            double OkapiWdtValue = (double)numeratorO / denominatorO;
-            return OkapiWdtValue;
-        }
-
-
-        public double GetDocumentWeight(int docID, IIndex index)
-        {
-            return 1.0;
-        }
-
-    }
-
-    public class Wacky : IRankVariant
-    {
-        public double calculateQuery2TermWeight(int docFrequency, int corpusSize)
-        {
-            int numerator = corpusSize - docFrequency;
-
-            double division = (double)numerator / docFrequency;
-            if (division > 1)
-            {
-                double WackyWqtValue = Math.Log(division);
-                return WackyWqtValue;
-
-            }
-            else
-                return 0.0;
-        }
-
-        public double calculateDoc2TermWeight(int termFrequency, int docID, int corpusSize, IIndex index)
-        {
-
-            DiskPositionalIndex.PostingDocWeight temp = index.GetPostingDocWeight(docID);
-
-            double avDocTermFreq = temp.GetDocAveTermFreq();
-            double numeratorW = (double)1 + Math.Log(termFrequency);
-            double denominatorW = (double)1 + Math.Log(avDocTermFreq);
-            double WackyWdtValue = (double)numeratorW / denominatorW;
-            return WackyWdtValue;
-        }
-
-
-        public double GetDocumentWeight(int docID, IIndex index)
-        {
-            DiskPositionalIndex.PostingDocWeight temp = index.GetPostingDocWeight(docID);
-            int fileSizeInByte = temp.GetDocByteSize();
-            double WackyLd = (double)(Math.Sqrt(fileSizeInByte));
-            Console.WriteLine(WackyLd);
-            return WackyLd;
 
         }
     }
