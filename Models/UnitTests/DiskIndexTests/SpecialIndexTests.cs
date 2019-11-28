@@ -30,10 +30,12 @@ namespace UnitTests.DiskIndexTest
             IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(corpusDir);
 
             //Create directory  to bins folders if it doesn't exist
-            Directory.CreateDirectory(Path.Join(corpusDir, "/index/"));
+            Directory.CreateDirectory(pathToIndex);
 
             //Initialize the index. 
             IIndex index = Indexer.IndexCorpus(corpus);
+
+            
 
             //The rest of your code...
             List<string> terms = new List<string>();

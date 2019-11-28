@@ -102,8 +102,13 @@ namespace Search.Index
                 stream.Dispose();
 
             }
+
+            
             kGram.buildKGram(unstemmedVocabulary);
             index.Save();
+
+           TierIndexer.CreateTierIndices(index);
+            
             soundEx.Save();
             elapsedTime.Stop();
             Console.WriteLine("[Indexer] Done Indexing! Time Elapsed " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));

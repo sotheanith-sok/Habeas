@@ -12,6 +12,10 @@ namespace Search.Index
     public class BackendProgram
     {
         private IIndex index; //currently set-up to use on-disk index
+
+        private IIndex tierIndex1;
+        private IIndex tierIndex2;
+        private IIndex tierIndex3;
         private IDocumentCorpus corpus;
 
         //mode indicates if the search engine is in boolean mode or ranked retrieval mode
@@ -37,12 +41,18 @@ namespace Search.Index
                 bool doesOnDiskIndexExist = Directory.Exists(pathToIndex);
                 // bool doesOnDiskIndexExist = Directory.Exists(pathToIndex) && (Directory.GetFiles(pathToIndex).Length != 0);
 
+
                 //make corpus out of the selected directory path
                 corpus = DirectoryCorpus.LoadTextDirectory(path);
+
                 if (doesOnDiskIndexExist)
                 {
                     Console.WriteLine("Reading the existing on-disk index.");
                     index = new DiskPositionalIndex(pathToIndex);
+
+                    tierIndex1 = new DiskPositionalIndex(pathToIndex +"/TierIndex1/");
+                    tierIndex2 = new DiskPositionalIndex(pathToIndex +"/TierIndex2/");
+                    tierIndex3 = new DiskPositionalIndex(pathToIndex +"/TierIndex3/");
                 }
                 else
                 {
@@ -70,6 +80,7 @@ namespace Search.Index
             {
                 //Generate directory if we need to index corpus.
                 Directory.CreateDirectory(Path.Join(path, "/index/"));
+   
 
                 //if the corpus contains content
                 if (corpus != null && corpus.CorpusSize != 0)
@@ -149,6 +160,9 @@ namespace Search.Index
 
                 if (mode == false)
                 {
+
+                    
+
 
                     //parser to parse the query 
                     RankedRetrievalParser parser = new RankedRetrievalParser();

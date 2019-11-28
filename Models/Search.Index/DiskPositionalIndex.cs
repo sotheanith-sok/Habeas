@@ -22,16 +22,11 @@ namespace Search.Index
         private readonly Dictionary<int, int> docByteSize;
 
 
-
-
-
         //maintains the hashmap for the posting list for a specific term
         private OnDiskDictionary<string, List<Posting>> postingMap;
 
-
         //maintains a hashmap for the document weight for a specific document id
         private OnDiskDictionary<int, PostingDocWeight> docWeigthsHashMap;
-
 
         private Dictionary<string,List<Posting>> tempPostingMap;
         private Dictionary<int, PostingDocWeight> tempDocWeightsHashMap;
@@ -311,6 +306,18 @@ namespace Search.Index
             tempDocWeightsHashMap.Clear();
         }
 
+        public void SaveTier()
+        {
+            postingMap.Replace(tempPostingMap);
+            termFrequency.Clear();
+            calculatedDocWeights.Clear();
+            docByteSize.Clear();
+            tokensPerDocument.Clear();
+            averageTermFreqPerDoc.Clear();
+            tempPostingMap.Clear();
+            tempDocWeightsHashMap.Clear();
+        }
+
         ///<sumary>
         /// Writes 8-byte values of document weights to docWeights.bin 
         /// </summary>
@@ -371,6 +378,13 @@ namespace Search.Index
 
         public int GetDocumentsCount(){
             return docWeigthsHashMap.GetSize();
+        }
+
+        public List<string> GetVocabFromTemp()
+        {
+            List<string> vocabulary = tempPostingMap.Keys.ToList();
+            vocabulary.Sort();
+            return vocabulary;
         }
 
     }

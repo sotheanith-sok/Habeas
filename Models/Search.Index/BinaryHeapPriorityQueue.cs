@@ -132,9 +132,9 @@ public class MaxPriorityQueue
     /// </summary>
     /// <param name="rank"></param>
     /// <param name="docId"></param>
-    public void MaxHeapInsert(double rank, int docId)
+    public void MaxHeapInsert(double value, int docId)
     {
-        InvertedIndex element = new InvertedIndex(rank, docId);
+        InvertedIndex element = new InvertedIndex(value, docId);
 
         //get current state of priority queue
         List<InvertedIndex> tempQueue = this.priorityQueue;
@@ -190,18 +190,30 @@ public class MaxPriorityQueue
     public List<InvertedIndex> RetrieveTier(double percentOfDocuments)
     {
         List<InvertedIndex> topDocuments = new List<InvertedIndex>();
+        double limit = Math.Floor((percentOfDocuments * this.priorityQueue.Count) / 100);
 
-        //floor the division so that we don't overestimate... underestimating is okay
-        while (topDocuments.Count < Math.Floor(percentOfDocuments / 100) * this.priorityQueue.Count)
+        if (limit <= 1)
         {
-            if (priorityQueue.Count == 0)
-            {
-                break;
-            }
-            else
+            while (this.priorityQueue.Count > 0)
             {
                 InvertedIndex max = ExtractMax(this.priorityQueue);
                 topDocuments.Add(max);
+            }
+        }
+        else
+        {
+            //floor the division so that we don't overestimate... underestimating is okay
+            while (topDocuments.Count < limit)
+            {
+                if (priorityQueue.Count == 0)
+                {
+                    break;
+                }
+                else
+                {
+                    InvertedIndex max = ExtractMax(this.priorityQueue);
+                    topDocuments.Add(max);
+                }
             }
         }
 
