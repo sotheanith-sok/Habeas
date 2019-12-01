@@ -222,7 +222,16 @@ public class MaxPriorityQueue
         {
             priorityQueue.Clear();
         }
+
+
+        //prepares the tier to be stored onto disk by sorting according to ascending order of document ID, needed for encoding
+        topDocuments.Sort(delegate(MaxPriorityQueue.InvertedIndex x, MaxPriorityQueue.InvertedIndex y)
+        {
+            return x.GetDocumentId().CompareTo(y.GetDocumentId());
+        });
         return topDocuments;
+
+        
 
     }
 
@@ -263,6 +272,13 @@ public class MaxPriorityQueue
     public void ClearHeap()
     {
         this.priorityQueue.Clear();
+    }
+
+    public int CompareObjectByDocId(MaxPriorityQueue.InvertedIndex x, MaxPriorityQueue.InvertedIndex y)
+    {
+        
+        int retval = x.GetDocumentId().CompareTo(y.GetDocumentId());
+        return retval;
     }
 
 

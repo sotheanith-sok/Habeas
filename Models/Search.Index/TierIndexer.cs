@@ -60,6 +60,8 @@ namespace Search.Index
                 List<MaxPriorityQueue.InvertedIndex> Tier2 = termQueue.RetrieveTier(10);
                 List<MaxPriorityQueue.InvertedIndex> Tier3 = termQueue.GetPriorityQueue();
 
+            
+
 
 
                 //adds the document to its proper tier 
@@ -74,6 +76,8 @@ namespace Search.Index
                 termQueue.ClearHeap();
             }
 
+            
+
             //save the indices to the Disk
             Tier1Hashmap.SaveTier();
             Tier2Hashmap.SaveTier();
@@ -83,7 +87,7 @@ namespace Search.Index
 
         private static void BuildTierIndex(List<MaxPriorityQueue.InvertedIndex> tier, Dictionary<int, List<int>> docIDsAndPostings, string term, DiskPositionalIndex TierHashMap)
         {
-
+            
             foreach (MaxPriorityQueue.InvertedIndex t in tier)
             {
                 int docID = t.GetDocumentId();

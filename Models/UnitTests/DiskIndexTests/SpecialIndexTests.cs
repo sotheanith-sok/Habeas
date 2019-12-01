@@ -34,7 +34,6 @@ namespace UnitTests.DiskIndexTest
 
             //Initialize the index. 
             IIndex index = Indexer.IndexCorpus(corpus);
-
             
 
             //The rest of your code...

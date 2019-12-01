@@ -107,7 +107,8 @@ namespace Search.Index
             kGram.buildKGram(unstemmedVocabulary);
             index.Save();
 
-           TierIndexer.CreateTierIndices(index);
+            
+            TierIndexer.CreateTierIndices(index);
             
             soundEx.Save();
             elapsedTime.Stop();

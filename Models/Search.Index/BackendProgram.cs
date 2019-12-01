@@ -50,9 +50,9 @@ namespace Search.Index
                     Console.WriteLine("Reading the existing on-disk index.");
                     index = new DiskPositionalIndex(pathToIndex);
 
-                    tierIndex1 = new DiskPositionalIndex(pathToIndex +"/TierIndex1/");
-                    tierIndex2 = new DiskPositionalIndex(pathToIndex +"/TierIndex2/");
-                    tierIndex3 = new DiskPositionalIndex(pathToIndex +"/TierIndex3/");
+                    tierIndex1 = new DiskPositionalIndex(pathToIndex + "/TierIndex1/");
+                    tierIndex2 = new DiskPositionalIndex(pathToIndex + "/TierIndex2/");
+                    tierIndex3 = new DiskPositionalIndex(pathToIndex + "/TierIndex3/");
                 }
                 else
                 {
@@ -80,7 +80,7 @@ namespace Search.Index
             {
                 //Generate directory if we need to index corpus.
                 Directory.CreateDirectory(Path.Join(path, "/index/"));
-   
+
 
                 //if the corpus contains content
                 if (corpus != null && corpus.CorpusSize != 0)
@@ -158,61 +158,147 @@ namespace Search.Index
                 //the list of strings to return 
                 List<String> results = new List<string>();
 
+
                 if (mode == false)
                 {
 
-                    
 
-
-                    //parser to parse the query 
                     RankedRetrievalParser parser = new RankedRetrievalParser();
+                    //create a stemming token processor
+                    ITokenProcessor processor = new StemmingTokenProcesor();
+                    //parse the query
+                    List<string> terms = parser.ParseQuery(query);
 
-
-                    List<string> finalTerms = parser.ParseQuery(query);
-
-                    //retrieves the top ten documents of the normalized tokens
-                    RankedRetrieval rv = new RankedRetrieval(corpus, index, RankedRetrievalMode);
-                    // temporarily removed
-                    //IList<MaxPriorityQueue.InvertedIndex> topTenDocs = rv.GetRankedDocuments(index, finalTerms, RankedRetrievalMode);
-
-                    IList<MaxPriorityQueue.InvertedIndex> topTenDocs = rv.GetTopTen(finalTerms);
-                    //get tier 1 which is top 10 percent of documents
-
-                    //get tier 2 which is top 
-
-
-                    // The following 30ish lines have been temporarily removed for the
-                    //purpose of working on Milestone 3
-                    //do not delete this code
-                    // //collect the top ten documents
-                    if (topTenDocs.Count > 0)
+                    //the list of postings
+                    IList<Posting> postings;
+                    Boolean temp = true;
+                    while (temp)
                     {
+
+                        //get the postings
+                        postings = tierIndex1.GetPostings(terms);
                         //add the count of the postings to the list of strings to be returned
-                        results.Add(topTenDocs.Count.ToString());
-
-                        //for each posting...
-                        int numberRank = 1;
-                        foreach (MaxPriorityQueue.InvertedIndex p in topTenDocs)
+                        results.Add(postings.Count.ToString());
+                        Console.WriteLine(postings.Count);
+                        foreach (Posting p in postings)
                         {
-                            //use the document id to access the document
-                            IDocument doc = corpus.GetDocument(p.GetDocumentId());
+                            if (results.Count < 20)
+                            {
+                                //use the document id to access the document
+                                IDocument doc = corpus.GetDocument(p.DocumentId);
+                                results.Add(doc.Title);
+                                results.Add(doc.DocumentId.ToString());
+                            }
+                            else{
+                                temp = false;
+                            }
 
-                            //add the title to the list of strings to be returned
-                            results.Add("#" + numberRank + ": (" + Math.Round(p.GetRank(), 5).ToString() + ") " + doc.Title);
-
-                            //add the document id to the list of strings to be returned 
-                            results.Add(doc.DocumentId.ToString());
-                            Console.WriteLine(p.GetDocumentId() + "" + doc.Title);
-                            numberRank++;
                         }
+                        Console.WriteLine(results.Count);
+
+                        if (results.Count < 20)
+                        {
+                            postings = tierIndex2.GetPostings(terms);
+                            //add the count of the postings to the list of strings to be returned
+                            results.Add(postings.Count.ToString());
+                            foreach (Posting p in postings)
+                            {
+                                if (results.Count < 20)
+                                {
+                                    //use the document id to access the document
+                                    IDocument doc = corpus.GetDocument(p.DocumentId);
+                                    results.Add(doc.Title);
+                                    results.Add(doc.DocumentId.ToString());
+                                }
+                                else
+                                {
+                                    temp = false;
+                                }
+
+                            }
+                        }
+
+                        if (results.Count < 20)
+                        {
+                            postings = tierIndex3.GetPostings(terms);
+                            //add the count of the postings to the list of strings to be returned
+                            results.Add(postings.Count.ToString());
+                            foreach (Posting p in postings)
+                            {
+                                if (results.Count < 20)
+                                {
+                                    //use the document id to access the document
+                                    IDocument doc = corpus.GetDocument(p.DocumentId);
+                                    results.Add(doc.Title);
+                                    results.Add(doc.DocumentId.ToString());
+                                }
+
+                                else
+                                {
+                                    temp = false;
+                                }
+                            }
+                        }
+
+
                     }
-                    //if there aren't any postings...
-                    else
-                    {
-                        //add a zero to the list of strings to be returned
-                        results.Add("0");
-                    }
-                    // end of temporarily removed section
+
+
+                    //DONT DELETE THIS CODE SECTION PLEASE :) --YASHUA 
+
+
+
+                    // //parser to parse the query 
+                    // RankedRetrievalParser parser = new RankedRetrievalParser();
+
+
+                    // List<string> finalTerms = parser.ParseQuery(query);
+
+
+
+                    // //retrieves the top ten documents of the normalized tokens
+                    // RankedRetrieval rv = new RankedRetrieval(corpus, index, RankedRetrievalMode);
+                    // // temporarily removed
+                    // //IList<MaxPriorityQueue.InvertedIndex> topTenDocs = rv.GetRankedDocuments(index, finalTerms, RankedRetrievalMode);
+
+                    // IList<MaxPriorityQueue.InvertedIndex> topTenDocs = rv.GetTopTen(finalTerms);
+                    // //get tier 1 which is top 10 percent of documents
+
+                    // //get tier 2 which is top 
+
+
+                    // // The following 30ish lines have been temporarily removed for the
+                    // //purpose of working on Milestone 3
+                    // //do not delete this code
+                    // // //collect the top ten documents
+                    // if (topTenDocs.Count > 0)
+                    // {
+                    //     //add the count of the postings to the list of strings to be returned
+                    //     results.Add(topTenDocs.Count.ToString());
+
+                    //     //for each posting...
+                    //     int numberRank = 1;
+                    //     foreach (MaxPriorityQueue.InvertedIndex p in topTenDocs)
+                    //     {
+                    //         //use the document id to access the document
+                    //         IDocument doc = corpus.GetDocument(p.GetDocumentId());
+
+                    //         //add the title to the list of strings to be returned
+                    //         results.Add("#" + numberRank + ": (" + Math.Round(p.GetRank(), 5).ToString() + ") " + doc.Title);
+
+                    //         //add the document id to the list of strings to be returned 
+                    //         results.Add(doc.DocumentId.ToString());
+                    //         Console.WriteLine(p.GetDocumentId() + "" + doc.Title);
+                    //         numberRank++;
+                    //     }
+                    // }
+                    // //if there aren't any postings...
+                    // else
+                    // {
+                    //     //add a zero to the list of strings to be returned
+                    //     results.Add("0");
+                    // }
+                    // // end of temporarily removed section
 
 
                     //return the list of strings
