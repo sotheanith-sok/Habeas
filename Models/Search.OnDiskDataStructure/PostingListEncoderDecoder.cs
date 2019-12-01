@@ -43,6 +43,7 @@ namespace Search.OnDiskDataStructure
                 previousDocID = p.DocumentId;
             }
 
+            Console.WriteLine(concat.Find(x=>x<0));
             return VariableBytes.Compress(concat);
         }
 

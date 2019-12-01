@@ -176,7 +176,7 @@ namespace Search.Index
                     {
 
                         //get the postings
-                        postings = tierIndex1.GetPostings(terms);
+                        postings = tierIndex1.GetPositionalPostings(terms);
                         //add the count of the postings to the list of strings to be returned
                         results.Add(postings.Count.ToString());
                         Console.WriteLine(postings.Count);
@@ -198,7 +198,8 @@ namespace Search.Index
 
                         if (results.Count < 20)
                         {
-                            postings = tierIndex2.GetPostings(terms);
+                            postings = tierIndex2.GetPositionalPostings(terms);
+                            Console.WriteLine(postings.Count);
                             //add the count of the postings to the list of strings to be returned
                             results.Add(postings.Count.ToString());
                             foreach (Posting p in postings)
@@ -220,7 +221,8 @@ namespace Search.Index
 
                         if (results.Count < 20)
                         {
-                            postings = tierIndex3.GetPostings(terms);
+                            postings = tierIndex3.GetPositionalPostings(terms);
+                            Console.WriteLine(postings.Count);
                             //add the count of the postings to the list of strings to be returned
                             results.Add(postings.Count.ToString());
                             foreach (Posting p in postings)

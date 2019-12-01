@@ -58,7 +58,7 @@ namespace Search.Index
                 //create 3 lists of docIDs 
                 List<MaxPriorityQueue.InvertedIndex> Tier1 = termQueue.RetrieveTier(1);
                 List<MaxPriorityQueue.InvertedIndex> Tier2 = termQueue.RetrieveTier(10);
-                List<MaxPriorityQueue.InvertedIndex> Tier3 = termQueue.GetPriorityQueue();
+                List<MaxPriorityQueue.InvertedIndex> Tier3 = termQueue.RetrieveTier(100);
 
             
 
