@@ -50,9 +50,11 @@ namespace Search.Index
                     Console.WriteLine("Reading the existing on-disk index.");
                     index = new DiskPositionalIndex(pathToIndex);
 
-                    tierIndex1 = new DiskPositionalIndex(pathToIndex + "/TierIndex1/");
-                    tierIndex2 = new DiskPositionalIndex(pathToIndex + "/TierIndex2/");
-                    tierIndex3 = new DiskPositionalIndex(pathToIndex + "/TierIndex3/");
+                    
+                    tierIndex1 = new DiskPositionalIndex(pathToIndex + "TierIndex1/");
+                    tierIndex2 = new DiskPositionalIndex(pathToIndex + "TierIndex2/");
+                    tierIndex3 = new DiskPositionalIndex(pathToIndex + "TierIndex3/");
+
                 }
                 else
                 {
@@ -87,6 +89,7 @@ namespace Search.Index
                 {
                     //make an index for the corpus
                     index = Indexer.IndexCorpus(corpus);
+
                     // //Write the in-memory index on disk.
                     // DiskIndexWriter diskIndexWriter = new DiskIndexWriter();
 
@@ -161,83 +164,91 @@ namespace Search.Index
 
                 if (mode == false)
                 {
-
+                    Console.WriteLine("In SearchQuery for ranked retrieval");
 
                     RankedRetrievalParser parser = new RankedRetrievalParser();
-                    //create a stemming token processor
-                    ITokenProcessor processor = new StemmingTokenProcesor();
+
                     //parse the query
                     List<string> terms = parser.ParseQuery(query);
 
                     //the list of postings
                     IList<Posting> postings;
+                    postings = tierIndex1.GetPositionalPostings(terms);
+
+                    Console.WriteLine(postings.Count);
+
+                    //add the count of the postings to the list of strings to be returned
+                    results.Add(50.ToString());
+                    int limit = 50;
+                    int counter = 0;
                     Boolean temp = true;
                     while (temp)
                     {
-
+                        
                         //get the postings
                         postings = tierIndex1.GetPositionalPostings(terms);
                         //add the count of the postings to the list of strings to be returned
-                        results.Add(postings.Count.ToString());
-                        Console.WriteLine(postings.Count);
+
                         foreach (Posting p in postings)
                         {
-                            if (results.Count < 20)
+                            
+                            if (counter < limit)
                             {
                                 //use the document id to access the document
                                 IDocument doc = corpus.GetDocument(p.DocumentId);
-                                results.Add(doc.Title);
+                                results.Add(doc.Title + " from Tier 1");
                                 results.Add(doc.DocumentId.ToString());
+                                counter++;
+                              
                             }
-                            else{
+                            else
+                            {
                                 temp = false;
+                                break;
                             }
 
                         }
-                        Console.WriteLine(results.Count);
 
-                        if (results.Count < 20)
+                        if (counter < limit)
                         {
+                            postings.Clear();
                             postings = tierIndex2.GetPositionalPostings(terms);
-                            Console.WriteLine(postings.Count);
-                            //add the count of the postings to the list of strings to be returned
-                            results.Add(postings.Count.ToString());
                             foreach (Posting p in postings)
                             {
-                                if (results.Count < 20)
-                                {
-                                    //use the document id to access the document
-                                    IDocument doc = corpus.GetDocument(p.DocumentId);
-                                    results.Add(doc.Title);
-                                    results.Add(doc.DocumentId.ToString());
-                                }
-                                else
+
+                                //use the document id to access the document
+                                IDocument doc = corpus.GetDocument(p.DocumentId);
+                                results.Add(doc.Title + " from Tier 2");
+                                results.Add(doc.DocumentId.ToString());
+                                counter++;
+                                if (counter > limit)
                                 {
                                     temp = false;
+                                    break;
                                 }
 
                             }
                         }
 
-                        if (results.Count < 20)
+                        if (counter < limit)
                         {
+                            postings.Clear();
                             postings = tierIndex3.GetPositionalPostings(terms);
-                            Console.WriteLine(postings.Count);
-                            //add the count of the postings to the list of strings to be returned
-                            results.Add(postings.Count.ToString());
+
                             foreach (Posting p in postings)
                             {
-                                if (results.Count < 20)
-                                {
-                                    //use the document id to access the document
-                                    IDocument doc = corpus.GetDocument(p.DocumentId);
-                                    results.Add(doc.Title);
-                                    results.Add(doc.DocumentId.ToString());
-                                }
 
-                                else
+                                //use the document id to access the document
+                                IDocument doc = corpus.GetDocument(p.DocumentId);
+                                results.Add(doc.Title + " from Tier 3");
+                                results.Add(doc.DocumentId.ToString());
+                                counter++;
+
+
+                                if (counter > limit)
                                 {
                                     temp = false;
+                                    break;
                                 }
                             }
                         }
@@ -246,7 +257,7 @@ namespace Search.Index
                     }
 
 
-                    //DONT DELETE THIS CODE SECTION PLEASE :) --YASHUA 
+                    //DONT DELETE THE CODE SECTION BELOW PLEASE :) --YASHUA 
 
 
 
@@ -306,9 +317,6 @@ namespace Search.Index
                     //return the list of strings
                     return results;
                 }
-
-
-
                 else
                 {
                     //the list of postings
@@ -354,9 +362,9 @@ namespace Search.Index
             {
                 return new List<string>();
             }
+
             // Console.Write("Corpus size is:");
             // Console.WriteLine(corpus.CorpusSize);
-
         }
 
         /// <summary>

@@ -24,16 +24,20 @@ namespace Search.Index
             MaxPriorityQueue termQueue = new MaxPriorityQueue();
 
             //Generate directory if we need to index corpus.
-            Directory.CreateDirectory(Path.Join(Indexer.path, "/TierIndex1/"));
+            Directory.CreateDirectory(Path.Join(Indexer.path, "TierIndex1/"));
             //Generate directory if we need to index corpus.
-            Directory.CreateDirectory(Path.Join(Indexer.path, "/TierIndex2/"));
+            Directory.CreateDirectory(Path.Join(Indexer.path, "TierIndex2/"));
             //Generate directory if we need to index corpus.
-            Directory.CreateDirectory(Path.Join(Indexer.path, "/TierIndex3/"));
+            Directory.CreateDirectory(Path.Join(Indexer.path, "TierIndex3/"));
 
             //declares the diskpositional indices  
-            DiskPositionalIndex Tier1Hashmap = new DiskPositionalIndex(Indexer.path+"/TierIndex1/");
-            DiskPositionalIndex Tier2Hashmap = new DiskPositionalIndex(Indexer.path+"/TierIndex2/");
-            DiskPositionalIndex Tier3Hashmap = new DiskPositionalIndex(Indexer.path+"/TierIndex3/");
+            DiskPositionalIndex Tier1Hashmap = new DiskPositionalIndex(Indexer.path+"TierIndex1/");
+            Tier1Hashmap.Clear();
+
+            DiskPositionalIndex Tier2Hashmap = new DiskPositionalIndex(Indexer.path+"TierIndex2/");
+            Tier2Hashmap.Clear();
+            DiskPositionalIndex Tier3Hashmap = new DiskPositionalIndex(Indexer.path+"TierIndex3/");
+            Tier3Hashmap.Clear();
 
             //hashmap of docIds and postings used for AddTerm function
             Dictionary<int, List<int>> docIDsAndPostings = new Dictionary<int, List<int>>();

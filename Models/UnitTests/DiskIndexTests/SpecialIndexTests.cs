@@ -34,7 +34,7 @@ namespace UnitTests.DiskIndexTest
 
             //Initialize the index. 
             IIndex index = Indexer.IndexCorpus(corpus);
-            
+
 
             //The rest of your code...
             List<string> terms = new List<string>();
@@ -88,6 +88,61 @@ namespace UnitTests.DiskIndexTest
             actual3[2].GetRank().Should().Be(0.0);
             actual3[3].GetDocumentId().Should().Be(4);
             actual3[3].GetRank().Should().Be(0.0);
+
+        }
+
+        [Fact]
+        public void TestingTierIndex()
+        {
+            //Path to where all the bin file will be write to
+            string pathToIndex = Path.Join(corpusDir, "/index/");
+
+            //Let Indexer know where should it writes all bin files
+            Indexer.path = pathToIndex;
+
+            //Read corpus
+            IDocumentCorpus corpus = DirectoryCorpus.LoadTextDirectory(corpusDir);
+
+            //Load Corpus to Index
+            IIndex tierIndex1 = Indexer.IndexCorpus(corpus);
+
+            //Create new DiskPositional Index from on disk files
+            tierIndex1 = new DiskPositionalIndex(pathToIndex + "TierIndex1");
+
+            //Check Info Of Postings Collected from Tier 1
+
+            //get the postings
+            IList<Posting> postings = new List<Posting> ();
+
+            IList<String> results = new List<string>();
+            
+            //The rest of your code...
+            List<string> terms = new List<string>();
+            terms.Add("hello");
+            terms.Add("world");
+
+
+            postings = tierIndex1.GetPositionalPostings(terms);
+            
+            
+            //add the count of the postings to the list of strings to be returned
+            results.Add(postings.Count.ToString());
+            foreach (Posting p in postings)
+            {
+                if (results.Count < 20)
+                {
+                    //use the document id to access the document
+                    IDocument doc = corpus.GetDocument(p.DocumentId);
+                    results.Add(doc.Title);
+                    results.Add(doc.DocumentId.ToString());
+                }
+            
+            }
+
+            foreach(string s in results)
+            {
+                Console.WriteLine(s);
+            }
 
         }
     }
