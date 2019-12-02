@@ -164,7 +164,6 @@ namespace Search.Index
 
                 if (mode == false)
                 {
-                    Console.WriteLine("In SearchQuery for ranked retrieval");
 
                     RankedRetrievalParser parser = new RankedRetrievalParser();
 
@@ -175,7 +174,7 @@ namespace Search.Index
                     IList<Posting> postings;
                     postings = tierIndex1.GetPositionalPostings(terms);
 
-                    Console.WriteLine(postings.Count);
+            
 
                     //add the count of the postings to the list of strings to be returned
                     results.Add(50.ToString());
