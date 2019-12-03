@@ -56,6 +56,9 @@ namespace Search.OnDiskDataStructure
         /// <param name="value"></param>
         public void Add(TKey key, TValue value)
         {
+            if(this.collection.Exists(x => x.key.Equals(key))){
+                
+            }
             foreach (DBObject<TKey> obj in this.collection.Find(x => x.key.Equals(key)))
             {
                 obj.raw_value = valueED.Encoding(value);
@@ -135,16 +138,23 @@ namespace Search.OnDiskDataStructure
             List<DBObject<TKey>> temp = new List<DBObject<TKey>>();
             foreach (KeyValuePair<TKey, TValue> pair in dictionary)
             {
+                if (pair.Key.Equals("fire"))
+                {
+                    Console.WriteLine("BEFORE DB:" + valueED.Encoding(pair.Value).Length);
+                }
                 temp.Add(new DBObject<TKey>
                 {
                     key = pair.Key,
                     raw_value = valueED.Encoding(pair.Value)
                 });
             }
-            
-            Console.WriteLine(temp.FindLast(x => x.key.Equals("fire")).raw_value.Length);
+
+
             this.collection.InsertBulk(temp);
-            Console.WriteLine(this.collection.FindOne(x => x.key.Equals("fire")).raw_value.Length);
+            foreach (DBObject<TKey> obj in this.collection.Find(x => x.key.Equals("fire")))
+            {
+                Console.WriteLine("FROM DB: " + obj.raw_value.Length);
+            }
         }
 
     }
