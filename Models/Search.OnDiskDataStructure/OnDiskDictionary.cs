@@ -149,10 +149,15 @@ namespace Search.OnDiskDataStructure
                 });
             }
 
-
             this.collection.InsertBulk(temp);
+            Console.WriteLine(temp.Count);
+            Console.WriteLine(this.collection.Count());
+        
             foreach (DBObject<TKey> obj in this.collection.Find(x => x.key.Equals("fire")))
             {
+                Console.WriteLine("From DB" +obj.id);
+                Console.WriteLine(obj.key.Equals("fire"));
+                Console.WriteLine("From DB:"+obj.key);
                 Console.WriteLine("FROM DB: " + obj.raw_value.Length);
             }
         }

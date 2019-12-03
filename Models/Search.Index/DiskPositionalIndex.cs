@@ -300,16 +300,16 @@ namespace Search.Index
             postingMap.Replace(tempPostingMap);
 
 
-            this.WriteDocWeights();
+            //this.WriteDocWeights();
 
-            docWeigthsHashMap.Replace(tempDocWeightsHashMap);
-            termFrequency.Clear();
-            calculatedDocWeights.Clear();
-            docByteSize.Clear();
-            tokensPerDocument.Clear();
-            averageTermFreqPerDoc.Clear();
-            tempPostingMap.Clear();
-            tempDocWeightsHashMap.Clear();
+            //docWeigthsHashMap.Replace(tempDocWeightsHashMap);
+            //termFrequency.Clear();
+            //calculatedDocWeights.Clear();
+            //docByteSize.Clear();
+            //tokensPerDocument.Clear();
+            //averageTermFreqPerDoc.Clear();
+            //tempPostingMap.Clear();
+            //tempDocWeightsHashMap.Clear();
         }
 
         ///<sumary>
