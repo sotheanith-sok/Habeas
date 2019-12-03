@@ -103,9 +103,9 @@ namespace Search.Index
                 stream.Dispose();
 
             }
-            kGram.buildKGram(unstemmedVocabulary);
+            // kGram.buildKGram(unstemmedVocabulary);
             index.Save();
-            soundEx.Save();
+            // soundEx.Save();
             elapsedTime.Stop();
             Console.WriteLine("[Indexer] Done Indexing! Time Elapsed " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
             GC.Collect();
