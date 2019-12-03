@@ -296,18 +296,15 @@ namespace Search.Index
         public void Save()
         {
             postingMap.Replace(tempPostingMap);
-
-
-            //this.WriteDocWeights();
-
-            //docWeigthsHashMap.Replace(tempDocWeightsHashMap);
-            //termFrequency.Clear();
-            //calculatedDocWeights.Clear();
-            //docByteSize.Clear();
-            //tokensPerDocument.Clear();
-            //averageTermFreqPerDoc.Clear();
-            //tempPostingMap.Clear();
-            //tempDocWeightsHashMap.Clear();
+            this.WriteDocWeights();
+            docWeigthsHashMap.Replace(tempDocWeightsHashMap);
+            termFrequency.Clear();
+            calculatedDocWeights.Clear();
+            docByteSize.Clear();
+            tokensPerDocument.Clear();
+            averageTermFreqPerDoc.Clear();
+            tempPostingMap.Clear();
+            tempDocWeightsHashMap.Clear();
         }
 
         public void SaveTier()

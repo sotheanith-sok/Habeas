@@ -77,7 +77,7 @@ namespace Search.OnDiskDataStructure
         /// </summary>
         public void Clear()
         {
-            
+            this.collection.Delete(x => true);
         }
 
         /// <summary>
