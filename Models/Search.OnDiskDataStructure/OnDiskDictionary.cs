@@ -1,9 +1,8 @@
-using CSharpTest.Net.Collections;
-using CSharpTest.Net.Serialization;
 using System.IO;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using LiteDB;
 namespace Search.OnDiskDataStructure
 {
     public class OnDiskDictionary<TKey, TValue> : IOnDiskDictionary<TKey, TValue> where TKey : IComparable
@@ -11,8 +10,10 @@ namespace Search.OnDiskDataStructure
 
         private IEncoderDecoder<TKey> keyED;
         private IEncoderDecoder<TValue> valueED;
-        private BPlusTree<TKey, byte[]> map;
+        private LiteDatabase database;
+        private LiteCollection<DBObject<TKey>> collection;
 
+        private string dictName;
         /// <summary>
         /// Contructor
         /// </summary>
@@ -24,31 +25,15 @@ namespace Search.OnDiskDataStructure
         {
             this.keyED = keyEncoderDecoder;
             this.valueED = valueEncoderDecoder;
-            ISerializer<TKey> tKeySerializer = null;
-            if (typeof(TKey) == typeof(int))
-            {
-                tKeySerializer = (ISerializer<TKey>)(PrimitiveSerializer.Int32);
-
-            }
-            else
-            {
-                tKeySerializer = (ISerializer<TKey>)(PrimitiveSerializer.String);
-
-            }
-
-            BPlusTree<TKey, byte[]>.Options options = new BPlusTree<TKey, byte[]>.Options(tKeySerializer, PrimitiveSerializer.Bytes)
-            {
-                CreateFile = CreatePolicy.IfNeeded,
-                FileName = Path.Join(path, dictName + ".bin")
-            };
-
-            map = new BPlusTree<TKey, byte[]>(options);
+            this.database = new LiteDatabase(Path.Join(path, dictName + ".bin"));
+            this.dictName=dictName;
+            this.collection = this.database.GetCollection<DBObject<TKey>>(dictName);
         }
 
-        ///Release map on distruction of this object
+        ///Release database on distruction of this object
         ~OnDiskDictionary()
         {
-            map.Dispose();
+            this.database.Dispose();
         }
 
         /// <summary>
@@ -58,14 +43,10 @@ namespace Search.OnDiskDataStructure
         /// <returns></returns>
         public TValue Get(TKey key)
         {
-            TValue result;
-            if (map.ContainsKey(key))
+            TValue result = default(TValue);
+            foreach (DBObject<TKey> obj in this.collection.Find(x => x.key.ToString().Equals(key.ToString())))
             {
-                result = valueED.Decoding(map[key]);
-            }
-            else
-            {
-                result = default(TValue);
+                result = valueED.Decoding(obj.raw_value);
             }
             return result;
         }
@@ -77,16 +58,18 @@ namespace Search.OnDiskDataStructure
         /// <param name="value"></param>
         public void Add(TKey key, TValue value)
         {
-            if (map.ContainsKey(key))
+            foreach (DBObject<TKey> obj in this.collection.Find(x => x.key.ToString().Equals(key.ToString())))
             {
-                
-                map[key] = valueED.Encoding(value);
-                
+                obj.raw_value = valueED.Encoding(value);
+                this.collection.Update(obj);
+                return;
             }
-            else
+
+            this.collection.Insert(new DBObject<TKey>
             {
-                map.Add(key, valueED.Encoding(value));
-            }
+                key = key,
+                raw_value = valueED.Encoding(value)
+            });
         }
 
         /// <summary>
@@ -94,7 +77,7 @@ namespace Search.OnDiskDataStructure
         /// </summary>
         public void Clear()
         {
-            map.Clear();
+            this.collection.Delete(x => true);
         }
 
         /// <summary>
@@ -103,12 +86,12 @@ namespace Search.OnDiskDataStructure
         /// <returns></returns>
         public TKey[] GetKeys()
         {
-            List<TKey> result = new List<TKey>();
-            foreach (TKey key in map.Keys)
+            List<TKey> keys = new List<TKey>();
+            foreach (DBObject<TKey> obj in this.collection.Find(x => true))
             {
-                result.Add(key);
+                keys.Add(obj.key);
             }
-            return result.ToArray();
+            return keys.ToArray();
         }
 
         /// <summary>
@@ -118,9 +101,9 @@ namespace Search.OnDiskDataStructure
         public TValue[] GetValues()
         {
             List<TValue> values = new List<TValue>();
-            foreach (byte[] rawValue in map.Values)
+            foreach (DBObject<TKey> obj in this.collection.Find(x => true))
             {
-                values.Add(valueED.Decoding(rawValue));
+                values.Add(valueED.Decoding(obj.raw_value));
             }
             return values.ToArray();
         }
@@ -141,7 +124,7 @@ namespace Search.OnDiskDataStructure
         /// <returns></returns>
         public bool ContainsKey(TKey key)
         {
-            return map.ContainsKey(key);
+            return this.collection.Exists(x => x.key.ToString().Equals(key.ToString()));
         }
 
         /// <summary>
@@ -150,12 +133,27 @@ namespace Search.OnDiskDataStructure
         /// <param name="dictionary"></param>
         public void Replace(Dictionary<TKey, TValue> dictionary)
         {
-            map.Clear();
+            this.Clear();
+            List<DBObject<TKey>> temp = new List<DBObject<TKey>>();
             foreach (KeyValuePair<TKey, TValue> pair in dictionary)
             {
-                this.Add(pair.Key, pair.Value);
+                temp.Add(new DBObject<TKey>
+                {
+                    key = pair.Key,
+                    raw_value = valueED.Encoding(pair.Value)
+                });
             }
+
+            this.collection.InsertBulk(temp);
+
         }
 
+    }
+
+    public class DBObject<T>
+    {
+        public int id { get; set; }
+        public T key { get; set; }
+        public byte[] raw_value { get; set; }
     }
 }

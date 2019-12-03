@@ -294,8 +294,8 @@ namespace Search.Index
         /// </summary>
         public void Save()
         {
-            this.WriteDocWeights();
             postingMap.Replace(tempPostingMap);
+            this.WriteDocWeights();
             docWeigthsHashMap.Replace(tempDocWeightsHashMap);
             termFrequency.Clear();
             calculatedDocWeights.Clear();
