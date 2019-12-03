@@ -32,13 +32,8 @@ namespace Search.Document
         {
             DocumentId = documentId;
             FilePath = absoluteFilePath;
-            FileName = Path.GetFileName(absoluteFilePath);
+            FileName = Path.GetFileName(FilePath);
 
-            StreamReader fileStreamReader = new StreamReader(FileManager.Instance.GetFile(this.FilePath));
-            Document jobject = JsonConvert.DeserializeObject<Document>(fileStreamReader.ReadToEnd());
-            Title = (jobject.title != null) ? jobject.title : "";
-            Author = jobject.author;
-            fileStreamReader.Dispose();
         }
 
         /// <summary>

@@ -28,7 +28,7 @@ namespace Search.Index
         //maintains a hashmap for the document weight for a specific document id
         private OnDiskDictionary<int, PostingDocWeight> docWeigthsHashMap;
 
-        private Dictionary<string,List<Posting>> tempPostingMap;
+        private Dictionary<string, List<Posting>> tempPostingMap;
         private Dictionary<int, PostingDocWeight> tempDocWeightsHashMap;
         private double averageDocLength;
 
@@ -37,7 +37,7 @@ namespace Search.Index
 
         public class PostingDocWeight
         {
-           
+
 
             private double docWeights { get; set; }
             private int docLength { get; set; }
@@ -217,7 +217,7 @@ namespace Search.Index
                 {
                     //Create a posting with (docID & position) to the posting list
                     tempPostingMap[term].Add(new Posting(docID, new List<int> { position }));
-                    
+
                 }
 
             }
@@ -227,7 +227,7 @@ namespace Search.Index
                 //Add term and a posting (docID & position) to the hashmap
                 List<Posting> postingList = new List<Posting>();
                 postingList.Add(new Posting(docID, new List<int> { position }));
-                tempPostingMap.Add(term,postingList);
+                tempPostingMap.Add(term, postingList);
 
             }
 
@@ -371,12 +371,14 @@ namespace Search.Index
             docByteSize.Add(docID, fileSizeInBytes);
         }
 
-        public void Clear(){
+        public void Clear()
+        {
             postingMap.Clear();
             docWeigthsHashMap.Clear();
         }
 
-        public int GetDocumentsCount(){
+        public int GetDocumentsCount()
+        {
             return docWeigthsHashMap.GetSize();
         }
 

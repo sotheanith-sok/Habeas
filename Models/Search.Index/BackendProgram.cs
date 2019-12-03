@@ -164,6 +164,7 @@ namespace Search.Index
 
                 if (mode == false)
                 {
+                    //Code for ranking variant system under BEPRankedRetrievalImplementation.txt
 
                     RankedRetrievalParser parser = new RankedRetrievalParser();
 
@@ -173,8 +174,6 @@ namespace Search.Index
                     //the list of postings
                     IList<Posting> postings;
                     postings = tierIndex1.GetPositionalPostings(terms);
-
-            
 
                     //add the count of the postings to the list of strings to be returned
                     results.Add(50.ToString());
@@ -256,61 +255,7 @@ namespace Search.Index
                     }
 
 
-                    //DONT DELETE THE CODE SECTION BELOW PLEASE :) --YASHUA 
-
-
-
-                    // //parser to parse the query 
-                    // RankedRetrievalParser parser = new RankedRetrievalParser();
-
-
-                    // List<string> finalTerms = parser.ParseQuery(query);
-
-
-
-                    // //retrieves the top ten documents of the normalized tokens
-                    // RankedRetrieval rv = new RankedRetrieval(corpus, index, RankedRetrievalMode);
-                    // // temporarily removed
-                    // //IList<MaxPriorityQueue.InvertedIndex> topTenDocs = rv.GetRankedDocuments(index, finalTerms, RankedRetrievalMode);
-
-                    // IList<MaxPriorityQueue.InvertedIndex> topTenDocs = rv.GetTopTen(finalTerms);
-                    // //get tier 1 which is top 10 percent of documents
-
-                    // //get tier 2 which is top 
-
-
-                    // // The following 30ish lines have been temporarily removed for the
-                    // //purpose of working on Milestone 3
-                    // //do not delete this code
-                    // // //collect the top ten documents
-                    // if (topTenDocs.Count > 0)
-                    // {
-                    //     //add the count of the postings to the list of strings to be returned
-                    //     results.Add(topTenDocs.Count.ToString());
-
-                    //     //for each posting...
-                    //     int numberRank = 1;
-                    //     foreach (MaxPriorityQueue.InvertedIndex p in topTenDocs)
-                    //     {
-                    //         //use the document id to access the document
-                    //         IDocument doc = corpus.GetDocument(p.GetDocumentId());
-
-                    //         //add the title to the list of strings to be returned
-                    //         results.Add("#" + numberRank + ": (" + Math.Round(p.GetRank(), 5).ToString() + ") " + doc.Title);
-
-                    //         //add the document id to the list of strings to be returned 
-                    //         results.Add(doc.DocumentId.ToString());
-                    //         Console.WriteLine(p.GetDocumentId() + "" + doc.Title);
-                    //         numberRank++;
-                    //     }
-                    // }
-                    // //if there aren't any postings...
-                    // else
-                    // {
-                    //     //add a zero to the list of strings to be returned
-                    //     results.Add("0");
-                    // }
-                    // // end of temporarily removed section
+                    
 
 
                     //return the list of strings
@@ -318,6 +263,10 @@ namespace Search.Index
                 }
                 else
                 {
+
+                     Console.WriteLine(query);
+
+
                     //the list of postings
                     IList<Posting> postings;
                     IQueryComponent component;
@@ -327,8 +276,11 @@ namespace Search.Index
                     BooleanQueryParser parser = new BooleanQueryParser();
                     //parse the query
                     component = parser.ParseQuery(query);
+
                     //get the postings
                     postings = component.GetPostings(index, processor);
+
+
                     //if there are any postings...
                     if (postings.Count > 0)
                     {
@@ -344,6 +296,7 @@ namespace Search.Index
                             //add the document id to the list of strings to be returned 
                             results.Add(doc.DocumentId.ToString());
                         }
+                        Console.WriteLine(results.Count);
                     }
                     //if there aren't any postings...
                     else

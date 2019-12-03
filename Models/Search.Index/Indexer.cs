@@ -48,30 +48,38 @@ namespace Search.Index
                 ITokenStream stream = new EnglishTokenStream(doc.GetContent());
 
                 IEnumerable<string> tokens = stream.GetTokens();
-                
+
                 //keeptrack of tokens per document 
-                int tokenCount =0;
+                int tokenCount = 0;
 
                 //keep track of file size 
                 int position = 0;
-             
+
                 foreach (string token in tokens)
                 {
+
                     tokenCount++;
                     //Process token to term
                     List<string> terms = processor.ProcessToken(token);
+
                     //Add term to the index
                     bool termsIsAdded = false;
+
+
                     foreach (string term in terms)
                     {
+
                         if (term.Length > 0)
                         {
                             index.AddTerm(term, doc.DocumentId, position);
+
                             termsIsAdded = true;
                         }
                     }
+
                     //Increase the position num
                     position = termsIsAdded ? position + 1 : position;
+                   
 
                     //Keep track of vocabularies for K-gram
                     foreach (string term in ((NormalTokenProcessor)processor).ProcessToken(token))
@@ -103,14 +111,14 @@ namespace Search.Index
 
             }
 
-            
+
             kGram.buildKGram(unstemmedVocabulary);
             index.Save();
-
-            
-            TierIndexer.CreateTierIndices(index);
-            
             soundEx.Save();
+
+            TierIndexer.CreateTierIndices(index);
+
+
             elapsedTime.Stop();
             Console.WriteLine("[Indexer] Done Indexing! Time Elapsed " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
             GC.Collect();
