@@ -30,6 +30,12 @@ namespace Search.Index
 
 
         private Dictionary<string, List<Posting>> tempPostingMap;
+
+        public Dictionary<string, List<Posting>> getOnMemoryIndex()
+        {
+            return tempPostingMap;
+        }
+
         private Dictionary<int, PostingDocWeight> tempDocWeightsHashMap;
         private double averageDocLength;
 
@@ -38,7 +44,7 @@ namespace Search.Index
 
         public class PostingDocWeight
         {
-           
+
 
             private double docWeights { get; set; }
             private int docLength { get; set; }

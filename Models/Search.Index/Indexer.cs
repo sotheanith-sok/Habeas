@@ -105,10 +105,14 @@ namespace Search.Index
 
             
             kGram.buildKGram(unstemmedVocabulary);
-            index.Save();
-
             
-            TierIndexer.CreateTierIndices(index);
+            //create a function in DPI which returns the in memory index
+            Dictionary<string, List<Posting>> onMemIndex = index.getOnMemoryIndex();
+            //pass in memory index into Create Tier Indexes
+            Console.WriteLine("Creating Tiered Indexes");
+            TierIndexer.CreateTierIndices(onMemIndex);
+            //put save after create tier indexer
+            index.Save();
             
             soundEx.Save();
             elapsedTime.Stop();
