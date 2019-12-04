@@ -23,6 +23,7 @@ namespace Search.OnDiskDataStructure
         /// <param name="valueEncoderDecoder"></param>
         public OnDiskDictionary(string path, string dictName, IEncoderDecoder<TKey> keyEncoderDecoder, IEncoderDecoder<TValue> valueEncoderDecoder)
         {
+            System.IO.Directory.CreateDirectory(path);
             this.keyED = keyEncoderDecoder;
             this.valueED = valueEncoderDecoder;
             this.database = new LiteDatabase(Path.Join(path, dictName + ".bin"));
