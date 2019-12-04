@@ -50,7 +50,7 @@ namespace Search.Index
                     Console.WriteLine("Reading the existing on-disk index.");
                     index = new DiskPositionalIndex(pathToIndex);
 
-                    
+
                     tierIndex1 = new DiskPositionalIndex(pathToIndex + "TierIndex1/");
                     tierIndex2 = new DiskPositionalIndex(pathToIndex + "TierIndex2/");
                     tierIndex3 = new DiskPositionalIndex(pathToIndex + "TierIndex3/");
@@ -173,87 +173,84 @@ namespace Search.Index
                     //the list of postings
                     IList<Posting> postings;
                     postings = tierIndex1.GetPositionalPostings(terms);
+                    Console.WriteLine("got positions");
 
-            
 
-                    //add the count of the postings to the list of strings to be returned
-                    results.Add(50.ToString());
                     int limit = 50;
                     int counter = 0;
-                    Boolean temp = true;
-                    while (temp)
-                    {
-                        
-                        //get the postings
-                        postings = tierIndex1.GetPositionalPostings(terms);
-                        //add the count of the postings to the list of strings to be returned
 
+
+                    //get the postings
+                    postings = tierIndex1.GetPositionalPostings(terms);
+                    //add the count of the postings to the list of strings to be returned
+
+                    foreach (Posting p in postings)
+                    {
+                        if (counter < limit)
+                        {
+                            //use the document id to access the document
+                            IDocument doc = corpus.GetDocument(p.DocumentId);
+
+                            Console.WriteLine("Here's the doc title dude: " + doc.Title);
+                            results.Add(doc.Title + " from Tier 1");
+                            results.Add(doc.DocumentId.ToString());
+                            counter++;
+
+                        }
+                        else
+                        {
+                            break;
+                        }
+
+                    }
+
+                    if (counter < limit)
+                    {
+                        Console.WriteLine("Anyone here?");
+                        postings.Clear();
+                        postings = tierIndex2.GetPositionalPostings(terms);
                         foreach (Posting p in postings)
                         {
-                            
-                            if (counter < limit)
+
+                            //use the document id to access the document
+                            IDocument doc = corpus.GetDocument(p.DocumentId);
+                            Console.WriteLine("Here's the doc title guy: " + doc.Title);
+                            results.Add(doc.Title + " from Tier 2");
+                            results.Add(doc.DocumentId.ToString());
+                            counter++;
+                            if (counter > limit)
                             {
-                                //use the document id to access the document
-                                IDocument doc = corpus.GetDocument(p.DocumentId);
-                                results.Add(doc.Title + " from Tier 1");
-                                results.Add(doc.DocumentId.ToString());
-                                counter++;
-                              
-                            }
-                            else
-                            {
-                                temp = false;
+
                                 break;
                             }
 
                         }
-
-                        if (counter < limit)
-                        {
-                            postings.Clear();
-                            postings = tierIndex2.GetPositionalPostings(terms);
-                            foreach (Posting p in postings)
-                            {
-
-                                //use the document id to access the document
-                                IDocument doc = corpus.GetDocument(p.DocumentId);
-                                results.Add(doc.Title + " from Tier 2");
-                                results.Add(doc.DocumentId.ToString());
-                                counter++;
-                                if (counter > limit)
-                                {
-                                    temp = false;
-                                    break;
-                                }
-
-                            }
-                        }
-
-                        if (counter < limit)
-                        {
-                            postings.Clear();
-                            postings = tierIndex3.GetPositionalPostings(terms);
-
-                            foreach (Posting p in postings)
-                            {
-
-                                //use the document id to access the document
-                                IDocument doc = corpus.GetDocument(p.DocumentId);
-                                results.Add(doc.Title + " from Tier 3");
-                                results.Add(doc.DocumentId.ToString());
-                                counter++;
-
-
-                                if (counter > limit)
-                                {
-                                    temp = false;
-                                    break;
-                                }
-                            }
-                        }
-
-
                     }
+
+                    if (counter < limit)
+                    {
+                        Console.WriteLine("Hello?");
+                        postings.Clear();
+                        postings = tierIndex3.GetPositionalPostings(terms);
+
+                        foreach (Posting p in postings)
+                        {
+
+                            //use the document id to access the document
+                            IDocument doc = corpus.GetDocument(p.DocumentId);
+                            Console.WriteLine("Here's the doc title man: " + doc.Title);
+                            results.Add(doc.Title + " from Tier 3");
+                            results.Add(doc.DocumentId.ToString());
+                            counter++;
+
+
+                            if (counter > limit)
+                            {
+                                break;
+                            }
+                        }
+                    }
+
 
 
                     //DONT DELETE THE CODE SECTION BELOW PLEASE :) --YASHUA 
@@ -314,6 +311,7 @@ namespace Search.Index
 
 
                     //return the list of strings
+                    results.Insert(0, (results.Count/2).ToString());
                     return results;
                 }
                 else
