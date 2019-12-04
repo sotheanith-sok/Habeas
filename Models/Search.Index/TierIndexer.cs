@@ -56,32 +56,46 @@ namespace Search.Index
                 Console.WriteLine("#"+i+". Dealing with vocab term "+ term+ " at: " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
                 //get postings for the term
                 IList<Posting> postings = index[term];
+                Console.WriteLine("Got "+postings.Count+" postings for "+term+ " at: " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
 
                 //for each posting, get the term frequency and docID
                 //to populate the MaxHeap and docId/posting hashmap
                 foreach (Posting p in postings)
                 {
+                    //Console.WriteLine("start: "+elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
                     int tf = p.Positions.Count;
+                    //Console.WriteLine("count "+ tf+" at: "+elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
                     int docID = p.DocumentId;
+                    //Console.WriteLine("ID "+docID+": "+elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
                     docIDsAndPostings.Add(docID, p.Positions);
+                    //Console.WriteLine("Posting Add: "+elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
                     termQueue.MaxHeapInsert(tf, docID);
+                    //Console.WriteLine("Insert Add: "+elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
                 }
+                //ths process s tme consumng
+                Console.WriteLine("Inserted postings for "+term+ " at: " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
 
                 //create 3 lists of docIDs 
                 List<MaxPriorityQueue.InvertedIndex> Tier1 = termQueue.RetrieveTier(1);
                 List<MaxPriorityQueue.InvertedIndex> Tier2 = termQueue.RetrieveTier(10);
                 List<MaxPriorityQueue.InvertedIndex> Tier3 = termQueue.RetrieveTier(100);
+                //
+                Console.WriteLine("Created Lists for "+term+ " at: " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
 
                 //adds the document to its proper tier 
                 TierIndexer.BuildTierIndex(Tier1, docIDsAndPostings, term, Tier1Hashmap);
                 TierIndexer.BuildTierIndex(Tier2, docIDsAndPostings, term, Tier2Hashmap);
                 TierIndexer.BuildTierIndex(Tier3, docIDsAndPostings, term, Tier3Hashmap);
+                Console.WriteLine("Created tier for "+term+ " at: " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
 
                 //clear hashmap of docIDs/postings for later use
                 docIDsAndPostings.Clear();
+                
+                Console.WriteLine("Cleared docsAndPostings for "+term+ " at: " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
 
                 //clear the MaxHeap
                 termQueue.ClearHeap();
+                Console.WriteLine("Cleared Heap for "+term+ " at: " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
             }
 
             
