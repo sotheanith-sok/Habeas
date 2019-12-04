@@ -176,7 +176,7 @@ namespace Search.Index
                     Console.WriteLine("got positions");
 
 
-                    int limit = 50;
+                    int limit = 49;
                     int counter = 0;
 
 
@@ -191,7 +191,6 @@ namespace Search.Index
                             //use the document id to access the document
                             IDocument doc = corpus.GetDocument(p.DocumentId);
 
-                            Console.WriteLine("Here's the doc title dude: " + doc.Title);
                             results.Add(doc.Title + " from Tier 1");
                             results.Add(doc.DocumentId.ToString());
                             counter++;
@@ -206,7 +205,6 @@ namespace Search.Index
 
                     if (counter < limit)
                     {
-                        Console.WriteLine("Anyone here?");
                         postings.Clear();
                         postings = tierIndex2.GetPositionalPostings(terms);
                         foreach (Posting p in postings)
@@ -214,7 +212,6 @@ namespace Search.Index
 
                             //use the document id to access the document
                             IDocument doc = corpus.GetDocument(p.DocumentId);
-                            Console.WriteLine("Here's the doc title guy: " + doc.Title);
                             results.Add(doc.Title + " from Tier 2");
                             results.Add(doc.DocumentId.ToString());
                             counter++;
@@ -229,7 +226,6 @@ namespace Search.Index
 
                     if (counter < limit)
                     {
-                        Console.WriteLine("Hello?");
                         postings.Clear();
                         postings = tierIndex3.GetPositionalPostings(terms);
 
@@ -238,7 +234,6 @@ namespace Search.Index
 
                             //use the document id to access the document
                             IDocument doc = corpus.GetDocument(p.DocumentId);
-                            Console.WriteLine("Here's the doc title man: " + doc.Title);
                             results.Add(doc.Title + " from Tier 3");
                             results.Add(doc.DocumentId.ToString());
                             counter++;
