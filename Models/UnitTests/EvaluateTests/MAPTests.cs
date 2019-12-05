@@ -38,17 +38,41 @@ namespace UnitTests.EvaluateTests
                 new List<int>{10,20},
             };
 
-            mAP.CalculateMAP(result, actual).Should().Be( 0.75F );
+            mAP.CalculateMAP(result, actual).Should().Be(0.75F);
         }
 
 
         [Fact]
         public void TestGetAP()
         {
-            List<int> result = new List<int>{1,2,33,4,55,66,77,8};
-            List<int> actual = new List<int>{1,2,3,4,5,6,7,8};
+            List<int> result = new List<int> { 1, 2, 33, 4, 55, 66, 77, 8 };
+            List<int> actual = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8 };
 
-            mAP.CalculateAP(result, actual).Should().Be( 13/32 );
+            mAP.CalculateAP(result, actual).Should().Be(13 / 32);
+        }
+
+
+        public Stopwatch TestSpeed(string query)
+        {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            SearchRankedRetrieval(query);
+            stopwatch.Stop();
+
+            return stopwatch;
+        }
+
+        public double GetAverageSpeed()
+        {
+            long sum = 0;
+            List<string> queries = ReadStringList(queryFilePath);
+            foreach (string query in queries)
+            {
+                Stopwatch stopwatch = TestSpeed(query);
+                sum += stopwatch.ElapsedMilliseconds;
+            }
+
+            return ((double)sum / queries.Count);
         }
 
     }
