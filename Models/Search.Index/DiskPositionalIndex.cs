@@ -52,7 +52,7 @@ namespace Search.Index
 
         private double averageDocLength;
 
-        private int counter;
+
 
 
         public class PostingDocWeight
@@ -492,6 +492,8 @@ namespace Search.Index
 
         }
 
+
+
         public List<MaxPriorityQueue.InvertedIndex> GetPostingsFromTier(string term, int tierNumber = 1)
         {
             List<MaxPriorityQueue.InvertedIndex> result = new List<MaxPriorityQueue.InvertedIndex>();
@@ -500,7 +502,7 @@ namespace Search.Index
             {
                 case 1:
                     temp = tier1.Get(term);
-                    if(temp == null)
+                    if (temp == null)
                     {
                         return new List<MaxPriorityQueue.InvertedIndex>();
                     }
@@ -517,56 +519,37 @@ namespace Search.Index
                         result.Add(tempInvIndex);
                     }
 
-                    // Console.WriteLine("From Tier 1 -------------------------");
-                    // foreach (MaxPriorityQueue.InvertedIndex i in result)
-                    // {
-                    //     Console.WriteLine(i.GetTuple().Item1);
-                    // }
-
-                    if (result.Count < 50)
-                    {
-                        goto case 2;
-                    }
-                    else
-                    {
-                        return result;
-                    }
-
+                    return result;
 
                 case 2:
 
                     temp = tier2.Get(term);
-                    foreach (var index in temp)
+                    if (temp == null)
                     {
-                        if (result.Count < 50)
-                        {
-                            int tf = index.GetTermFreq();
-                            int id = index.GetDocumentId();
-                            Tuple<int, int> tempTuple = new Tuple<int, int>(id, 2);
-                            MaxPriorityQueue.InvertedIndex tempInvIndex = new MaxPriorityQueue.InvertedIndex(tf, tempTuple);
-                            result.Add(tempInvIndex);
-                        }
+                        return new List<MaxPriorityQueue.InvertedIndex>();
                     }
 
-                    if (result.Count < 50)
+                    foreach (MaxPriorityQueue.InvertedIndex index in temp)
                     {
-                        goto case 3;
-                    }
-                    else
-                    {
-                        // Console.WriteLine("Length of Tier 2: " + temp.Count);
-                        // Console.WriteLine("From Tier 2 -------------------------");
 
-                        // foreach (MaxPriorityQueue.InvertedIndex i in result)
-                        // {
-                        //     Console.WriteLine(i.GetTuple().Item1);
+                        int tf = index.GetTermFreq();
+                        int id = index.GetDocumentId();
+                        Tuple<int, int> tempTuple = new Tuple<int, int>(id, 2);
+                        MaxPriorityQueue.InvertedIndex tempInvIndex = new MaxPriorityQueue.InvertedIndex(tf, tempTuple);
+                        result.Add(tempInvIndex);
 
-                        // }
-                        return result;
                     }
+
+                    return result;
 
                 case 3:
+
                     temp = tier3.Get(term);
+
+                    if (temp == null)
+                    {
+                        return new List<MaxPriorityQueue.InvertedIndex>();
+                    }
                     foreach (var index in temp)
                     {
                         int tf = index.GetTermFreq();
@@ -576,13 +559,6 @@ namespace Search.Index
                         result.Add(tempInvIndex);
                     }
 
-                    // Console.WriteLine("Length of Tier 3: " + temp.Count);
-
-                    // Console.WriteLine("From Tier 3 -------------------------");
-                    // foreach (MaxPriorityQueue.InvertedIndex i in result)
-                    // {
-                    //     Console.WriteLine(i.GetTuple().Item1);
-                    // }
                     return result;
                 default:
                     //an empty posting if the term does not exist.

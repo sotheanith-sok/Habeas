@@ -32,20 +32,39 @@ namespace Metrics.MeanAveragePrecision
             List<List<int>> relevances = ReadIntList(qrelFilePath);
 
             List<List<int>> retrievals = new List<List<int>>();
-             long sum = 0;
+            long sum = 0;
 
+            int tOneSat = 0;
             IList<MaxPriorityQueue.InvertedIndex> topDocs;
             foreach (string query in queries)
             {
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
-                topDocs= BEP.SearchRankedRetrieval(query);
+                topDocs = BEP.SearchRankedRetrieval(query);
                 stopwatch.Stop();
                 sum += stopwatch.ElapsedMilliseconds;
+                int tierOneCount = 0;
+                foreach (MaxPriorityQueue.InvertedIndex item in topDocs)
+                {
+                    if (item.GetTuple().Item2 == 1)
+                    {
+                        tierOneCount++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                if (tierOneCount == 49)
+                {
+                    tOneSat++;
+                }
 
                 retrievals.Add(ConvertRankedResult(topDocs));
             }
 
+            Console.WriteLine("Queries Satisfied by Tier One: " + tOneSat);
             Console.WriteLine((double)sum / queries.Count);
 
             float meanAP = CalculateMAP(retrievals, relevances);
