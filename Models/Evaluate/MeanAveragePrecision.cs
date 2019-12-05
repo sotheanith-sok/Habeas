@@ -50,24 +50,16 @@ namespace Metrics.MeanAveragePrecision
                 topDocs = BEP.SearchRankedRetrieval(query);
                 stopwatch.Stop();
                 totalTime += stopwatch.ElapsedMilliseconds;
-                int tierOneCount = 0;
                 foreach (MaxPriorityQueue.InvertedIndex item in topDocs)
                 {
-                    if (item.GetTuple().Item2 == 1)
+                    if (item.GetTuple().Item2 != 1)
                     {
-                        tierOneCount++;
-                    }
-                    else
-                    {
-                        break;
+                        goto Unsat;
                     }
                 }
 
-                if (tierOneCount == 49)
-                {
-                    tOneSat++;
-                }
-
+                tOneSat++;
+                Unsat:
 
                 retrievals.Add(ConvertRankedResult(topDocs));
             }
