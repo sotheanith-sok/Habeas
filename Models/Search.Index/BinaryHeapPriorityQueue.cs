@@ -36,6 +36,14 @@ public class MaxPriorityQueue
 
         }
 
+        public InvertedIndex(double rank, Tuple<int, int> docTier)
+        {
+            this.rank = rank;
+            this.docTierTuple = docTier;
+
+        }
+
+
 
         public double GetRank()
         {
@@ -64,7 +72,7 @@ public class MaxPriorityQueue
 
     public MaxPriorityQueue()
     {
-        priorityQueue = new List<InvertedIndex>();
+        this.priorityQueue = new List<InvertedIndex>();
     }
 
     /// <summary>
@@ -206,6 +214,30 @@ public class MaxPriorityQueue
         this.priorityQueue = tempQueue;
 
     }
+
+    public void MaxHeapInsert(double value, Tuple<int, int> tuple)
+    {
+        InvertedIndex element = new InvertedIndex(value, tuple);
+
+        //get current state of priority queue
+        List<InvertedIndex> tempQueue = this.priorityQueue;
+
+        //add new element to the list
+        tempQueue.Add(element);
+
+
+        //need to maxheapify through half the elements in the PQ to maintain max heap property
+        for (int i = tempQueue.Count / 2; i >= 0; i--)
+        {
+            MaxHeapify(tempQueue, i);
+        }
+
+        //update current state of the priority queue
+        this.priorityQueue = tempQueue;
+
+    }
+
+
     /// <summary>
     /// extracts from the priority queue the top ten documents
     /// </summary>
@@ -213,6 +245,17 @@ public class MaxPriorityQueue
     public List<InvertedIndex> RetrieveTopTen()
     {
         List<InvertedIndex> priorityQueue = this.priorityQueue;
+
+        // Console.WriteLine("In Retrieve Top Ten for Priority Queue------------------------------------");
+        // foreach (MaxPriorityQueue.InvertedIndex item in priorityQueue)
+        // {
+        //     Console.WriteLine("Document ID: " + item.GetTuple().Item1);
+        //     Console.WriteLine("From Tier: " + item.GetTuple().Item2);
+        // }
+
+
+
+
         List<InvertedIndex> topTen = new List<InvertedIndex>();
 
         while (topTen.Count < 50)
@@ -227,6 +270,13 @@ public class MaxPriorityQueue
                 topTen.Add(max);
             }
         }
+
+        // Console.WriteLine("In Retrieve Top Ten ------------------------------------");
+        // foreach (MaxPriorityQueue.InvertedIndex item in topTen)
+        // {
+        //     Console.WriteLine("Document ID: " + item.GetTuple().Item1);
+        //     Console.WriteLine("From Tier: " + item.GetTuple().Item2);
+        // }
 
         priorityQueue.Clear();
         return topTen;

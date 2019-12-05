@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Search.Document;
+using System;
 
 
 namespace Search.Index
@@ -96,6 +97,7 @@ namespace Search.Index
 
         private MaxPriorityQueue BuildAccumulatorQueue(List<string> query)
         {
+            Dictionary<int, int> id2tier = new Dictionary<int, int>();
             //stores temporary Accumulator value that will be added to the accumulator hashmap
             double docAccumulator;
             //caculate accumulated Value for each relevant document A_{d}
@@ -113,7 +115,12 @@ namespace Search.Index
                 foreach (MaxPriorityQueue.InvertedIndex item in docIDS)
                 {
                     double termFrequency = item.GetTermFreq();
-                    int docID = item.GetDocumentId();
+                    int docID = item.GetTuple().Item1;
+                    int tierID = item.GetTuple().Item2;
+
+
+
+                    id2tier.Add(docID, tierID);
 
 
                     //implements formula for w_{d,t}
@@ -146,7 +153,7 @@ namespace Search.Index
             //Make a new priority queue
             MaxPriorityQueue priorityQueue = new MaxPriorityQueue();
 
-            
+
             //for every key value in the Accumulator divide A_{d} by L_{d}
             foreach (KeyValuePair<int, double> candidate in this.accumulator)
             {
@@ -156,9 +163,19 @@ namespace Search.Index
                 // divide Accumulated Value A_{d} by L_{d} 
                 finalRank = (double)candidate.Value / normalizer;
 
+                int tierValue = id2tier[candidate.Key];
+                Tuple<int, int> tempTuple = new Tuple<int, int>(candidate.Key, tierValue);
+
                 //add to list to perform priority queue on 
-                priorityQueue.MaxHeapInsert(finalRank, candidate.Key);
+                priorityQueue.MaxHeapInsert(finalRank, tempTuple);
             }
+
+            // Console.WriteLine("In BUILD ACCUMULATOR QUEUE ------------------------------------");
+            // foreach (MaxPriorityQueue.InvertedIndex item in priorityQueue.GetPriorityQueue())
+            // {
+            //     Console.WriteLine("Document ID: " + item.GetTuple().Item1);
+            //     Console.WriteLine("From Tier: " + item.GetTuple().Item2);
+            // }
 
             return priorityQueue;
 

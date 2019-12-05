@@ -45,7 +45,7 @@ namespace Search.Index
                 if (doesOnDiskIndexExist)
                 {
                     Console.WriteLine("Reading the existing on-disk index.");
-                    index = new DiskPositionalIndex(pathToIndex);        
+                    index = new DiskPositionalIndex(pathToIndex);
                 }
                 else
                 {
@@ -159,7 +159,10 @@ namespace Search.Index
             //retrieves the top ten documents of the normalized tokens
             RankedRetrieval rv = new RankedRetrieval(corpus, index, RankedRetrievalMode);
 
-            return rv.GetTopTen(finalTerms);
+            IList<MaxPriorityQueue.InvertedIndex> tempFinal = rv.GetTopTen(finalTerms);
+
+
+            return tempFinal;
         }
 
         public IList<Posting> SearchBooleanRetrieval(string query)
@@ -202,6 +205,7 @@ namespace Search.Index
                     IList<MaxPriorityQueue.InvertedIndex> topTenDocs;
                     topTenDocs = SearchRanckedRetrieval(query);
 
+                    
                     //Converts the result for the front end
                     if (topTenDocs.Count > 0)
                     {
@@ -213,20 +217,22 @@ namespace Search.Index
                         foreach (MaxPriorityQueue.InvertedIndex p in topTenDocs)
                         {
                             //use the document id to access the document
-                            IDocument doc = corpus.GetDocument(p.GetDocumentId());
+                            IDocument doc = corpus.GetDocument(p.GetTuple().Item1);
 
                             //add the title to the list of strings to be returned
-                            results.Add("#" + numberRank + ": (" + Math.Round(p.GetRank(), 5).ToString() + ") " + doc.Title);
+                            results.Add("#" + numberRank + ": (" + Math.Round(p.GetRank(), 5).ToString() + ") " + doc.Title + " ----From Tier "+ p.GetTuple().Item2);
 
                             //add the document id to the list of strings to be returned 
                             results.Add(doc.DocumentId.ToString());
-                            Console.WriteLine(p.GetDocumentId() + "" + doc.Title);
+
+
+                            Console.WriteLine(p.GetTuple().Item1 + "" + doc.Title + " from tier " + p.GetTuple().Item2);
                             numberRank++;
                         }
                     }
-                    
+
                     return results;
-                    
+
                 }
                 //Boolean Retrieval
                 else

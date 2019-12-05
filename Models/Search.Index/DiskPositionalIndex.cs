@@ -344,7 +344,7 @@ namespace Search.Index
             this.WriteDocWeights();
             docWeigthsHashMap.Replace(tempDocWeightsHashMap);
             this.CreateTiers();
-            
+
             tier1.Replace(tempTier1);
             tier2.Replace(tempTier2);
             tier3.Replace(tempTier3);
@@ -501,8 +501,25 @@ namespace Search.Index
                 case 1:
                     temp = tier1.Get(term);
 
-                    result.AddRange(temp);
-                    if (result.Count < 20)
+                    Console.WriteLine("In the tier designator");
+                    foreach (var index in temp)
+                    {
+                        Console.WriteLine(index.GetTermFreq());
+                        Console.WriteLine(index.GetDocumentId());
+                        int tf = index.GetTermFreq();
+                        int id = index.GetDocumentId();
+                        Tuple<int, int> tempTuple = new Tuple<int, int>(id, 1);
+                        MaxPriorityQueue.InvertedIndex tempInvIndex = new MaxPriorityQueue.InvertedIndex(tf, tempTuple);
+                        result.Add(tempInvIndex);
+                    }
+
+                    // Console.WriteLine("From Tier 1 -------------------------");
+                    // foreach (MaxPriorityQueue.InvertedIndex i in result)
+                    // {
+                    //     Console.WriteLine(i.GetTuple().Item1);
+                    // }
+
+                    if (result.Count < 50)
                     {
                         goto case 2;
                     }
@@ -515,26 +532,58 @@ namespace Search.Index
                 case 2:
 
                     temp = tier2.Get(term);
-                    result.AddRange(temp);
+                    foreach (var index in temp)
+                    {
+                        if (result.Count < 50)
+                        {
+                            int tf = index.GetTermFreq();
+                            int id = index.GetDocumentId();
+                            Tuple<int, int> tempTuple = new Tuple<int, int>(id, 2);
+                            MaxPriorityQueue.InvertedIndex tempInvIndex = new MaxPriorityQueue.InvertedIndex(tf, tempTuple);
+                            result.Add(tempInvIndex);
+                        }
+                    }
 
-                    if (result.Count < 20)
+                    if (result.Count < 50)
                     {
                         goto case 3;
                     }
                     else
                     {
+                        // Console.WriteLine("Length of Tier 2: " + temp.Count);
+                        // Console.WriteLine("From Tier 2 -------------------------");
+
+                        // foreach (MaxPriorityQueue.InvertedIndex i in result)
+                        // {
+                        //     Console.WriteLine(i.GetTuple().Item1);
+
+                        // }
                         return result;
                     }
 
                 case 3:
                     temp = tier3.Get(term);
-                    result.AddRange(temp);
+                    foreach (var index in temp)
+                    {
+                        int tf = index.GetTermFreq();
+                        int id = index.GetDocumentId();
+                        Tuple<int, int> tempTuple = new Tuple<int, int>(id, 3);
+                        MaxPriorityQueue.InvertedIndex tempInvIndex = new MaxPriorityQueue.InvertedIndex(tf, tempTuple);
+                        result.Add(tempInvIndex);
+                    }
+
+                    // Console.WriteLine("Length of Tier 3: " + temp.Count);
+
+                    // Console.WriteLine("From Tier 3 -------------------------");
+                    // foreach (MaxPriorityQueue.InvertedIndex i in result)
+                    // {
+                    //     Console.WriteLine(i.GetTuple().Item1);
+                    // }
                     return result;
                 default:
                     //an empty posting if the term does not exist.
                     return result;
             }
-
 
         }
 
