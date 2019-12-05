@@ -523,7 +523,7 @@ namespace Search.Index
                     //     Console.WriteLine(i.GetTuple().Item1);
                     // }
 
-                    if (result.Count < 50)
+                    if (result.Count < 20)
                     {
                         goto case 2;
                     }
@@ -538,7 +538,7 @@ namespace Search.Index
                     temp = tier2.Get(term);
                     foreach (var index in temp)
                     {
-                        if (result.Count < 50)
+                        if (result.Count < 20)
                         {
                             int tf = index.GetTermFreq();
                             int id = index.GetDocumentId();
@@ -548,7 +548,7 @@ namespace Search.Index
                         }
                     }
 
-                    if (result.Count < 50)
+                    if (result.Count < 20)
                     {
                         goto case 3;
                     }

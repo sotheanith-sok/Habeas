@@ -258,7 +258,7 @@ public class MaxPriorityQueue
 
         List<InvertedIndex> topTen = new List<InvertedIndex>();
 
-        while (topTen.Count < 50)
+        while (topTen.Count < 20)
         {
             if (priorityQueue.Count == 0)
             {
@@ -289,7 +289,7 @@ public class MaxPriorityQueue
     /// extracts from the priority queue the top documents within a certain percent 
     /// </summary>
     /// <param name="percentOfDocuments"> integer representing percent of documents we need </param>
-    /// <returns>List of (rank, docid) of top 50 documents.</returns>
+    /// <returns>List of (rank, docid) of top 20 documents.</returns>
     public List<InvertedIndex> RetrieveTier(double percentOfDocuments)
     {
         List<InvertedIndex> topDocuments = new List<InvertedIndex>();
