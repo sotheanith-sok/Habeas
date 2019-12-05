@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using Xunit;
-using FluentAssertions;
 using System;
 using System.Linq;
 using Search.Index;
@@ -61,6 +59,7 @@ namespace Metrics.MeanAveragePrecision
                 //Removes leading '0's in the file name
                 fileName = fileName.TrimStart('0');
                 //Removes '.json'
+                fileName = fileName.Substring(0, fileName.IndexOf(".json"));
                 try {
                     list.Add(Int32.Parse(fileName));
                 }
