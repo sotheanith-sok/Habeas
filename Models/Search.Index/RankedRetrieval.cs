@@ -126,7 +126,7 @@ namespace Search.Index
                 }
             }
 
-    
+
             //documentFrequency
             int docFrequency = docIDS.Count;
 

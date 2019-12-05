@@ -28,21 +28,28 @@ namespace Metrics.MeanAveragePrecision
         /// <returns>MAP value</returns>
         public float GetMAP()
         {
+            Console.WriteLine("Evaluation with Cranfield corpus");
             List<string> queries = ReadStringList(queryFilePath);
             List<List<int>> relevances = ReadIntList(qrelFilePath);
+            Console.WriteLine($"on {queries.Count} queries");
 
             List<List<int>> retrievals = new List<List<int>>();
-            long sum = 0;
+
 
             int tOneSat = 0;
+
+            long totalTime = 0;
             IList<MaxPriorityQueue.InvertedIndex> topDocs;
-            foreach (string query in queries)
+            for (int i = 0; i < queries.Count; i++)
             {
+                string query = queries[i];
+                Console.WriteLine("#" + i);
+
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
                 topDocs = BEP.SearchRankedRetrieval(query);
                 stopwatch.Stop();
-                sum += stopwatch.ElapsedMilliseconds;
+                totalTime += stopwatch.ElapsedMilliseconds;
                 int tierOneCount = 0;
                 foreach (MaxPriorityQueue.InvertedIndex item in topDocs)
                 {
@@ -61,13 +68,18 @@ namespace Metrics.MeanAveragePrecision
                     tOneSat++;
                 }
 
+
                 retrievals.Add(ConvertRankedResult(topDocs));
             }
+            totalTime /= 1000;    //miliseconds to seconds
 
-            Console.WriteLine("Queries Satisfied by Tier One: " + tOneSat);
-            Console.WriteLine((double)sum / queries.Count);
+            Console.WriteLine("\nQueries Satisfied by Tier One: " + tOneSat);
+            Console.WriteLine("\nTotal Time: " + totalTime +"s");
+            Console.WriteLine("Mean Response Time: " + totalTime / (double)queries.Count + "s");
+            Console.WriteLine("Throughput: " + (double)queries.Count / totalTime);
 
             float meanAP = CalculateMAP(retrievals, relevances);
+            Console.WriteLine("Mean Average Precision: " + meanAP);
             return meanAP;
         }
 
@@ -82,12 +94,15 @@ namespace Metrics.MeanAveragePrecision
 
             foreach (var p in topDocs)
             {
-                int docId = p.GetDocumentId();
+                //TODO: Clarify the name later!
+                int docId = p.GetTuple().Item1;
+
                 IDocument doc = BackendProgram.corpus.GetDocument(docId);
                 string fileName = ((IFileDocument)doc).FileName;
                 //Removes leading '0's in the file name
                 fileName = fileName.TrimStart('0');
                 //Removes '.json'
+                fileName = fileName.Substring(0, fileName.IndexOf(".json"));
                 try
                 {
                     list.Add(Int32.Parse(fileName));
@@ -160,7 +175,7 @@ namespace Metrics.MeanAveragePrecision
             }
 
             queryFile.Close();
-            System.Console.WriteLine("There were {0} lines.", counter);
+            // System.Console.WriteLine("There were {0} lines.", counter);
             return s;
         }
 
@@ -184,7 +199,7 @@ namespace Metrics.MeanAveragePrecision
             }
 
             queryFile.Close();
-            System.Console.WriteLine("There were {0} lines.", counter);
+            // System.Console.WriteLine("There were {0} lines.", counter);
             return listOfRelevanceResults;
         }
 
