@@ -34,18 +34,20 @@ namespace UnitTests.EvaluateTests
                 new List<int>{10,20},
             };
 
-            mAP.CalculateMAP(result, actual).Should().Be( 0.75F );
+            mAP.CalculateMAP(result, actual).Should().Be(0.75F);
         }
 
 
         [Fact]
         public void TestCalculateAP()
         {
-            List<int> result = new List<int>{1,2,33,4,55,66,77,8};
-            List<int> actual = new List<int>{1,2,3,4,5,6,7,8};
+            List<int> result = new List<int> { 1, 2, 33, 4, 55, 66, 77, 8 };
+            List<int> actual = new List<int> { 1, 2, 3, 4, 5, 6, 7, 8 };
 
-            mAP.CalculateAP(result, actual).Should().Be( 13/32 );
+            mAP.CalculateAP(result, actual).Should().Be(13 / 32);
         }
+
+
 
     }
 }
