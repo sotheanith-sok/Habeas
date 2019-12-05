@@ -44,6 +44,8 @@ namespace Search.Document
         {
             StreamReader fileStreamReader = new StreamReader(FileManager.Instance.GetFile(this.FilePath));
             Document jobject = JsonConvert.DeserializeObject<Document>(fileStreamReader.ReadToEnd());
+            this.Title = jobject.title;
+            this.Author = jobject.author;
             var content = (jobject.body != null) ? jobject.body : "";
             fileStreamReader.Dispose();
             return new StringReader(content);

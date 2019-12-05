@@ -44,6 +44,9 @@ namespace Search.Index
         /// </summary>
         IReadOnlyList<string> GetVocabulary();
 
+
+        List<MaxPriorityQueue.InvertedIndex> GetPostingsFromTier(string term, int tierNumber = 1);
+
         //List<int> GetDocWeightsIds();
 
         //int GetDocumentsCount();

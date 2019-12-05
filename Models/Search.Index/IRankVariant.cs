@@ -14,7 +14,7 @@ namespace Search.Index
         double calculateQuery2TermWeight(int docFrequency, int corpusSize);
        
 
-        double calculateDoc2TermWeight(int termFrequency, int docID, int corpusSize, IIndex index);
+        double calculateDoc2TermWeight(double termFrequency, int docID, int corpusSize, IIndex index);
 
         double GetDocumentWeight(int docID, IIndex index);
         

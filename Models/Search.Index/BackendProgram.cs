@@ -13,10 +13,7 @@ namespace Search.Index
     {
         private IIndex index; //currently set-up to use on-disk index
 
-        private IIndex tierIndex1;
-        private IIndex tierIndex2;
-        private IIndex tierIndex3;
-        private IDocumentCorpus corpus;
+        public static IDocumentCorpus corpus;
 
         //mode indicates if the search engine is in boolean mode or ranked retrieval mode
         //if mode is true, the search engine is in boolean mode
@@ -48,13 +45,7 @@ namespace Search.Index
                 if (doesOnDiskIndexExist)
                 {
                     Console.WriteLine("Reading the existing on-disk index.");
-                    index = new DiskPositionalIndex(pathToIndex);
-
-                    
-                    tierIndex1 = new DiskPositionalIndex(pathToIndex + "TierIndex1/");
-                    tierIndex2 = new DiskPositionalIndex(pathToIndex + "TierIndex2/");
-                    tierIndex3 = new DiskPositionalIndex(pathToIndex + "TierIndex3/");
-
+                    index = new DiskPositionalIndex(pathToIndex);        
                 }
                 else
                 {
@@ -164,107 +155,51 @@ namespace Search.Index
 
                 if (mode == false)
                 {
-                    //Code for ranking variant system under BEPRankedRetrievalImplementation.txt
+                    Console.WriteLine("In Ranked Retrieval");
+                    Console.WriteLine("Query:" + query);
 
+                    //parser to parse the query 
                     RankedRetrievalParser parser = new RankedRetrievalParser();
+
+                    List<string> finalTerms = parser.ParseQuery(query);
+
+                    //retrieves the top ten documents of the normalized tokens
+                    RankedRetrieval rv = new RankedRetrieval(corpus, index, RankedRetrievalMode);
+
+                    IList<MaxPriorityQueue.InvertedIndex> topTenDocs = rv.GetTopTen(finalTerms);
 
                     //parse the query
                     List<string> terms = parser.ParseQuery(query);
 
-                    //the list of postings
-                    IList<Posting> postings;
-                    postings = tierIndex1.GetPositionalPostings(terms);
-
-                    //add the count of the postings to the list of strings to be returned
-                    results.Add(50.ToString());
-                    int limit = 50;
-                    int counter = 0;
-                    Boolean temp = true;
-                    while (temp)
+                    if (topTenDocs.Count > 0)
                     {
-                        
-                        //get the postings
-                        postings = tierIndex1.GetPositionalPostings(terms);
                         //add the count of the postings to the list of strings to be returned
+                        results.Add(topTenDocs.Count.ToString());
 
-                        foreach (Posting p in postings)
+                        //for each posting...
+                        int numberRank = 1;
+                        foreach (MaxPriorityQueue.InvertedIndex p in topTenDocs)
                         {
-                            
-                            if (counter < limit)
-                            {
-                                //use the document id to access the document
-                                IDocument doc = corpus.GetDocument(p.DocumentId);
-                                results.Add(doc.Title + " from Tier 1");
-                                results.Add(doc.DocumentId.ToString());
-                                counter++;
-                              
-                            }
-                            else
-                            {
-                                temp = false;
-                                break;
-                            }
+                            //use the document id to access the document
+                            IDocument doc = corpus.GetDocument(p.GetDocumentId());
 
+                            //add the title to the list of strings to be returned
+                            results.Add("#" + numberRank + ": (" + Math.Round(p.GetRank(), 5).ToString() + ") " + doc.Title);
+
+                            //add the document id to the list of strings to be returned 
+                            results.Add(doc.DocumentId.ToString());
+                            Console.WriteLine(p.GetDocumentId() + "" + doc.Title);
+                            numberRank++;
                         }
-
-                        if (counter < limit)
-                        {
-                            postings.Clear();
-                            postings = tierIndex2.GetPositionalPostings(terms);
-                            foreach (Posting p in postings)
-                            {
-
-                                //use the document id to access the document
-                                IDocument doc = corpus.GetDocument(p.DocumentId);
-                                results.Add(doc.Title + " from Tier 2");
-                                results.Add(doc.DocumentId.ToString());
-                                counter++;
-                                if (counter > limit)
-                                {
-                                    temp = false;
-                                    break;
-                                }
-
-                            }
-                        }
-
-                        if (counter < limit)
-                        {
-                            postings.Clear();
-                            postings = tierIndex3.GetPositionalPostings(terms);
-
-                            foreach (Posting p in postings)
-                            {
-
-                                //use the document id to access the document
-                                IDocument doc = corpus.GetDocument(p.DocumentId);
-                                results.Add(doc.Title + " from Tier 3");
-                                results.Add(doc.DocumentId.ToString());
-                                counter++;
-
-
-                                if (counter > limit)
-                                {
-                                    temp = false;
-                                    break;
-                                }
-                            }
-                        }
-
-
                     }
 
-
-                    
-
-
-                    //return the list of strings
                     return results;
                 }
+                // end of ranked retrieval segment (if statement)
                 else
                 {
 
-                     Console.WriteLine(query);
+                    Console.WriteLine(query);
 
 
                     //the list of postings

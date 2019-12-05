@@ -18,6 +18,7 @@ namespace Search.Index
         public static double averageDocLength;
 
 
+
         /// <summary>
         /// Constructs an index from a corpus of documents
         /// </summary>
@@ -79,7 +80,7 @@ namespace Search.Index
 
                     //Increase the position num
                     position = termsIsAdded ? position + 1 : position;
-                   
+
 
                     //Keep track of vocabularies for K-gram
                     foreach (string term in ((NormalTokenProcessor)processor).ProcessToken(token))
@@ -115,9 +116,6 @@ namespace Search.Index
             kGram.buildKGram(unstemmedVocabulary);
             index.Save();
             soundEx.Save();
-
-            TierIndexer.CreateTierIndices(index);
-
 
             elapsedTime.Stop();
             Console.WriteLine("[Indexer] Done Indexing! Time Elapsed " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));

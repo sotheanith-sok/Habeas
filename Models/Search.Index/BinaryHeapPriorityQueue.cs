@@ -12,20 +12,35 @@ public class MaxPriorityQueue
         private double rank;
         private int docID;
 
+        private int termFreq;
+
         public InvertedIndex(double rank, int docID)
         {
             this.rank = rank;
             this.docID = docID;
         }
 
+        public InvertedIndex(int termFreq, int docID)
+        {
+            this.termFreq = termFreq;
+            this.docID = docID;
+        }
+
         public double GetRank()
         {
-            return rank;
+            return this.rank;
         }
         public int GetDocumentId()
         {
-            return docID;
+            return this.docID;
         }
+
+        public int GetTermFreq()
+        {
+            return this.termFreq;
+        }
+
+
     }
 
     private List<InvertedIndex> priorityQueue;
@@ -153,6 +168,28 @@ public class MaxPriorityQueue
 
     }
 
+
+
+    public void MaxHeapInsert(int value, int docId)
+    {
+        InvertedIndex element = new InvertedIndex(value, docId);
+
+        //get current state of priority queue
+        List<InvertedIndex> tempQueue = this.priorityQueue;
+
+        //add new element to the list
+        tempQueue.Add(element);
+
+        //need to maxheapify through half the elements in the PQ to maintain max heap property
+        for (int i = tempQueue.Count / 2; i >= 0; i--)
+        {
+            MaxHeapify(tempQueue, i);
+        }
+
+        //update current state of the priority queue
+        this.priorityQueue = tempQueue;
+
+    }
     /// <summary>
     /// extracts from the priority queue the top ten documents
     /// </summary>

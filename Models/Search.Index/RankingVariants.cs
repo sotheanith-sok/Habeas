@@ -10,7 +10,7 @@ namespace Search.Index
             return Math.Log(1 + (double)corpusSize / docFrequency);
         }
 
-        public double calculateDoc2TermWeight(int termFrequency, int docID, int corpusSize, IIndex index)
+        public double calculateDoc2TermWeight(double termFrequency, int docID, int corpusSize, IIndex index)
         {
             return (double)(1 + Math.Log(termFrequency));
         }
@@ -30,7 +30,7 @@ namespace Search.Index
         {
             return Math.Log((double)corpusSize / docFrequency);
         }
-        public double calculateDoc2TermWeight(int termFrequency, int docID, int corpusSize, IIndex index)
+        public double calculateDoc2TermWeight(double termFrequency, int docID, int corpusSize, IIndex index)
         {
             return termFrequency;
         }
@@ -58,7 +58,7 @@ namespace Search.Index
             else
                 return OkapiWqtValue;
         }
-        public double calculateDoc2TermWeight(int termFrequency, int docID, int corpusSize, IIndex index)
+        public double calculateDoc2TermWeight(double termFrequency, int docID, int corpusSize, IIndex index)
         {
 
             DiskPositionalIndex.PostingDocWeight temp = index.GetPostingDocWeight(docID);
@@ -94,11 +94,12 @@ namespace Search.Index
                 return 0.0;
         }
 
-        public double calculateDoc2TermWeight(int termFrequency, int docID, int corpusSize, IIndex index)
+        public double calculateDoc2TermWeight(double termFrequency, int docID, int corpusSize, IIndex index)
         {
 
             DiskPositionalIndex.PostingDocWeight temp = index.GetPostingDocWeight(docID);
 
+            
             double avDocTermFreq = temp.GetDocAveTermFreq();
             double numeratorW = (double)1 + Math.Log(termFrequency);
             double denominatorW = (double)1 + Math.Log(avDocTermFreq);

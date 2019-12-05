@@ -12,16 +12,17 @@ namespace Search.Index
 {
     public class TierIndexer
     {
+
+        public static int counter = 0;
         //Given an in memory index and a path
         //Generates the three indices for the tiered index
-        public static void CreateTierIndices(DiskPositionalIndex index)
+        public static void CreateTierIndices(Dictionary<string, List<Posting>> tempPostingMap)
         {
-            //Collects the vocabulary of the on memory index
-            IReadOnlyList<string> vocab = index.GetVocabulary();
+            Console.WriteLine("[Tier Indexer]: Creating Tier Indices");
 
-            //creates a priority queue for the purposes
-            //of ordering the documents in terms of how frequently the doc contains the term
-            MaxPriorityQueue termQueue = new MaxPriorityQueue();
+            List<Posting> termPostings;
+            List<string> vocab = tempPostingMap.Keys.ToList();
+            
 
             //Generate directory if we need to index corpus.
             Directory.CreateDirectory(Path.Join(Indexer.path, "TierIndex1/"));
@@ -31,76 +32,140 @@ namespace Search.Index
             Directory.CreateDirectory(Path.Join(Indexer.path, "TierIndex3/"));
 
             //declares the diskpositional indices  
-            DiskPositionalIndex Tier1Hashmap = new DiskPositionalIndex(Indexer.path+"TierIndex1/");
+            DiskPositionalIndex Tier1Hashmap = new DiskPositionalIndex(Indexer.path + "TierIndex1/");
             Tier1Hashmap.Clear();
-
-            DiskPositionalIndex Tier2Hashmap = new DiskPositionalIndex(Indexer.path+"TierIndex2/");
+            DiskPositionalIndex Tier2Hashmap = new DiskPositionalIndex(Indexer.path + "TierIndex2/");
             Tier2Hashmap.Clear();
-            DiskPositionalIndex Tier3Hashmap = new DiskPositionalIndex(Indexer.path+"TierIndex3/");
+            DiskPositionalIndex Tier3Hashmap = new DiskPositionalIndex(Indexer.path + "TierIndex3/");
             Tier3Hashmap.Clear();
 
-            //hashmap of docIds and postings used for AddTerm function
-            Dictionary<int, List<int>> docIDsAndPostings = new Dictionary<int, List<int>>();
 
+            //Creates three postings list to each term and a posting list.
+            List<Posting> Tier1Postings = new List<Posting>();
+            List<Posting> Tier2Postings = new List<Posting>();
+            List<Posting> Tier3Postings = new List<Posting>();
+
+            int termPostingLength = new int();
             //this foreach loop constructs the 3 indices
             //for each word in the vocab...
             foreach (string term in vocab)
             {
-                //get postings for the term
-                IList<Posting> postings = index.GetPositionalPostings(term);
 
-                //for each posting, get the term frequency and docID
-                //to populate the MaxHeap and docId/posting hashmap
-                foreach (Posting p in postings)
+                //get postings for the term
+                termPostings = tempPostingMap[term];
+
+                //check the size of the posting list 
+                termPostingLength = termPostings.Count;
+
+                //sort this.termPostings according to highest term frequency
+                termPostings.Sort(
+                    delegate (Posting post1, Posting post2)
+                    {
+                        return post2.Positions.Count.CompareTo(post1.Positions.Count);
+                    }
+                );
+
+                Tier1Postings = RetrieveTopPercent(1, term, termPostingLength, termPostings);
+                Tier1Postings.Sort(
+                    delegate (Posting post1, Posting post2)
+                    {
+                        return post1.DocumentId.CompareTo(post2.DocumentId);
+                    });
+                if (termPostings.Count > 0)
                 {
-                    int tf = p.Positions.Count;
-                    int docID = p.DocumentId;
-                    docIDsAndPostings.Add(docID, p.Positions);
-                    termQueue.MaxHeapInsert(tf, docID);
+                    Tier2Postings = RetrieveTopPercent(10, term, termPostingLength, termPostings);
+                    Tier2Postings.Sort(
+                    delegate (Posting post1, Posting post2)
+                    {
+                        return post1.DocumentId.CompareTo(post2.DocumentId);
+                    });
                 }
 
-                //create 3 lists of docIDs 
-                List<MaxPriorityQueue.InvertedIndex> Tier1 = termQueue.RetrieveTier(1);
-                List<MaxPriorityQueue.InvertedIndex> Tier2 = termQueue.RetrieveTier(10);
-                List<MaxPriorityQueue.InvertedIndex> Tier3 = termQueue.RetrieveTier(100);
-
-            
-
-
-
-                //adds the document to its proper tier 
-                TierIndexer.BuildTierIndex(Tier1, docIDsAndPostings, term, Tier1Hashmap);
-                TierIndexer.BuildTierIndex(Tier2, docIDsAndPostings, term, Tier2Hashmap);
-                TierIndexer.BuildTierIndex(Tier3, docIDsAndPostings, term, Tier3Hashmap);
-
-                //clear hashmap of docIDs/postings for later use
-                docIDsAndPostings.Clear();
-
-                //clear the MaxHeap
-                termQueue.ClearHeap();
+                if (termPostings.Count > 0)
+                {
+                    Tier3Postings.AddRange(termPostings);
+                    Tier3Postings.Sort(
+                   delegate (Posting post1, Posting post2)
+                   {
+                       return post1.DocumentId.CompareTo(post2.DocumentId);
+                   });
+                }
+                //Add terms to temporary posting map in DiskPositionalIndex
+                Tier1Hashmap.SetTempPostingMap(term, Tier1Postings);
+                if (termPostings.Count > 0)
+                {
+                    Tier2Hashmap.SetTempPostingMap(term, Tier2Postings);
+                }
+                if (termPostings.Count > 0)
+                {
+                    Tier3Hashmap.SetTempPostingMap(term, Tier3Postings);
+                }
+                TierIndexer.counter =0;
             }
 
-            
+
 
             //save the indices to the Disk
             Tier1Hashmap.SaveTier();
+
             Tier2Hashmap.SaveTier();
             Tier3Hashmap.SaveTier();
 
-        }
 
-        private static void BuildTierIndex(List<MaxPriorityQueue.InvertedIndex> tier, Dictionary<int, List<int>> docIDsAndPostings, string term, DiskPositionalIndex TierHashMap)
+
+            //Clear Postings
+            Tier1Postings.Clear();
+            Tier2Postings.Clear();
+            Tier3Postings.Clear();
+            Console.WriteLine(vocab.Count);
+            Console.WriteLine("[Tier Indexer] Finished Creating Tier Indices");
+        } //end Create Tier Method
+
+
+        public static List<Posting> RetrieveTopPercent(double percentOfDocuments, string term, int termPostingsLength, List<Posting> termPostings)
         {
-            
-            foreach (MaxPriorityQueue.InvertedIndex t in tier)
+
+
+            //temproary variable for a posting
+            Posting posting;
+            List<Posting> tempPosting = new List<Posting>();
+
+            //calculate the limit for each tier
+            double limit = Math.Floor((percentOfDocuments * termPostingsLength) / 100);
+
+            //if posting size is small then just fit into tier 1... most likely we are dealing with a small corpus?
+            if (limit <= 1)
             {
-                int docID = t.GetDocumentId();
-                List<int> positionList = docIDsAndPostings[docID];
-                foreach (int p in positionList)
+                tempPosting.AddRange(termPostings);
+                termPostings.Clear();
+
+                return tempPosting;
+            }
+            else
+            {
+                while (tempPosting.Count < limit)
                 {
-                    TierHashMap.AddTerm(term, docID, p);
+                    if (termPostings.Count == 0)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        posting = termPostings[TierIndexer.counter];
+                        TierIndexer.counter = TierIndexer.counter+1;
+                        Console.WriteLine(TierIndexer.counter);
+                        tempPosting.Add(posting);
+                        //termPostings.Remove(posting);
+                    }
                 }
             }
-        }
-    }
-}
+            Console.WriteLine(TierIndexer.counter = TierIndexer.counter + 1);
+
+            return tempPosting;
+
+
+        }//end RetriveTopPErcent
+
+    }// end Tier Indexer Class
+
+}//end namepsace

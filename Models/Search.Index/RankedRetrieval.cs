@@ -108,40 +108,39 @@ namespace Search.Index
             foreach (string term in query)
             {
                 //posting list of a term grabbed from the On Disk file
-                IList<Posting> postings = index.GetPostings(term);
+                List<MaxPriorityQueue.InvertedIndex> docIDS = this.index.GetPostingsFromTier(term);
 
+                //documentFrequency
+                int docFrequency = docIDS.Count;
 
-                if (postings != default(List<Posting>))
+                //implements formula for w_{q,t}
+                this.query2termWeight = this.rankVariant.calculateQuery2TermWeight(docFrequency, this.corpusSize);
+
+                foreach (MaxPriorityQueue.InvertedIndex item in docIDS)
                 {
-                    int docFrequency = postings.Count;
+                    double termFrequency = item.GetTermFreq();
+                    int docID = item.GetDocumentId();
 
-                    //implements formula for w_{q,t}
-                    this.query2termWeight = this.rankVariant.calculateQuery2TermWeight(docFrequency, this.corpusSize);
 
-                    foreach (Posting post in postings)
+                    //implements formula for w_{d,t}
+                    this.doc2termWeight = this.rankVariant.calculateDoc2TermWeight(termFrequency, docID, this.corpusSize, this.index);
+
+                    //the A_{d} value for a specific term in that document
+                    docAccumulator = this.query2termWeight * this.doc2termWeight;
+
+                    //if the A_{d} value exists on the hashmap increase its value else create a new key-value pair
+                    if (accumulator.ContainsKey(docID))
                     {
-                        int termFrequency = post.Positions.Count;
-
-
-                        //implements formula for w_{d,t}
-                        this.doc2termWeight = this.rankVariant.calculateDoc2TermWeight(termFrequency, post.DocumentId, this.corpusSize, this.index);
-
-                        //the A_{d} value for a specific term in that document
-                        docAccumulator = this.query2termWeight * this.doc2termWeight;
-
-                        //if the A_{d} value exists on the hashmap increase its value else create a new key-value pair
-                        if (accumulator.ContainsKey(post.DocumentId))
-                        {
-                            this.accumulator[post.DocumentId] += docAccumulator;
-                        }
-                        else
-                        {
-                            this.accumulator.Add(post.DocumentId, docAccumulator);
-                        }
+                        this.accumulator[docID] += docAccumulator;
+                    }
+                    else
+                    {
+                        this.accumulator.Add(docID, docAccumulator);
                     }
                 }
+
             }
-        }
+        } // end of BuildAccumulator(List<String> query)
 
         /// <summary>
         /// Creates a new priority queue by inserting the rank of the document and document id 
@@ -172,6 +171,23 @@ namespace Search.Index
             }
 
             return priorityQueue;
+
+        } // end of BuildPriorityQueuer();
+
+
+        public IList<MaxPriorityQueue.InvertedIndex> GetTopFifty(List<string> query)
+        {
+
+            //Build the Accumulator Hashmap
+            BuildAccumulator(query);
+
+            //Build Priority Queue using the Accumulator divided by L_{d}  
+            MaxPriorityQueue priorityQueue = BuildPriorityQueue();
+
+            accumulator.Clear();
+
+            //Retrieve Top Ten Documents according to percent
+            return priorityQueue.RetrieveTopTen();
 
         }
     }
