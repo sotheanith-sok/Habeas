@@ -25,15 +25,43 @@ namespace Search.Document
         /// </summary>
         public string FilePath { get; }
         public string FileName { get; }
-        public string Title { get; set; }
-        public string Author { get; set; }
+        private string _Title;
+        public string Title
+        {
+            get
+            {
+                if (this._Title==default(string)){
+                    this.Deserialize();
+                }
+                return this._Title;
+            }
+            set
+            {
+                this._Title = value;
+            }
+        }
+
+        private string _Author;
+        public string Author
+        {
+            get
+            {
+                if (this._Author==default(string)){
+                    this.Deserialize();
+                }
+                return this._Author;
+            }
+            set
+            {
+                this._Author = value;
+            }
+        }
 
         public JsonFileDocument(int documentId, string absoluteFilePath)
         {
             DocumentId = documentId;
             FilePath = absoluteFilePath;
-            FileName = Path.GetFileName(FilePath);
-
+            FileName = Path.GetFileName(absoluteFilePath);
         }
 
         /// <summary>
@@ -60,6 +88,15 @@ namespace Search.Document
         public static JsonFileDocument CreateJsonFileDocument(string absoluteFilePath, int documentId)
         {
             return new JsonFileDocument(documentId, absoluteFilePath);
+        }
+
+        public void Deserialize()
+        {
+            StreamReader fileStreamReader = new StreamReader(FileManager.Instance.GetFile(this.FilePath));
+            Document jobject = JsonConvert.DeserializeObject<Document>(fileStreamReader.ReadToEnd());
+            Title = (jobject.title != null) ? jobject.title : "";
+            Author = jobject.author;
+            fileStreamReader.Dispose();
         }
 
     }

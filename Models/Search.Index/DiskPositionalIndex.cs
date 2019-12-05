@@ -30,6 +30,12 @@ namespace Search.Index
         private OnDiskDictionary<int, PostingDocWeight> docWeigthsHashMap;
 
         private Dictionary<string, List<Posting>> tempPostingMap;
+
+        public Dictionary<string, List<Posting>> getOnMemoryIndex()
+        {
+            return tempPostingMap;
+        }
+
         private Dictionary<int, PostingDocWeight> tempDocWeightsHashMap;
 
 
