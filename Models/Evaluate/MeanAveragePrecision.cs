@@ -45,11 +45,12 @@ namespace Metrics.MeanAveragePrecision
 
                 retrievals.Add(ConvertRankedResult(topDocs));
             }
-
-            Console.WriteLine((double)sum / queries.Count);
+            sum /= 1000;    //miliseconds to seconds
+            Console.WriteLine("Mean Response Time: " + sum / (double)queries.Count + "s");
+            Console.WriteLine("Throughput: " + (double)queries.Count / sum);
 
             float meanAP = CalculateMAP(retrievals, relevances);
-            Console.WriteLine("MAP: " + meanAP);
+            Console.WriteLine("Mean Average Precision: " + meanAP);
             return meanAP;
         }
 
@@ -64,12 +65,15 @@ namespace Metrics.MeanAveragePrecision
 
             foreach (var p in topDocs)
             {
-                int docId = p.GetDocumentId();
+                //TODO: Clarify the name later!
+                int docId = p.GetTuple().Item1;
+                
                 IDocument doc = BackendProgram.corpus.GetDocument(docId);
                 string fileName = ((IFileDocument)doc).FileName;
                 //Removes leading '0's in the file name
                 fileName = fileName.TrimStart('0');
                 //Removes '.json'
+                fileName = fileName.Substring(0, fileName.IndexOf(".json"));
                 try
                 {
                     list.Add(Int32.Parse(fileName));
