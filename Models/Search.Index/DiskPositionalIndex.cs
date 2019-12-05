@@ -500,6 +500,10 @@ namespace Search.Index
             {
                 case 1:
                     temp = tier1.Get(term);
+                    if(temp == null)
+                    {
+                        return new List<MaxPriorityQueue.InvertedIndex>();
+                    }
 
                     Console.WriteLine("In the tier designator");
                     foreach (var index in temp)

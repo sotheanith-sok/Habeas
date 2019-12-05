@@ -3,57 +3,74 @@ using Xunit;
 using FluentAssertions;
 using System;
 using System.Linq;
+using Search.Index;
+using Search.Document;
 
 namespace Metrics.MeanAveragePrecision
 {
-    public class PrecisionTest
+    public class MeanAveragePrecision
     {
-        private static string corpusPath = "../../../corpus/Cranfield/relevance/";
-        private static string queryFilePath = corpusPath + "Actualqueries";
-        private static string qrelFilePath = corpusPath + "qrel";
+        private static string corpusPath = "../../../corpus/Cranfield/";
+        private static string queryFilePath = corpusPath + "relevance/~queries";
+        private static string qrelFilePath = corpusPath + "relevance/qrel";
+        private BackendProgram BEP;
+        
+        public MeanAveragePrecision()
+        {
+            BEP = new BackendProgram();
+            BEP.GetIndex(corpusPath);
 
-
-        [Fact]
-        public void TestSearchQuery()
+        }
+        
+        /// <summary>
+        /// Gets MeanAveragePrecision for 'Cranfield' corpus
+        /// </summary>
+        /// <returns>MAP value</returns>
+        public float GetMAP()
         {
             List<string> queries = ReadStringList(queryFilePath);
             List<List<int>> relevances = ReadIntList(qrelFilePath);
 
-            
-            // for(int i=0; i<queries.Count; i++)
-            // {
-            //     string query = queries[i];
-            //     List<int> qrel = relevances[i];
-                
-            //     //Get the query result from the program
-            //     List<string> results = SearchQuery(query);
-            //     List<int> numbers = processResults(results);
+            List<List<int>> retrievals = new List<List<int>>();
 
-            //     //calculate average precision
-            //     float precision = GetAveragePrecision(numbers, qrel);
-            // }
+            IList<MaxPriorityQueue.InvertedIndex> topDocs;
+            foreach(string query in queries)
+            {
+                topDocs = BEP.SearchRanckedRetrieval(query);
+                retrievals.Add( ConvertRankedResult(topDocs) );
+            }
             
+            float meanAP = CalculateMAP(retrievals, relevances);
+            return meanAP;
         }
 
-
-        [Fact]
-        public void TestGetMAP()
+        /// <summary>
+        /// Converts the result from ranked retrieval to list of integer(fileName) for Cranfield corpus
+        /// </summary>
+        /// <param name="topDocs"></param>
+        /// <returns></returns>
+        private List<int> ConvertRankedResult(IList<MaxPriorityQueue.InvertedIndex> topDocs)
         {
-            List<List<int>> result = new List<List<int>>{
-                new List<int>{10},
-                new List<int>{10},
-                new List<int>{10},
-                new List<int>{10},
-            };
-            List<List<int>> actual = new List<List<int>>{
-                new List<int>{10},
-                new List<int>{10},
-                new List<int>{10,20},
-                new List<int>{10,20},
-            };
+            List<int> list = new List<int>();
 
-            float map = GetMAP(result, actual);
-            map.Should().Be( 0.75F );
+            foreach(var p in topDocs)
+            {
+                int docId = p.GetDocumentId();
+                IDocument doc = BackendProgram.corpus.GetDocument(docId);
+                string fileName = ((IFileDocument)doc).FileName;
+                //Removes leading '0's in the file name
+                fileName = fileName.TrimStart('0');
+                //Removes '.json'
+                try {
+                    list.Add(Int32.Parse(fileName));
+                }
+                catch(Exception e){
+                    Console.WriteLine(e.ToString());
+                }
+                
+            }
+
+            return list;
         }
 
         /// <summary>
@@ -62,32 +79,22 @@ namespace Metrics.MeanAveragePrecision
         /// <param name="results">list of all query results</param>
         /// <param name="actuals">list of actual relevances for all queries</param>
         /// <returns></returns>
-        public float GetMAP(List<List<int>> results, List<List<int>> actuals)
+        public float CalculateMAP(List<List<int>> results, List<List<int>> actuals)
         {
             float sumaps = 0;
             for(int i=0; i<results.Count; i++)
             {
-                sumaps += GetAveragePrecision(results[i], actuals[i]);
+                sumaps += CalculateAP(results[i], actuals[i]);
             }
             return sumaps / results.Count;
         }
 
-        [Fact]
-        public void TestGetAP()
-        {
-            List<int> result = new List<int>{1,2,33,4,55,66,77,8};
-            List<int> actual = new List<int>{1,2,3,4,5,6,7,8};
-
-            float ap = GetAveragePrecision(result, actual);
-            ap.Should().Be( 13/32 );
-        }
-
         /// <summary>
-        /// Calculates MeanAveragePrecision with the query result and actual relevance
+        /// Calculates AveragePrecision with the query result and actual relevance
         /// </summary>
         /// <param name="result"></param>
         /// <param name="actual"></param>
-        public float GetAveragePrecision(List<int> result, List<int> actual)
+        public float CalculateAP(List<int> result, List<int> actual)
         {
             int totalRelevant = 0;
             List<float> pks = new List<float>();
@@ -103,16 +110,11 @@ namespace Metrics.MeanAveragePrecision
             return sumpks / actual.Count;
         }
 
-        [Fact]
-        public void TestReads()
-        {
-            List<string> queries = ReadStringList("C:\\Users\\Lenovo\\Desktop\\Computer Science\\CECS 529\\Cranfield\\relevance\\Actualqueries");
-            // List<string> queryResult = BackendQuery(queries[1]);
-            queries.Count.Should().Be(225, "That's how many queries there are!");
-            queries[0].Should().Be("similarity law aeroelastic model high speed aircraft", "That's the first query .");
-            queries[224].Should().Be("what design factors can be used to control lift-drag ratios at mach numbers above 5", "That's the last query");
-        }
-
+        /// <summary>
+        /// Reads the queries to test from file
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
         public List<string> ReadStringList(string fileName)
         {
             int counter = 0;
@@ -132,13 +134,18 @@ namespace Metrics.MeanAveragePrecision
             return s;
         }
 
-        public List<List<int>> ReadIntList(string FileName)
+        /// <summary>
+        /// Reads the relevances(list of file names) for queries from file
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
+        public List<List<int>> ReadIntList(string fileName)
         {
             int counter = 0;
             string line;
             List<List<int>> listOfRelevanceResults = new List<List<int>>();
 
-            System.IO.StreamReader queryFile = new System.IO.StreamReader(FileName);
+            System.IO.StreamReader queryFile = new System.IO.StreamReader(fileName);
             List<int> i = new List<int>();
             while ((line = queryFile.ReadLine()) != null)
             {
