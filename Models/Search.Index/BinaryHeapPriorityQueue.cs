@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System;
 using System.IO;
 using Search.Query;
+using Search.Index;
 public class MaxPriorityQueue
 {
     /// <summary>
@@ -12,7 +13,9 @@ public class MaxPriorityQueue
         private double rank;
         private int docID;
 
-        private int termFreq;
+        private int value;
+
+        private Tuple<int, int> docTierTuple;
 
         public InvertedIndex(double rank, int docID)
         {
@@ -20,11 +23,27 @@ public class MaxPriorityQueue
             this.docID = docID;
         }
 
-        public InvertedIndex(int termFreq, int docID)
+        public InvertedIndex(int value, int docID)
         {
-            this.termFreq = termFreq;
+            this.value = value;
             this.docID = docID;
         }
+
+        public InvertedIndex(int frequency, Tuple<int, int> docTier)
+        {
+            this.value = frequency;
+            this.docTierTuple = docTier;
+
+        }
+
+        public InvertedIndex(double rank, Tuple<int, int> docTier)
+        {
+            this.rank = rank;
+            this.docTierTuple = docTier;
+
+        }
+
+
 
         public double GetRank()
         {
@@ -37,7 +56,12 @@ public class MaxPriorityQueue
 
         public int GetTermFreq()
         {
-            return this.termFreq;
+            return this.value;
+        }
+
+        public Tuple<int, int> GetTuple()
+        {
+            return this.docTierTuple;
         }
 
 
@@ -48,7 +72,7 @@ public class MaxPriorityQueue
 
     public MaxPriorityQueue()
     {
-        priorityQueue = new List<InvertedIndex>();
+        this.priorityQueue = new List<InvertedIndex>();
     }
 
     /// <summary>
@@ -190,6 +214,30 @@ public class MaxPriorityQueue
         this.priorityQueue = tempQueue;
 
     }
+
+    public void MaxHeapInsert(double value, Tuple<int, int> tuple)
+    {
+        InvertedIndex element = new InvertedIndex(value, tuple);
+
+        //get current state of priority queue
+        List<InvertedIndex> tempQueue = this.priorityQueue;
+
+        //add new element to the list
+        tempQueue.Add(element);
+
+
+        //need to maxheapify through half the elements in the PQ to maintain max heap property
+        for (int i = tempQueue.Count / 2; i >= 0; i--)
+        {
+            MaxHeapify(tempQueue, i);
+        }
+
+        //update current state of the priority queue
+        this.priorityQueue = tempQueue;
+
+    }
+
+
     /// <summary>
     /// extracts from the priority queue the top ten documents
     /// </summary>
@@ -197,9 +245,20 @@ public class MaxPriorityQueue
     public List<InvertedIndex> RetrieveTopTen()
     {
         List<InvertedIndex> priorityQueue = this.priorityQueue;
+
+        // Console.WriteLine("In Retrieve Top Ten for Priority Queue------------------------------------");
+        // foreach (MaxPriorityQueue.InvertedIndex item in priorityQueue)
+        // {
+        //     Console.WriteLine("Document ID: " + item.GetTuple().Item1);
+        //     Console.WriteLine("From Tier: " + item.GetTuple().Item2);
+        // }
+
+
+
+
         List<InvertedIndex> topTen = new List<InvertedIndex>();
 
-        while (topTen.Count < 10)
+        while (topTen.Count < 50)
         {
             if (priorityQueue.Count == 0)
             {
@@ -211,6 +270,13 @@ public class MaxPriorityQueue
                 topTen.Add(max);
             }
         }
+
+        // Console.WriteLine("In Retrieve Top Ten ------------------------------------");
+        // foreach (MaxPriorityQueue.InvertedIndex item in topTen)
+        // {
+        //     Console.WriteLine("Document ID: " + item.GetTuple().Item1);
+        //     Console.WriteLine("From Tier: " + item.GetTuple().Item2);
+        // }
 
         priorityQueue.Clear();
         return topTen;
@@ -320,7 +386,6 @@ public class MaxPriorityQueue
 
 
 }
-
 
 
 
