@@ -12,20 +12,35 @@ public class MaxPriorityQueue
         private double rank;
         private int docID;
 
+        private int termFreq;
+
         public InvertedIndex(double rank, int docID)
         {
             this.rank = rank;
             this.docID = docID;
         }
 
+        public InvertedIndex(int termFreq, int docID)
+        {
+            this.termFreq = termFreq;
+            this.docID = docID;
+        }
+
         public double GetRank()
         {
-            return rank;
+            return this.rank;
         }
         public int GetDocumentId()
         {
-            return docID;
+            return this.docID;
         }
+
+        public int GetTermFreq()
+        {
+            return this.termFreq;
+        }
+
+
     }
 
     private List<InvertedIndex> priorityQueue;
@@ -132,9 +147,9 @@ public class MaxPriorityQueue
     /// </summary>
     /// <param name="rank"></param>
     /// <param name="docId"></param>
-    public void MaxHeapInsert(double rank, int docId)
+    public void MaxHeapInsert(double value, int docId)
     {
-        InvertedIndex element = new InvertedIndex(rank, docId);
+        InvertedIndex element = new InvertedIndex(value, docId);
 
         //get current state of priority queue
         List<InvertedIndex> tempQueue = this.priorityQueue;
@@ -153,6 +168,28 @@ public class MaxPriorityQueue
 
     }
 
+
+
+    public void MaxHeapInsert(int value, int docId)
+    {
+        InvertedIndex element = new InvertedIndex(value, docId);
+
+        //get current state of priority queue
+        List<InvertedIndex> tempQueue = this.priorityQueue;
+
+        //add new element to the list
+        tempQueue.Add(element);
+
+        //need to maxheapify through half the elements in the PQ to maintain max heap property
+        for (int i = tempQueue.Count / 2; i >= 0; i--)
+        {
+            MaxHeapify(tempQueue, i);
+        }
+
+        //update current state of the priority queue
+        this.priorityQueue = tempQueue;
+
+    }
     /// <summary>
     /// extracts from the priority queue the top ten documents
     /// </summary>
@@ -179,6 +216,62 @@ public class MaxPriorityQueue
         return topTen;
 
     }
+
+
+
+    /// <summary>
+    /// extracts from the priority queue the top documents within a certain percent 
+    /// </summary>
+    /// <param name="percentOfDocuments"> integer representing percent of documents we need </param>
+    /// <returns>List of (rank, docid) of top 50 documents.</returns>
+    public List<InvertedIndex> RetrieveTier(double percentOfDocuments)
+    {
+        List<InvertedIndex> topDocuments = new List<InvertedIndex>();
+        double limit = Math.Floor((percentOfDocuments * this.priorityQueue.Count) / 100);
+
+        if (limit <= 1)
+        {
+            while (this.priorityQueue.Count > 0)
+            {
+                InvertedIndex max = ExtractMax(this.priorityQueue);
+                topDocuments.Add(max);
+            }
+        }
+        else
+        {
+            //floor the division so that we don't overestimate... underestimating is okay
+            while (topDocuments.Count < limit)
+            {
+                if (priorityQueue.Count == 0)
+                {
+                    break;
+                }
+                else
+                {
+                    InvertedIndex max = ExtractMax(this.priorityQueue);
+                    topDocuments.Add(max);
+                }
+            }
+        }
+
+        //we only want to clear the queue once we have pulled every item from the queue to create the tiers
+        if (priorityQueue.Count == 0)
+        {
+            priorityQueue.Clear();
+        }
+
+
+        //prepares the tier to be stored onto disk by sorting according to ascending order of document ID, needed for encoding
+        topDocuments.Sort(delegate (MaxPriorityQueue.InvertedIndex x, MaxPriorityQueue.InvertedIndex y)
+        {
+            return x.GetDocumentId().CompareTo(y.GetDocumentId());
+        });
+        return topDocuments;
+
+
+
+    }
+
 
     /// <summary>
     /// extracts the highest value and then maintains the max heap property
@@ -211,6 +304,18 @@ public class MaxPriorityQueue
     public List<InvertedIndex> GetPriorityQueue()
     {
         return this.priorityQueue;
+    }
+
+    public void ClearHeap()
+    {
+        this.priorityQueue.Clear();
+    }
+
+    public int CompareObjectByDocId(MaxPriorityQueue.InvertedIndex x, MaxPriorityQueue.InvertedIndex y)
+    {
+
+        int retval = x.GetDocumentId().CompareTo(y.GetDocumentId());
+        return retval;
     }
 
 

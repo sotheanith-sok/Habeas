@@ -20,7 +20,7 @@ namespace Search.OnDiskDataStructure
 
             //1. Write document frequency
             concat.Add(postings.Count);
-
+           
             int previousDocID = 0;
             foreach (Posting p in postings)
             {

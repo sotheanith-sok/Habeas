@@ -12,7 +12,8 @@ namespace Search.Index
     public class BackendProgram
     {
         private IIndex index; //currently set-up to use on-disk index
-        private IDocumentCorpus corpus;
+
+        public static IDocumentCorpus corpus;
 
         //mode indicates if the search engine is in boolean mode or ranked retrieval mode
         //if mode is true, the search engine is in boolean mode
@@ -28,7 +29,7 @@ namespace Search.Index
         {
             Console.WriteLine("\n-------------------------------------------------------------------------------");
             Console.WriteLine($"Path: {path}");
-                
+
             try
             {
                 string pathToIndex = Path.Join(path, "/index/");
@@ -36,13 +37,15 @@ namespace Search.Index
 
                 bool doesOnDiskIndexExist = Directory.Exists(pathToIndex);
                 // bool doesOnDiskIndexExist = Directory.Exists(pathToIndex) && (Directory.GetFiles(pathToIndex).Length != 0);
-                
+
+
                 //make corpus out of the selected directory path
                 corpus = DirectoryCorpus.LoadTextDirectory(path);
+
                 if (doesOnDiskIndexExist)
                 {
                     Console.WriteLine("Reading the existing on-disk index.");
-                    index = new DiskPositionalIndex(pathToIndex);
+                    index = new DiskPositionalIndex(pathToIndex);        
                 }
                 else
                 {
@@ -55,7 +58,7 @@ namespace Search.Index
             {
                 Console.WriteLine(e);
             }
-            
+
             Console.WriteLine("Ready to go!");
             Console.WriteLine("-------------------------------------------------------------------------------");
         }
@@ -71,11 +74,13 @@ namespace Search.Index
                 //Generate directory if we need to index corpus.
                 Directory.CreateDirectory(Path.Join(path, "/index/"));
 
+
                 //if the corpus contains content
                 if (corpus != null && corpus.CorpusSize != 0)
                 {
                     //make an index for the corpus
                     index = Indexer.IndexCorpus(corpus);
+
                     // //Write the in-memory index on disk.
                     // DiskIndexWriter diskIndexWriter = new DiskIndexWriter();
 
@@ -147,20 +152,25 @@ namespace Search.Index
                 //the list of strings to return 
                 List<String> results = new List<string>();
 
+
                 if (mode == false)
                 {
-                  
+                    Console.WriteLine("In Ranked Retrieval");
+                    Console.WriteLine("Query:" + query);
+
                     //parser to parse the query 
                     RankedRetrievalParser parser = new RankedRetrievalParser();
 
-                    
                     List<string> finalTerms = parser.ParseQuery(query);
 
                     //retrieves the top ten documents of the normalized tokens
-                    RankingVariant rv = new RankingVariant(corpus);
-                    IList<MaxPriorityQueue.InvertedIndex> topTenDocs = rv.GetRankedDocuments(index, finalTerms, RankedRetrievalMode);
+                    RankedRetrieval rv = new RankedRetrieval(corpus, index, RankedRetrievalMode);
 
-                    //collect the top ten documents
+                    IList<MaxPriorityQueue.InvertedIndex> topTenDocs = rv.GetTopTen(finalTerms);
+
+                    //parse the query
+                    List<string> terms = parser.ParseQuery(query);
+
                     if (topTenDocs.Count > 0)
                     {
                         //add the count of the postings to the list of strings to be returned
@@ -182,20 +192,16 @@ namespace Search.Index
                             numberRank++;
                         }
                     }
-                    //if there aren't any postings...
-                    else
-                    {
-                        //add a zero to the list of strings to be returned
-                        results.Add("0");
-                    }
-                    //return the list of strings
+
                     return results;
                 }
-
-
-
+                // end of ranked retrieval segment (if statement)
                 else
                 {
+
+                    Console.WriteLine(query);
+
+
                     //the list of postings
                     IList<Posting> postings;
                     IQueryComponent component;
@@ -205,8 +211,11 @@ namespace Search.Index
                     BooleanQueryParser parser = new BooleanQueryParser();
                     //parse the query
                     component = parser.ParseQuery(query);
+
                     //get the postings
                     postings = component.GetPostings(index, processor);
+
+
                     //if there are any postings...
                     if (postings.Count > 0)
                     {
@@ -222,6 +231,7 @@ namespace Search.Index
                             //add the document id to the list of strings to be returned 
                             results.Add(doc.DocumentId.ToString());
                         }
+                        Console.WriteLine(results.Count);
                     }
                     //if there aren't any postings...
                     else
@@ -233,16 +243,15 @@ namespace Search.Index
                     return results;
 
                 }
-               
+
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
                 return new List<string>();
             }
+
             // Console.Write("Corpus size is:");
             // Console.WriteLine(corpus.CorpusSize);
-
         }
 
         /// <summary>

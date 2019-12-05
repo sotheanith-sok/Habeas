@@ -18,6 +18,7 @@ namespace Search.Index
         public static double averageDocLength;
 
 
+
         /// <summary>
         /// Constructs an index from a corpus of documents
         /// </summary>
@@ -48,30 +49,38 @@ namespace Search.Index
                 ITokenStream stream = new EnglishTokenStream(doc.GetContent());
 
                 IEnumerable<string> tokens = stream.GetTokens();
-                
+
                 //keeptrack of tokens per document 
-                int tokenCount =0;
+                int tokenCount = 0;
 
                 //keep track of file size 
                 int position = 0;
-             
+
                 foreach (string token in tokens)
                 {
+
                     tokenCount++;
                     //Process token to term
                     List<string> terms = processor.ProcessToken(token);
+
                     //Add term to the index
                     bool termsIsAdded = false;
+
+
                     foreach (string term in terms)
                     {
+
                         if (term.Length > 0)
                         {
                             index.AddTerm(term, doc.DocumentId, position);
+
                             termsIsAdded = true;
                         }
                     }
+
                     //Increase the position num
                     position = termsIsAdded ? position + 1 : position;
+
 
                     //Keep track of vocabularies for K-gram
                     foreach (string term in ((NormalTokenProcessor)processor).ProcessToken(token))
@@ -83,7 +92,6 @@ namespace Search.Index
                 //Add token count per document
                 index.AddTokensPerDocument(doc.DocumentId, tokenCount);
 
-                
                 //get number of bytes in file 
                 string docFilePath = doc.FilePath;
                 int fileSizeInByte = (int)(new FileInfo(docFilePath).Length / 8f);
@@ -103,9 +111,12 @@ namespace Search.Index
                 stream.Dispose();
 
             }
-            // kGram.buildKGram(unstemmedVocabulary);
+
+
+            kGram.buildKGram(unstemmedVocabulary);
             index.Save();
-            // soundEx.Save();
+            soundEx.Save();
+
             elapsedTime.Stop();
             Console.WriteLine("[Indexer] Done Indexing! Time Elapsed " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
             GC.Collect();

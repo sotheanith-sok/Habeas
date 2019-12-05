@@ -118,6 +118,10 @@ namespace Habeas.Controllers
                         string term = args.ToString();
                         //gets list of posting titles from backend
                         List<string> Postings = BEP.SearchQuery(term);
+                        foreach(string item in Postings)
+                        {
+                            Console.WriteLine(item);
+                        }
                         //sends results to view
                         Electron.IpcMain.Send(mainWindow, "searchText", Postings);
                     });

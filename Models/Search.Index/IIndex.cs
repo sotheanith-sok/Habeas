@@ -37,16 +37,19 @@ namespace Search.Index
         IList<Posting> GetPositionalPostings(List<string> term);
 
 
-        List<DiskPositionalIndex.PostingDocWeight> GetPostingDocWeights();
+        DiskPositionalIndex.PostingDocWeight GetPostingDocWeight(int docID);
 
         /// <summary>
         /// A (sorted) list of all terms in the index vocabulary.
         /// </summary>
         IReadOnlyList<string> GetVocabulary();
 
-        DiskPositionalIndex.PostingDocWeight GetPostingDocWeight(int docID);
 
-        int GetDocumentsCount();
+        List<MaxPriorityQueue.InvertedIndex> GetPostingsFromTier(string term, int tierNumber = 1);
+
+        //List<int> GetDocWeightsIds();
+
+        //int GetDocumentsCount();
 
     }
 }

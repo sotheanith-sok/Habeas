@@ -13,6 +13,7 @@ namespace Search.OnDiskDataStructure
         private LiteDatabase database;
         private LiteCollection<DBObject<TKey>> collection;
 
+        private string dictName;
         /// <summary>
         /// Contructor
         /// </summary>
@@ -26,6 +27,7 @@ namespace Search.OnDiskDataStructure
             this.keyED = keyEncoderDecoder;
             this.valueED = valueEncoderDecoder;
             this.database = new LiteDatabase(Path.Join(path, dictName + ".bin"));
+            this.dictName = dictName;
             this.collection = this.database.GetCollection<DBObject<TKey>>(dictName);
         }
 
@@ -57,10 +59,6 @@ namespace Search.OnDiskDataStructure
         /// <param name="value"></param>
         public void Add(TKey key, TValue value)
         {
-            if (this.collection.Exists(x => x.key.ToString().Equals(key.ToString())))
-            {
-
-            }
             foreach (DBObject<TKey> obj in this.collection.Find(x => x.key.ToString().Equals(key.ToString())))
             {
                 obj.raw_value = valueED.Encoding(value);

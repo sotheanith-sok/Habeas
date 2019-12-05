@@ -4,12 +4,13 @@ using Search.Query;
 using System;
 using Search.OnDiskDataStructure;
 using System.IO;
+using Search.Document;
 namespace Search.Index
 {
     public class DiskPositionalIndex : IIndex
     {
-        //HashMap used to store termFrequency of current Document
-        private readonly Dictionary<string, int> termFrequency;
+        //HashMap used to store tempTermFreq of current Document
+        private readonly Dictionary<string, int> tempTermFreq;
 
         //maintains a list of the docWeights to store in the docWeights.bin file
         private readonly Dictionary<int, double> calculatedDocWeights;
@@ -22,26 +23,41 @@ namespace Search.Index
         private readonly Dictionary<int, int> docByteSize;
 
 
-
-
-
         //maintains the hashmap for the posting list for a specific term
         private OnDiskDictionary<string, List<Posting>> postingMap;
-
 
         //maintains a hashmap for the document weight for a specific document id
         private OnDiskDictionary<int, PostingDocWeight> docWeigthsHashMap;
 
-
         private Dictionary<string, List<Posting>> tempPostingMap;
+
+        public Dictionary<string, List<Posting>> getOnMemoryIndex()
+        {
+            return tempPostingMap;
+        }
+
         private Dictionary<int, PostingDocWeight> tempDocWeightsHashMap;
+
+
+
+        private Dictionary<string, List<MaxPriorityQueue.InvertedIndex>> tempTier1;
+
+        private Dictionary<string, List<MaxPriorityQueue.InvertedIndex>> tempTier2;
+        private Dictionary<string, List<MaxPriorityQueue.InvertedIndex>> tempTier3;
+
+
+        private OnDiskDictionary<string, List<MaxPriorityQueue.InvertedIndex>> tier1;
+        private OnDiskDictionary<string, List<MaxPriorityQueue.InvertedIndex>> tier2;
+        private OnDiskDictionary<string, List<MaxPriorityQueue.InvertedIndex>> tier3;
+
         private double averageDocLength;
 
-
+        private int counter;
 
 
         public class PostingDocWeight
         {
+
 
             private double docWeights { get; set; }
             private int docLength { get; set; }
@@ -55,7 +71,6 @@ namespace Search.Index
                 this.docByteSize = docByteSize;
                 this.averageTermFreq = averageTermFreq;
             }
-
             public double GetDocWeight()
             {
                 return this.docWeights;
@@ -83,30 +98,54 @@ namespace Search.Index
         public DiskPositionalIndex(string path)
         {
 
-            termFrequency = new Dictionary<string, int>();
+            tempTermFreq = new Dictionary<string, int>();
             tokensPerDocument = new Dictionary<int, int>();
             docByteSize = new Dictionary<int, int>();
             calculatedDocWeights = new Dictionary<int, double>();
             averageTermFreqPerDoc = new Dictionary<int, double>();
 
+
+
+
+            tempTier1 = new Dictionary<string, List<MaxPriorityQueue.InvertedIndex>>();
+            tempTier2 = new Dictionary<string, List<MaxPriorityQueue.InvertedIndex>>();
+            tempTier3 = new Dictionary<string, List<MaxPriorityQueue.InvertedIndex>>();
+
+
+
+            tier1 = new OnDiskDictionary<string, List<MaxPriorityQueue.InvertedIndex>>(path, "Tier1Index", new StringEncoderDecoder(), new InvertedIndexEncoderDecoder());
+            tier2 = new OnDiskDictionary<string, List<MaxPriorityQueue.InvertedIndex>>(path, "Tier2Index", new StringEncoderDecoder(), new InvertedIndexEncoderDecoder());
+            tier3 = new OnDiskDictionary<string, List<MaxPriorityQueue.InvertedIndex>>(path, "Tier3Index", new StringEncoderDecoder(), new InvertedIndexEncoderDecoder());
+
+
             tempPostingMap = new Dictionary<string, List<Posting>>();
             tempDocWeightsHashMap = new Dictionary<int, PostingDocWeight>();
+
+
+
             postingMap = new OnDiskDictionary<string, List<Posting>>(path, "InvertedIndex", new StringEncoderDecoder(), new PostingListEncoderDecoder());
             docWeigthsHashMap = new OnDiskDictionary<int, PostingDocWeight>(path, "docWeights", new IntEncoderDecoder(), new PostingDocWeightEncoderDecoder());
 
         }
 
-        public List<PostingDocWeight> GetPostingDocWeights()
+        public Dictionary<string, List<Posting>> GetPostingMap()
         {
-            List<int> documents = docWeigthsHashMap.GetKeys().ToList();
-            List<PostingDocWeight> finalList = new List<PostingDocWeight>();
-            foreach (int documentID in documents)
-            {
-                finalList.Add(GetPostingDocWeight(documentID));
-            }
-
-            return finalList;
+            return this.tempPostingMap;
         }
+
+        // not sure what GetDocWeightsIds is used for  ? but apparently nothing references it so we might not even need it ???
+
+        // public List<int> GetDocWeightsIds()
+        // {
+        //     List<int> documents = docWeigthsHashMap.GetKeys().ToList();
+        //     List<PostingDocWeight> finalList = new List<PostingDocWeight>();
+        //     foreach (int documentID in documents)
+        //     {
+        //         finalList.Add(GetPostingDocWeight(documentID));
+        //     }
+
+        //     return finalList;
+        // }
 
         public PostingDocWeight GetPostingDocWeight(int docID)
         {
@@ -128,7 +167,9 @@ namespace Search.Index
         public IList<Posting> GetPostings(string term)
         {
 
+
             List<Posting> result = postingMap.Get(term);
+            Console.WriteLine("results for get postings" + result.Count);
             if (default(List<Posting>) == result)
             {
                 return new List<Posting>();
@@ -206,6 +247,8 @@ namespace Search.Index
             //ChangeFrequency
             UpdateTermFrequencyForDoc(term);
 
+
+
             //Check if inverted index contains the term (key)
             if (tempPostingMap.ContainsKey(term))
             {
@@ -244,13 +287,13 @@ namespace Search.Index
         public void UpdateTermFrequencyForDoc(string term)
         {
 
-            if (termFrequency.ContainsKey(term))
+            if (tempTermFreq.ContainsKey(term))
             {
-                termFrequency[term] += 1;
+                tempTermFreq[term] += 1;
             }
             else
             {
-                termFrequency.Add(term, 1);
+                tempTermFreq.Add(term, 1);
             }
 
         }
@@ -261,7 +304,7 @@ namespace Search.Index
         public void CalculateDocWeight(int docID)
         {
             double temp = 0;
-            foreach (int value in termFrequency.Values)
+            foreach (int value in tempTermFreq.Values)
             {
                 temp = temp + Math.Pow((1 + Math.Log(value)), 2);
             }
@@ -270,7 +313,7 @@ namespace Search.Index
             calculatedDocWeights.Add(docID, Math.Sqrt(temp));
 
             //clear frequency map for next iteration of document
-            termFrequency.Clear();
+            tempTermFreq.Clear();
         }
 
 
@@ -298,18 +341,37 @@ namespace Search.Index
         public void Save()
         {
             postingMap.Replace(tempPostingMap);
+            this.WriteDocWeights();
+            docWeigthsHashMap.Replace(tempDocWeightsHashMap);
+            this.CreateTiers();
+            
+            tier1.Replace(tempTier1);
+            tier2.Replace(tempTier2);
+            tier3.Replace(tempTier3);
+
+            tempTermFreq.Clear();
+            calculatedDocWeights.Clear();
+            docByteSize.Clear();
+            tokensPerDocument.Clear();
+            averageTermFreqPerDoc.Clear();
+            tempPostingMap.Clear();
+            tempDocWeightsHashMap.Clear();
+
+            tempTier1.Clear();
+            tempTier2.Clear();
+            tempTier3.Clear();
 
 
-            //this.WriteDocWeights();
+        }
 
-            //docWeigthsHashMap.Replace(tempDocWeightsHashMap);
-            //termFrequency.Clear();
-            //calculatedDocWeights.Clear();
-            //docByteSize.Clear();
-            //tokensPerDocument.Clear();
-            //averageTermFreqPerDoc.Clear();
-            //tempPostingMap.Clear();
-            //tempDocWeightsHashMap.Clear();
+        public void SaveTier()
+        {
+            Console.WriteLine("At Save Tier");
+            if (tempPostingMap.Count > 0)
+            {
+                postingMap.Replace(tempPostingMap);
+            }
+
         }
 
         ///<sumary>
@@ -341,12 +403,12 @@ namespace Search.Index
         public void CalcAveTermFreq(int docID)
         {
             int sum = 0;
-            foreach (int termFreq in this.termFrequency.Values)
+            foreach (int termFreq in this.tempTermFreq.Values)
             {
                 sum = sum + termFreq;
             }
 
-            double averageTermFreq = (double)sum / this.termFrequency.Count;
+            double averageTermFreq = (double)sum / this.tempTermFreq.Count;
 
             averageTermFreqPerDoc.Add(docID, averageTermFreq);
 
@@ -375,6 +437,107 @@ namespace Search.Index
         {
             return docWeigthsHashMap.GetSize();
         }
+
+        public List<string> GetVocabFromTemp()
+        {
+            List<string> vocabulary = tempPostingMap.Keys.ToList();
+            vocabulary.Sort();
+            return vocabulary;
+        }
+
+
+        public void SetTempPostingMap(string term, List<Posting> tierPostingsList)
+        {
+            tempPostingMap.Add(term, tierPostingsList);
+        }
+
+
+
+
+        public void CreateTiers()
+        {
+            Console.WriteLine("Creating Tier Indices");
+            List<Posting> termPostings;
+            List<string> vocab = this.tempPostingMap.Keys.ToList();
+
+            foreach (string term in vocab)
+            {
+
+                //get postings for the term
+                termPostings = tempPostingMap[term];
+
+
+                //make priority queue
+
+                MaxPriorityQueue tierQueue = new MaxPriorityQueue();
+                foreach (Posting p in termPostings)
+                {
+                    tierQueue.MaxHeapInsert(p.Positions.Count, p.DocumentId);
+                }
+
+                //Create the Tiers using a priority queue
+                List<MaxPriorityQueue.InvertedIndex> temp = tierQueue.RetrieveTier(1);
+                tempTier1.Add(term, temp);
+
+                temp = tierQueue.RetrieveTier(10);
+                tempTier2.Add(term, temp);
+
+
+                temp = tierQueue.RetrieveTier(100);
+                tempTier3.Add(term, temp);
+
+
+
+            }
+
+        }
+
+        public List<MaxPriorityQueue.InvertedIndex> GetPostingsFromTier(string term, int tierNumber = 1)
+        {
+            List<MaxPriorityQueue.InvertedIndex> result = new List<MaxPriorityQueue.InvertedIndex>();
+            List<MaxPriorityQueue.InvertedIndex> temp = new List<MaxPriorityQueue.InvertedIndex>();
+            switch (tierNumber)
+            {
+                case 1:
+                    temp = tier1.Get(term);
+
+                    result.AddRange(temp);
+                    if (result.Count < 20)
+                    {
+                        goto case 2;
+                    }
+                    else
+                    {
+                        return result;
+                    }
+
+
+                case 2:
+
+                    temp = tier2.Get(term);
+                    result.AddRange(temp);
+
+                    if (result.Count < 20)
+                    {
+                        goto case 3;
+                    }
+                    else
+                    {
+                        return result;
+                    }
+
+                case 3:
+                    temp = tier3.Get(term);
+                    result.AddRange(temp);
+                    return result;
+                default:
+                    //an empty posting if the term does not exist.
+                    return result;
+            }
+
+
+        }
+
 
     }
 
