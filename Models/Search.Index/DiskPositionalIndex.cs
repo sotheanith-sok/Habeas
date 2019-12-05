@@ -505,11 +505,11 @@ namespace Search.Index
                         return new List<MaxPriorityQueue.InvertedIndex>();
                     }
 
-                    Console.WriteLine("In the tier designator");
+                    // Console.WriteLine("In the tier designator");
                     foreach (var index in temp)
                     {
-                        Console.WriteLine(index.GetTermFreq());
-                        Console.WriteLine(index.GetDocumentId());
+                        // Console.WriteLine(index.GetTermFreq());
+                        // Console.WriteLine(index.GetDocumentId());
                         int tf = index.GetTermFreq();
                         int id = index.GetDocumentId();
                         Tuple<int, int> tempTuple = new Tuple<int, int>(id, 1);
