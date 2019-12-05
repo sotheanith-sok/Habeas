@@ -79,11 +79,13 @@ namespace Search.Index
         public IList<MaxPriorityQueue.InvertedIndex> GetTopTen(List<string> query)
         {
 
-            //Build the Accumulator Hashmap
-            BuildAccumulator(query);
+            // //Build the Accumulator Hashmap
+            // BuildAccumulator(query);
 
-            //Build Priority Queue using the Accumulator divided by L_{d}  
-            MaxPriorityQueue priorityQueue = BuildPriorityQueue();
+            // //Build Priority Queue using the Accumulator divided by L_{d}  
+            // MaxPriorityQueue priorityQueue = BuildPriorityQueue();
+
+            MaxPriorityQueue priorityQueue = BuildAccumulatorQueue(query);
 
             accumulator.Clear();
 
@@ -92,6 +94,75 @@ namespace Search.Index
 
         }
 
+        private MaxPriorityQueue BuildAccumulatorQueue(List<string> query)
+        {
+            //stores temporary Accumulator value that will be added to the accumulator hashmap
+            double docAccumulator;
+            //caculate accumulated Value for each relevant document A_{d}
+            foreach (string term in query)
+            {
+                //posting list of a term grabbed from the On Disk file
+                List<MaxPriorityQueue.InvertedIndex> docIDS = this.index.GetPostingsFromTier(term);
+
+                //documentFrequency
+                int docFrequency = docIDS.Count;
+
+                //implements formula for w_{q,t}
+                this.query2termWeight = this.rankVariant.calculateQuery2TermWeight(docFrequency, this.corpusSize);
+
+                foreach (MaxPriorityQueue.InvertedIndex item in docIDS)
+                {
+                    double termFrequency = item.GetTermFreq();
+                    int docID = item.GetDocumentId();
+
+
+                    //implements formula for w_{d,t}
+                    this.doc2termWeight = this.rankVariant.calculateDoc2TermWeight(termFrequency, docID, this.corpusSize, this.index);
+
+                    //the A_{d} value for a specific term in that document
+                    docAccumulator = this.query2termWeight * this.doc2termWeight;
+
+                    //if the A_{d} value exists on the hashmap increase its value else create a new key-value pair
+                    if (accumulator.ContainsKey(docID))
+                    {
+                        this.accumulator[docID] += docAccumulator;
+                    }
+                    else
+                    {
+                        this.accumulator.Add(docID, docAccumulator);
+                    }
+                }
+
+
+
+
+            } //end of for each
+
+            //temporary variable to hold the doc weight
+            double normalizer;
+            //temporary variable to hold the final ranking value of that document
+            double finalRank;
+
+            //Make a new priority queue
+            MaxPriorityQueue priorityQueue = new MaxPriorityQueue();
+
+            
+            //for every key value in the Accumulator divide A_{d} by L_{d}
+            foreach (KeyValuePair<int, double> candidate in this.accumulator)
+            {
+                //get corresponding L_{d} value according to ranking system
+                normalizer = this.rankVariant.GetDocumentWeight(candidate.Key, this.index);
+
+                // divide Accumulated Value A_{d} by L_{d} 
+                finalRank = (double)candidate.Value / normalizer;
+
+
+                //add to list to perform priority queue on 
+                priorityQueue.MaxHeapInsert(finalRank, candidate.Key);
+            }
+
+            return priorityQueue;
+        } // end of BuildAccumulatorQueue()
 
         /// <summary>
         /// Builds the Accumulator hashmap for the query to retrieve top 10 documents
@@ -140,6 +211,9 @@ namespace Search.Index
                 }
 
             }
+
+
+
         } // end of BuildAccumulator(List<String> query)
 
         /// <summary>
@@ -156,6 +230,7 @@ namespace Search.Index
 
             //Make a new priority queue
             MaxPriorityQueue priorityQueue = new MaxPriorityQueue();
+
 
             //for every key value in the Accumulator divide A_{d} by L_{d}
             foreach (KeyValuePair<int, double> candidate in this.accumulator)
@@ -174,22 +249,6 @@ namespace Search.Index
 
         } // end of BuildPriorityQueuer();
 
-
-        public IList<MaxPriorityQueue.InvertedIndex> GetTopFifty(List<string> query)
-        {
-
-            //Build the Accumulator Hashmap
-            BuildAccumulator(query);
-
-            //Build Priority Queue using the Accumulator divided by L_{d}  
-            MaxPriorityQueue priorityQueue = BuildPriorityQueue();
-
-            accumulator.Clear();
-
-            //Retrieve Top Ten Documents according to percent
-            return priorityQueue.RetrieveTopTen();
-
-        }
     }
 
 }
