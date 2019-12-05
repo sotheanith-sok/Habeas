@@ -37,14 +37,14 @@ namespace Metrics.MeanAveragePrecision
 
             long totalTime = 0;
             IList<MaxPriorityQueue.InvertedIndex> topDocs;
-            for(int i=0; i<queries.Count; i++)
+            for (int i = 0; i < queries.Count; i++)
             {
                 string query = queries[i];
-                Console.WriteLine("#"+i);
-                
+                Console.WriteLine("#" + i);
+
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
-                topDocs= BEP.SearchRankedRetrieval(query);
+                topDocs = BEP.SearchRankedRetrieval(query);
                 stopwatch.Stop();
                 totalTime += stopwatch.ElapsedMilliseconds;
 
@@ -52,7 +52,7 @@ namespace Metrics.MeanAveragePrecision
             }
             totalTime /= 1000;    //miliseconds to seconds
 
-            Console.WriteLine("\nTotal Time: " + totalTime +"s");
+            Console.WriteLine("\nTotal Time: " + totalTime + "s");
             Console.WriteLine("Mean Response Time: " + totalTime / (double)queries.Count + "s");
             Console.WriteLine("Throughput: " + (double)queries.Count / totalTime);
 
@@ -73,8 +73,9 @@ namespace Metrics.MeanAveragePrecision
             foreach (var p in topDocs)
             {
                 //TODO: Clarify the name later!
-                int docId = p.GetTuple().Item1;
-                
+                //int docId = p.GetTuple().Item1; this is for MILESTONE 3
+                int docId = p.GetDocumentId();
+
                 IDocument doc = BackendProgram.corpus.GetDocument(docId);
                 string fileName = ((IFileDocument)doc).FileName;
                 //Removes leading '0's in the file name

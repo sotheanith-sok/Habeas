@@ -169,13 +169,15 @@ namespace Search.Index
 
 
             List<Posting> result = postingMap.Get(term);
-            Console.WriteLine("results for get postings" + result.Count);
-            if (default(List<Posting>) == result)
+
+            
+            if (default(List<Posting>) == result) // checking if results is null
             {
                 return new List<Posting>();
             }
             else
             {
+                // Console.WriteLine("results for get postings " + result.Count);
                 return result;
             }
         }
@@ -500,7 +502,7 @@ namespace Search.Index
             {
                 case 1:
                     temp = tier1.Get(term);
-                    if(temp == null)
+                    if (temp == null)
                     {
                         return new List<MaxPriorityQueue.InvertedIndex>();
                     }

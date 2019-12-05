@@ -81,12 +81,12 @@ namespace Search.Index
         {
 
             // //Build the Accumulator Hashmap
-            // BuildAccumulator(query);
+            BuildAccumulator(query);
 
             // //Build Priority Queue using the Accumulator divided by L_{d}  
             // MaxPriorityQueue priorityQueue = BuildPriorityQueue();
 
-            MaxPriorityQueue priorityQueue = BuildAccumulatorQueue(query);
+            MaxPriorityQueue priorityQueue = BuildPriorityQueue();
 
             accumulator.Clear();
 
@@ -104,7 +104,10 @@ namespace Search.Index
             foreach (string term in query)
             {
                 //posting list of a term grabbed from the On Disk file
+                //From Tiered Index (Milestone3)
                 List<MaxPriorityQueue.InvertedIndex> docIDS = this.index.GetPostingsFromTier(term);
+                //From Regular Disk Index (Milestone2)
+                IList<Posting> postings = this.index.GetPostings(term);
 
                 //documentFrequency
                 int docFrequency = docIDS.Count;
@@ -197,18 +200,18 @@ namespace Search.Index
             foreach (string term in query)
             {
                 //posting list of a term grabbed from the On Disk file
-                List<MaxPriorityQueue.InvertedIndex> docIDS = this.index.GetPostingsFromTier(term);
+                IList<Posting> postings = this.index.GetPostings(term);
 
                 //documentFrequency
-                int docFrequency = docIDS.Count;
+                int docFrequency = postings.Count;
 
                 //implements formula for w_{q,t}
                 this.query2termWeight = this.rankVariant.calculateQuery2TermWeight(docFrequency, this.corpusSize);
 
-                foreach (MaxPriorityQueue.InvertedIndex item in docIDS)
+                foreach (Posting item in postings)
                 {
-                    double termFrequency = item.GetTermFreq();
-                    int docID = item.GetDocumentId();
+                    double termFrequency = item.Positions.Count;
+                    int docID = item.DocumentId;
 
 
                     //implements formula for w_{d,t}

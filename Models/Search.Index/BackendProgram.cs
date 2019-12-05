@@ -205,7 +205,7 @@ namespace Search.Index
                     IList<MaxPriorityQueue.InvertedIndex> topTenDocs;
                     topTenDocs = SearchRankedRetrieval(query);
 
-                    
+
                     //Converts the result for the front end
                     if (topTenDocs.Count > 0)
                     {
@@ -214,19 +214,35 @@ namespace Search.Index
 
                         //for each posting...
                         int numberRank = 1;
+                        // foreach (MaxPriorityQueue.InvertedIndex p in topTenDocs)
+                        // {
+                        //     //use the document id to access the document
+                        //     IDocument doc = corpus.GetDocument(p.GetTuple().Item1);
+
+                        //     //add the title to the list of strings to be returned
+                        //     results.Add("#" + numberRank + ": (" + Math.Round(p.GetRank(), 5).ToString() + ") " + doc.Title + " ----From Tier "+ p.GetTuple().Item2);
+
+                        //     //add the document id to the list of strings to be returned 
+                        //     results.Add(doc.DocumentId.ToString());
+
+
+                        //     Console.WriteLine(p.GetTuple().Item1 + "" + doc.Title + " from tier " + p.GetTuple().Item2);
+                        //     numberRank++;
+                        // }
+
                         foreach (MaxPriorityQueue.InvertedIndex p in topTenDocs)
                         {
                             //use the document id to access the document
-                            IDocument doc = corpus.GetDocument(p.GetTuple().Item1);
+                            IDocument doc = corpus.GetDocument(p.GetDocumentId());
 
                             //add the title to the list of strings to be returned
-                            results.Add("#" + numberRank + ": (" + Math.Round(p.GetRank(), 5).ToString() + ") " + doc.Title + " ----From Tier "+ p.GetTuple().Item2);
+                            results.Add("#" + numberRank + ": (" + Math.Round(p.GetRank(), 5).ToString() + ") " + doc.Title);
 
                             //add the document id to the list of strings to be returned 
                             results.Add(doc.DocumentId.ToString());
 
 
-                            Console.WriteLine(p.GetTuple().Item1 + "" + doc.Title + " from tier " + p.GetTuple().Item2);
+                            Console.WriteLine(p.GetDocumentId() + "" + doc.Title + " from tier ");
                             numberRank++;
                         }
                     }
