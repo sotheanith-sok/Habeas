@@ -5,6 +5,8 @@ using System;
 using System.Linq;
 using Search.Index;
 using Search.Document;
+using System.Diagnostics;
+
 
 namespace Metrics.MeanAveragePrecision
 {
@@ -14,14 +16,14 @@ namespace Metrics.MeanAveragePrecision
         private static string queryFilePath = corpusPath + "relevance/~queries";
         private static string qrelFilePath = corpusPath + "relevance/qrel";
         private BackendProgram BEP;
-        
+
         public MeanAveragePrecision()
         {
             BEP = new BackendProgram();
             BEP.GetIndex(corpusPath);
 
         }
-        
+
         /// <summary>
         /// Gets MeanAveragePrecision for 'Cranfield' corpus
         /// </summary>
@@ -32,14 +34,22 @@ namespace Metrics.MeanAveragePrecision
             List<List<int>> relevances = ReadIntList(qrelFilePath);
 
             List<List<int>> retrievals = new List<List<int>>();
+             long sum = 0;
 
             IList<MaxPriorityQueue.InvertedIndex> topDocs;
-            foreach(string query in queries)
+            foreach (string query in queries)
             {
-                topDocs = BEP.SearchRanckedRetrieval(query);
-                retrievals.Add( ConvertRankedResult(topDocs) );
+                Stopwatch stopwatch = new Stopwatch();
+                stopwatch.Start();
+                topDocs= BEP.SearchRankedRetrieval(query);
+                stopwatch.Stop();
+                sum += stopwatch.ElapsedMilliseconds;
+
+                retrievals.Add(ConvertRankedResult(topDocs));
             }
-            
+
+            Console.WriteLine((double)sum / queries.Count);
+
             float meanAP = CalculateMAP(retrievals, relevances);
             return meanAP;
         }
@@ -53,7 +63,7 @@ namespace Metrics.MeanAveragePrecision
         {
             List<int> list = new List<int>();
 
-            foreach(var p in topDocs)
+            foreach (var p in topDocs)
             {
                 int docId = p.GetDocumentId();
                 IDocument doc = BackendProgram.corpus.GetDocument(docId);
@@ -61,13 +71,15 @@ namespace Metrics.MeanAveragePrecision
                 //Removes leading '0's in the file name
                 fileName = fileName.TrimStart('0');
                 //Removes '.json'
-                try {
+                try
+                {
                     list.Add(Int32.Parse(fileName));
                 }
-                catch(Exception e){
+                catch (Exception e)
+                {
                     Console.WriteLine(e.ToString());
                 }
-                
+
             }
 
             return list;
@@ -82,7 +94,7 @@ namespace Metrics.MeanAveragePrecision
         public float CalculateMAP(List<List<int>> results, List<List<int>> actuals)
         {
             float sumaps = 0;
-            for(int i=0; i<results.Count; i++)
+            for (int i = 0; i < results.Count; i++)
             {
                 sumaps += CalculateAP(results[i], actuals[i]);
             }
@@ -100,11 +112,12 @@ namespace Metrics.MeanAveragePrecision
             List<float> pks = new List<float>();
             float sumpks = 0;
 
-            for(int i=0; i<result.Count; i++)
+            for (int i = 0; i < result.Count; i++)
             {
-                if( actual.Contains(result[i]) ) {
+                if (actual.Contains(result[i]))
+                {
                     totalRelevant++;
-                    sumpks += totalRelevant/(i+1);
+                    sumpks += totalRelevant / (i + 1);
                 }
             }
             return sumpks / actual.Count;
@@ -121,8 +134,8 @@ namespace Metrics.MeanAveragePrecision
             string line;
 
 
-            System.IO.StreamReader queryFile =new System.IO.StreamReader(fileName);
-            List<String> s = new List<string>(); 
+            System.IO.StreamReader queryFile = new System.IO.StreamReader(fileName);
+            List<String> s = new List<string>();
             while ((line = queryFile.ReadLine()) != null)
             {
                 counter++;
@@ -156,6 +169,31 @@ namespace Metrics.MeanAveragePrecision
             queryFile.Close();
             System.Console.WriteLine("There were {0} lines.", counter);
             return listOfRelevanceResults;
+        }
+
+
+
+        public Stopwatch TestSpeed(string query)
+        {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            BEP.SearchRankedRetrieval(query);
+            stopwatch.Stop();
+
+            return stopwatch;
+        }
+
+        public double GetAverageSpeed()
+        {
+            long sum = 0;
+            List<string> queries = ReadStringList(queryFilePath);
+            foreach (string query in queries)
+            {
+                Stopwatch stopwatch = TestSpeed(query);
+                sum += stopwatch.ElapsedMilliseconds;
+            }
+
+            return ((double)sum / queries.Count);
         }
 
     }

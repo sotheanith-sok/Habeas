@@ -146,7 +146,7 @@ namespace Search.Index
         /// </summary>
         /// <param name="query"></param>
         /// <returns>MaxPriorityQueue of top ten documents</returns>
-        public IList<MaxPriorityQueue.InvertedIndex> SearchRanckedRetrieval(string query)
+        public IList<MaxPriorityQueue.InvertedIndex> SearchRankedRetrieval(string query)
         {
             Console.WriteLine("In Ranked Retrieval");
             Console.WriteLine("Query:" + query);
@@ -203,7 +203,7 @@ namespace Search.Index
                 {
                     //Performs RanckedRetrieval
                     IList<MaxPriorityQueue.InvertedIndex> topTenDocs;
-                    topTenDocs = SearchRanckedRetrieval(query);
+                    topTenDocs = SearchRankedRetrieval(query);
 
                     
                     //Converts the result for the front end

@@ -52,28 +52,6 @@ namespace UnitTests.EvaluateTests
         }
 
 
-        public Stopwatch TestSpeed(string query)
-        {
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
-            SearchRankedRetrieval(query);
-            stopwatch.Stop();
-
-            return stopwatch;
-        }
-
-        public double GetAverageSpeed()
-        {
-            long sum = 0;
-            List<string> queries = ReadStringList(queryFilePath);
-            foreach (string query in queries)
-            {
-                Stopwatch stopwatch = TestSpeed(query);
-                sum += stopwatch.ElapsedMilliseconds;
-            }
-
-            return ((double)sum / queries.Count);
-        }
 
     }
 }
