@@ -10,7 +10,7 @@ namespace UnitTests.EvaluateTests
     public class MAPTests
     {
         private static string corpusPath = "../../../corpus/Cranfield/relevance/";
-        private static string queryFilePath = corpusPath + "Actualqueries";
+        private static string queryFilePath = corpusPath + "~queries";
         private static string qrelFilePath = corpusPath + "qrel";
 
         private static MeanAveragePrecision mAP = new MeanAveragePrecision();

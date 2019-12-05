@@ -10,14 +10,16 @@ namespace Metrics.MeanAveragePrecision
 {
     public class MeanAveragePrecision
     {
-        private static string corpusPath = "../../../corpus/Cranfield/relevance/";
-        private static string queryFilePath = corpusPath + "Actualqueries";
-        private static string qrelFilePath = corpusPath + "qrel";
+        private static string corpusPath = "../../../corpus/Cranfield/";
+        private static string queryFilePath = corpusPath + "relevance/~queries";
+        private static string qrelFilePath = corpusPath + "relevance/qrel";
         private BackendProgram BEP;
         
         public MeanAveragePrecision()
         {
             BEP = new BackendProgram();
+            BEP.GetIndex(corpusPath);
+
         }
         
         /// <summary>
