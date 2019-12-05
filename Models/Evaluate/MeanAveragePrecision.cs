@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using Xunit;
-using FluentAssertions;
 using System;
 using System.Linq;
 using Search.Index;
