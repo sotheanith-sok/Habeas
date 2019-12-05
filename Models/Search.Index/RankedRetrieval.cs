@@ -15,6 +15,8 @@ namespace Search.Index
         //temporarily stores the document id with its corresponding rank  [docId -> A_{docID}]
         private Dictionary<int, double> accumulator;
 
+        public List<int> NonZeroAccumulatorCounts { get; }
+
         //used to calculate the queryToTermWeight
         private int corpusSize;
 
@@ -42,6 +44,8 @@ namespace Search.Index
 
             string path = Indexer.path;
             this.corpusSize = this.GetCorpusSize(path);
+
+            NonZeroAccumulatorCounts = new List<int>();
         }
 
         /// <summary>
@@ -90,6 +94,8 @@ namespace Search.Index
             // MaxPriorityQueue priorityQueue = BuildPriorityQueue();
 
             MaxPriorityQueue priorityQueue = BuildAccumulatorQueue(query);
+            //WARN: temporary to get the NonZeroAccumulatorCounts
+            NonZeroAccumulatorCounts.Add(accumulator.Count);
 
             accumulator.Clear();
 

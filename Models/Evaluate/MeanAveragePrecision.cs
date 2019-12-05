@@ -80,6 +80,16 @@ namespace Metrics.MeanAveragePrecision
 
             float meanAP = CalculateMAP(retrievals, relevances);
             Console.WriteLine("Mean Average Precision: " + meanAP);
+            
+            List<int> accumulatorCounts = BEP.NonZeroAccumulatorCounts;
+            float avgAccumulatorCounts;
+            int sum = 0;
+            foreach(int count in accumulatorCounts) {
+                sum += count;
+            }
+            avgAccumulatorCounts = (float)sum / accumulatorCounts.Count;
+            Console.WriteLine("Avg Non-Zero Accumulator Counts: " + avgAccumulatorCounts);
+
             return meanAP;
         }
 

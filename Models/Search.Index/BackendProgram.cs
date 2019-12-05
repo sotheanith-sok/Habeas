@@ -21,6 +21,8 @@ namespace Search.Index
         private static Boolean mode = true;
         private static String RankedRetrievalMode = "Default";
 
+        public List<int> NonZeroAccumulatorCounts {get;}
+
         /// <summary>
         /// Gets on-disk index or generate a new index out of the selected corpus
         /// </summary>
@@ -158,6 +160,9 @@ namespace Search.Index
 
             //retrieves the top ten documents of the normalized tokens
             RankedRetrieval rv = new RankedRetrieval(corpus, index, RankedRetrievalMode);
+            
+            //WARN: temporary
+            NonZeroAccumulatorCounts = rv.NonZeroAccumulatorCounts;
 
             IList<MaxPriorityQueue.InvertedIndex> tempFinal = rv.GetTopTen(finalTerms);
 
