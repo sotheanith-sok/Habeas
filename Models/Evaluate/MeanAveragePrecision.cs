@@ -39,6 +39,7 @@ namespace Metrics.MeanAveragePrecision
             }
             
             float meanAP = CalculateMAP(retrievals, relevances);
+            Console.WriteLine("MAP: " + meanAP);
             return meanAP;
         }
 
