@@ -476,10 +476,10 @@ namespace Search.Index
                 }
 
                 //Create the Tiers using a priority queue
-                List<MaxPriorityQueue.InvertedIndex> temp = tierQueue.RetrieveTier(1);
+                List<MaxPriorityQueue.InvertedIndex> temp = tierQueue.RetrieveTier(25);
                 tempTier1.Add(term, temp);
 
-                temp = tierQueue.RetrieveTier(10);
+                temp = tierQueue.RetrieveTier(25);
                 tempTier2.Add(term, temp);
 
 
