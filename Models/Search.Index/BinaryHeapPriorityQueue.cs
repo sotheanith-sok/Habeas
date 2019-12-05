@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System;
 using System.IO;
 using Search.Query;
+using Search.Index;
 public class MaxPriorityQueue
 {
     /// <summary>
@@ -12,7 +13,9 @@ public class MaxPriorityQueue
         private double rank;
         private int docID;
 
-        private int termFreq;
+        private int value;
+
+        private Tuple<int, int> docTierTuple;
 
         public InvertedIndex(double rank, int docID)
         {
@@ -20,11 +23,19 @@ public class MaxPriorityQueue
             this.docID = docID;
         }
 
-        public InvertedIndex(int termFreq, int docID)
+        public InvertedIndex(int value, int docID)
         {
-            this.termFreq = termFreq;
+            this.value = value;
             this.docID = docID;
         }
+
+        public InvertedIndex(int frequency, Tuple<int, int> docTier)
+        {
+            this.value = frequency;
+            this.docTierTuple = docTier;
+
+        }
+
 
         public double GetRank()
         {
@@ -37,7 +48,12 @@ public class MaxPriorityQueue
 
         public int GetTermFreq()
         {
-            return this.termFreq;
+            return this.value;
+        }
+
+        public Tuple<int, int> GetTuple()
+        {
+            return this.docTierTuple;
         }
 
 
@@ -199,7 +215,7 @@ public class MaxPriorityQueue
         List<InvertedIndex> priorityQueue = this.priorityQueue;
         List<InvertedIndex> topTen = new List<InvertedIndex>();
 
-        while (topTen.Count < 10)
+        while (topTen.Count < 50)
         {
             if (priorityQueue.Count == 0)
             {
@@ -320,7 +336,6 @@ public class MaxPriorityQueue
 
 
 }
-
 
 
 

@@ -156,12 +156,12 @@ namespace Search.Index
                 // divide Accumulated Value A_{d} by L_{d} 
                 finalRank = (double)candidate.Value / normalizer;
 
-
                 //add to list to perform priority queue on 
                 priorityQueue.MaxHeapInsert(finalRank, candidate.Key);
             }
 
             return priorityQueue;
+
         } // end of BuildAccumulatorQueue()
 
         /// <summary>
