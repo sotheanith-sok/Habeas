@@ -119,9 +119,10 @@ namespace Search.Index
                     int tierID = item.GetTuple().Item2;
 
 
-
-                    id2tier.Add(docID, tierID);
-
+                    if (!id2tier.ContainsKey(docID))
+                    {
+                        id2tier.Add(docID, tierID);
+                    }
 
                     //implements formula for w_{d,t}
                     this.doc2termWeight = this.rankVariant.calculateDoc2TermWeight(termFrequency, docID, this.corpusSize, this.index);
