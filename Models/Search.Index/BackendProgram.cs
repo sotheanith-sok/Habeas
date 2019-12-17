@@ -21,7 +21,7 @@ namespace Search.Index
         private static Boolean mode = true;
         private static String RankedRetrievalMode = "Default";
 
-        public List<int> NonZeroAccumulatorCounts {get;}
+        public List<int> NonZeroAccumulatorCounts {get; set;}
 
         /// <summary>
         /// Gets on-disk index or generate a new index out of the selected corpus
