@@ -188,7 +188,7 @@ namespace Metrics.MeanAveragePrecision
         /// <returns></returns>
         public List<List<int>> ReadIntList(string fileName)
         {
-            int counter = 0;
+           
             string line;
             List<List<int>> listOfRelevanceResults = new List<List<int>>();
 
