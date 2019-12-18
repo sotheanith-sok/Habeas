@@ -89,12 +89,13 @@ namespace Search.Index
         {
 
             // //Build the Accumulator Hashmap
-            // BuildAccumulator(query);
-
             // //Build Priority Queue using the Accumulator divided by L_{d}  
-            // MaxPriorityQueue priorityQueue = BuildPriorityQueue();
-
+          
+            //For regular index
             MaxPriorityQueue priorityQueue = BuildAccumulator(query);
+
+            //For Tiered Indices
+            //MaxPriorityQueue priorityQueue = BuildAccumulatorQueue(query);
             //WARN: temporary to get the NonZeroAccumulatorCounts
             NonZeroAccumulatorCounts.Add(accumulator.Count);
 
