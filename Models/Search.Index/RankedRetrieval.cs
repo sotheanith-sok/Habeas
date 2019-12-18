@@ -94,7 +94,7 @@ namespace Search.Index
             // //Build Priority Queue using the Accumulator divided by L_{d}  
             // MaxPriorityQueue priorityQueue = BuildPriorityQueue();
 
-            MaxPriorityQueue priorityQueue = BuildAccumulatorQueue(query);
+            MaxPriorityQueue priorityQueue = BuildAccumulator(query);
             //WARN: temporary to get the NonZeroAccumulatorCounts
             NonZeroAccumulatorCounts.Add(accumulator.Count);
 
@@ -210,7 +210,7 @@ namespace Search.Index
         /// Builds the Accumulator hashmap for the query to retrieve top 10 documents
         /// </summary>
         /// <param name="query"></param>
-        private void BuildAccumulator(List<string> query)
+        private MaxPriorityQueue BuildAccumulator(List<string> query)
         {
 
             //stores temporary Accumulator value that will be added to the accumulator hashmap
@@ -253,17 +253,6 @@ namespace Search.Index
                 }
 
             }
-
-
-
-        } // end of BuildAccumulator(List<String> query)
-
-        /// <summary>
-        /// Creates a new priority queue by inserting the rank of the document and document id 
-        /// </summary>
-        /// <returns> a priority queue with max heap property</returns>
-        private MaxPriorityQueue BuildPriorityQueue()
-        {
 
             //temporary variable to hold the doc weight
             double normalizer;
