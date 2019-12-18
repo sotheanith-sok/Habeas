@@ -5,6 +5,7 @@ using Search.Query;
 using Search.Index;
 public class MaxPriorityQueue
 {
+    public int topResults = 50;
     /// <summary>
     /// object that contains the rank and document id which is the object the priority queue is maintianing 
     /// </summary>
@@ -258,7 +259,7 @@ public class MaxPriorityQueue
 
         List<InvertedIndex> topTen = new List<InvertedIndex>();
 
-        while (topTen.Count < 20)
+        while (topTen.Count < topResults)
         {
             if (priorityQueue.Count == 0)
             {

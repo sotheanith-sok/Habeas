@@ -7,6 +7,7 @@ namespace Search.Index
 {
     public class RankedRetrieval
     {
+        public int resultsReturned= 50;
         //w_{q,t}
         private double query2termWeight;
         //w_{d,t}
@@ -116,7 +117,7 @@ namespace Search.Index
 
             }
             Console.WriteLine("Tier Count: " + docIDS.Count);
-            if (docIDS.Count < 20)
+            if (docIDS.Count < resultsReturned)
             {
                 foreach (string term in query)
                 {
@@ -124,7 +125,7 @@ namespace Search.Index
                 }
             }
             Console.WriteLine("Tier 2 Count: " + docIDS.Count);
-            if (docIDS.Count < 20)
+            if (docIDS.Count < resultsReturned)
             {
                 foreach (string term in query)
                 {
@@ -220,7 +221,7 @@ namespace Search.Index
             foreach (string term in query)
             {
                 //posting list of a term grabbed from the On Disk file
-                List<MaxPriorityQueue.InvertedIndex> docIDS = this.index.GetPostingsFromTier(term);
+                IList<Posting> docIDS = this.index.GetPostings(term);
 
                 //documentFrequency
                 int docFrequency = docIDS.Count;
@@ -228,10 +229,10 @@ namespace Search.Index
                 //implements formula for w_{q,t}
                 this.query2termWeight = this.rankVariant.calculateQuery2TermWeight(docFrequency, this.corpusSize);
 
-                foreach (MaxPriorityQueue.InvertedIndex item in docIDS)
+                foreach (Posting item in docIDS)
                 {
-                    double termFrequency = item.GetTermFreq();
-                    int docID = item.GetDocumentId();
+                    double termFrequency = item.Positions.Count;
+                    int docID = item.DocumentId;
 
 
                     //implements formula for w_{d,t}

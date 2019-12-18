@@ -60,7 +60,7 @@ namespace Metrics.MeanAveragePrecision
 
                 tOneSat++;
                 Unsat:
-
+                printResults(i,ConvertRankedResult(topDocs));
                 retrievals.Add(ConvertRankedResult(topDocs));
             }
             totalTime /= 1000;    //miliseconds to seconds
@@ -142,6 +142,7 @@ namespace Metrics.MeanAveragePrecision
         /// <param name="actual"></param>
         public float CalculateAP(List<int> result, List<int> actual)
         {
+           
             int totalRelevant = 0;
             List<float> pks = new List<float>();
             float sumpks = 0;
@@ -228,6 +229,17 @@ namespace Metrics.MeanAveragePrecision
             }
 
             return ((double)sum / queries.Count);
+        }
+
+        public void printResults(int query , List<int> result)
+        {
+            Console.WriteLine("This is a set of results for query " +query+ "returned by Hebeas");
+            Console.Write("Doc Ids: ");
+            foreach(int item in result)
+            {
+                Console.Write(item+ " ");
+            }
+            Console.WriteLine();
         }
 
     }
