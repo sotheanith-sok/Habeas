@@ -7,7 +7,7 @@ namespace Search.Index
 {
     public class RankedRetrieval
     {
-        public int resultsReturned= 50;
+        public int resultsReturned = 50;
         //w_{q,t}
         private double query2termWeight;
         //w_{d,t}
@@ -78,7 +78,7 @@ namespace Search.Index
         }
 
         //Make a new priority queue
-        MaxPriorityQueue priorityQueue = new MaxPriorityQueue();
+        MaxPriorityQueue TierPriorityQueue = new MaxPriorityQueue();
 
         /// <summary>
         /// Method that takes in the query and returns a list of the top ten ranking documents
@@ -90,84 +90,95 @@ namespace Search.Index
 
             // //Build the Accumulator Hashmap
             // //Build Priority Queue using the Accumulator divided by L_{d}  
-          
+
             //For regular index
-            MaxPriorityQueue priorityQueue = BuildAccumulatorQueue(query);
+            MaxPriorityQueue TierPriorityQueue = BuildAccumulatorQueue(query);
 
             //For Tiered Indices
-            //MaxPriorityQueue priorityQueue = BuildAccumulatorTierQueue(query);
+            //MaxPriorityQueue TierP = BuildAccumulatorTierQueue(query);
+            //  if (this.TierPriorityQueue.GetPriorityQueue().Count < 50)
+            // {
+            //     BuildAccumulatorTierQueue(query, 2);
+            // }
+            // if (this.TierPriorityQueue.GetPriorityQueue().Count < 50)
+            // {
+            //     BuildAccumulatorTierQueue(query, 3);
+            // }
+
             //WARN: temporary to get the NonZeroAccumulatorCounts
             NonZeroAccumulatorCounts.Add(accumulator.Count);
 
             accumulator.Clear();
 
             //Retrieve Top Ten Documents according to percent
-            return priorityQueue.RetrieveTopTen();
+            return this.TierPriorityQueue.RetrieveTopTen();
 
         }
 
-        private MaxPriorityQueue BuildAccumulatorTierQueue(List<string> query)
+        private MaxPriorityQueue BuildAccumulatorTierQueue(List<string> query, int tier = 1)
         {
+            this.TierPriorityQueue.ClearHeap();
+
             Dictionary<int, int> id2tier = new Dictionary<int, int>();
             //stores temporary Accumulator value that will be added to the accumulator hashmap
             double docAccumulator;
             List<MaxPriorityQueue.InvertedIndex> docIDS = new List<MaxPriorityQueue.InvertedIndex>();
             foreach (string term in query)
             {
-                docIDS.AddRange(this.index.GetPostingsFromTier(term));
-
-            }
-            Console.WriteLine("Tier Count: " + docIDS.Count);
-            if (docIDS.Count < resultsReturned)
-            {
-                foreach (string term in query)
+                if (tier == 1) // get postings only from tier
                 {
-                    docIDS.AddRange(this.index.GetPostingsFromTier(term, 2));
+                    docIDS = this.index.GetPostingsFromTier(term);
                 }
-            }
-            Console.WriteLine("Tier 2 Count: " + docIDS.Count);
-            if (docIDS.Count < resultsReturned)
-            {
-                foreach (string term in query)
+                else if (tier == 2) //get postings from tier 1 and tier 2
                 {
-                    docIDS.AddRange(this.index.GetPostingsFromTier(term, 3));
+                    for (int i = 1; i < tier; i++)
+                    {
+                        docIDS.AddRange(this.index.GetPostingsFromTier(term, i));
+                    }
                 }
-            }
-
-
-            //documentFrequency
-            int docFrequency = docIDS.Count;
-
-            //implements formula for w_{q,t}
-            this.query2termWeight = this.rankVariant.calculateQuery2TermWeight(docFrequency, this.corpusSize);
-
-            foreach (MaxPriorityQueue.InvertedIndex item in docIDS)
-            {
-                double termFrequency = item.GetTermFreq();
-                int docID = item.GetTuple().Item1;
-                int tierID = item.GetTuple().Item2;
-
-
-                if (!id2tier.ContainsKey(docID))
+                else //get postings from all tiers
                 {
-                    id2tier.Add(docID, tierID);
+                    for (int i = 1; i < tier; i++)
+                    {
+                        docIDS.AddRange(this.index.GetPostingsFromTier(term, i));
+                    }
+
                 }
 
+                //documentFrequency
+                int docFrequency = docIDS.Count;
 
-                //implements formula for w_{d,t}
-                this.doc2termWeight = this.rankVariant.calculateDoc2TermWeight(termFrequency, docID, this.corpusSize, this.index);
+                //implements formula for w_{q,t}
+                this.query2termWeight = this.rankVariant.calculateQuery2TermWeight(docFrequency, this.corpusSize);
 
-                //the A_{d} value for a specific term in that document
-                docAccumulator = this.query2termWeight * this.doc2termWeight;
-
-                //if the A_{d} value exists on the hashmap increase its value else create a new key-value pair
-                if (accumulator.ContainsKey(docID))
+                foreach (MaxPriorityQueue.InvertedIndex item in docIDS)
                 {
-                    this.accumulator[docID] += docAccumulator;
-                }
-                else
-                {
-                    this.accumulator.Add(docID, docAccumulator);
+                    double termFrequency = item.GetTermFreq();
+                    int docID = item.GetTuple().Item1;
+                    int tierID = item.GetTuple().Item2;
+
+
+                    if (!id2tier.ContainsKey(docID))
+                    {
+                        id2tier.Add(docID, tierID);
+                    }
+
+
+                    //implements formula for w_{d,t}
+                    this.doc2termWeight = this.rankVariant.calculateDoc2TermWeight(termFrequency, docID, this.corpusSize, this.index);
+
+                    //the A_{d} value for a specific term in that document
+                    docAccumulator = this.query2termWeight * this.doc2termWeight;
+
+                    //if the A_{d} value exists on the hashmap increase its value else create a new key-value pair
+                    if (accumulator.ContainsKey(docID))
+                    {
+                        this.accumulator[docID] += docAccumulator;
+                    }
+                    else
+                    {
+                        this.accumulator.Add(docID, docAccumulator);
+                    }
                 }
             }
 
@@ -179,7 +190,7 @@ namespace Search.Index
             //temporary variable to hold the final ranking value of that document
             double finalRank;
 
-
+            Console.WriteLine("Rank returned by the Accumulator: ");
             //for every key value in the Accumulator divide A_{d} by L_{d}
             foreach (KeyValuePair<int, double> candidate in this.accumulator)
             {
@@ -190,20 +201,16 @@ namespace Search.Index
                 finalRank = (double)candidate.Value / normalizer;
 
                 int tierValue = id2tier[candidate.Key];
+                Console.WriteLine("Candidate " + candidate + " Rank Score" + finalRank + " ");
                 Tuple<int, int> tempTuple = new Tuple<int, int>(candidate.Key, tierValue);
 
                 //add to list to perform priority queue on 
-                this.priorityQueue.MaxHeapInsert(finalRank, tempTuple);
+                this.TierPriorityQueue.MaxHeapInsert(finalRank, tempTuple);
             }
+            Console.WriteLine("End of Ranking returned by the Accumulator");
 
-            // Console.WriteLine("In BUILD ACCUMULATOR QUEUE ------------------------------------");
-            // foreach (MaxPriorityQueue.InvertedIndex item in priorityQueue.GetPriorityQueue())
-            // {
-            //     Console.WriteLine("Document ID: " + item.GetTuple().Item1);
-            //     Console.WriteLine("From Tier: " + item.GetTuple().Item2);
-            // }
 
-            return priorityQueue;
+            return this.TierPriorityQueue;
 
         } // end of BuildAccumulatorQueue()
 
@@ -251,9 +258,9 @@ namespace Search.Index
                     {
                         this.accumulator.Add(docID, docAccumulator);
                     }
-                }
+                } // end of foreach loop for postings in docIDS
 
-            }
+            } // end of foreach loop for query
 
             //temporary variable to hold the doc weight
             double normalizer;
@@ -261,9 +268,9 @@ namespace Search.Index
             double finalRank;
 
             //Make a new priority queue
-            MaxPriorityQueue priorityQueue = new MaxPriorityQueue();
+            MaxPriorityQueue TierP = new MaxPriorityQueue();
 
-
+            Console.WriteLine("Rank returned by the Accumulator: ");
             //for every key value in the Accumulator divide A_{d} by L_{d}
             foreach (KeyValuePair<int, double> candidate in this.accumulator)
             {
@@ -273,11 +280,16 @@ namespace Search.Index
                 // divide Accumulated Value A_{d} by L_{d} 
                 finalRank = (double)candidate.Value / normalizer;
 
-                //add to list to perform priority queue on 
-                priorityQueue.MaxHeapInsert(finalRank, candidate.Key);
-            }
+                Console.WriteLine("Candidate " + candidate + " Rank Score" + finalRank + " ");
 
-            return priorityQueue;
+
+                //add to list to perform priority queue on 
+                TierP.MaxHeapInsert(finalRank, candidate.Key);
+            }
+            Console.WriteLine("End of Ranking returned by the Accumulator");
+
+
+            return TierP;
 
         } // end of BuildPriorityQueuer();
 

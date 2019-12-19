@@ -52,7 +52,7 @@ namespace Metrics.MeanAveragePrecision
                 totalTime += stopwatch.ElapsedMilliseconds;
                 foreach (MaxPriorityQueue.InvertedIndex item in topDocs)
                 {
-                    if (item.GetTuple().Item2 != 1)
+                    if (item.GetDocumentId() != 1)
                     {
                         goto Unsat;
                     }
@@ -97,7 +97,7 @@ namespace Metrics.MeanAveragePrecision
             foreach (var p in topDocs)
             {
                 //TODO: Clarify the name later!
-                int docId = p.GetTuple().Item1;
+                int docId = p.GetDocumentId();
 
                 IDocument doc = BackendProgram.corpus.GetDocument(docId);
                 string fileName = ((IFileDocument)doc).FileName;

@@ -507,13 +507,14 @@ namespace Search.Index
                         return new List<MaxPriorityQueue.InvertedIndex>();
                     }
 
-                    // Console.WriteLine("In the tier designator");
+
+                    //Console.WriteLine("Printing Doc Ids for: " + term);
                     foreach (var index in temp)
                     {
-                        // Console.WriteLine(index.GetTermFreq());
-                        // Console.WriteLine(index.GetDocumentId());
+                        
                         int tf = index.GetTermFreq();
                         int id = index.GetDocumentId();
+                        //Console.Write(id + " ");
                         Tuple<int, int> tempTuple = new Tuple<int, int>(id, 1);
                         MaxPriorityQueue.InvertedIndex tempInvIndex = new MaxPriorityQueue.InvertedIndex(tf, tempTuple);
                         result.Add(tempInvIndex);
