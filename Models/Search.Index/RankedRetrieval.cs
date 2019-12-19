@@ -92,10 +92,10 @@ namespace Search.Index
             // //Build Priority Queue using the Accumulator divided by L_{d}  
 
             //For regular index
-            MaxPriorityQueue TierPriorityQueue = BuildAccumulatorQueue(query);
+            //this.TierPriorityQueue = BuildAccumulatorQueue(query);
 
             //For Tiered Indices
-            //MaxPriorityQueue TierP = BuildAccumulatorTierQueue(query);
+            this.TierPriorityQueue = BuildAccumulatorTierQueue(query);
             //  if (this.TierPriorityQueue.GetPriorityQueue().Count < 50)
             // {
             //     BuildAccumulatorTierQueue(query, 2);
@@ -190,7 +190,7 @@ namespace Search.Index
             //temporary variable to hold the final ranking value of that document
             double finalRank;
 
-            Console.WriteLine("Rank returned by the Accumulator: ");
+            //Console.WriteLine("Rank returned by the Accumulator: ");
             //for every key value in the Accumulator divide A_{d} by L_{d}
             foreach (KeyValuePair<int, double> candidate in this.accumulator)
             {
@@ -201,13 +201,13 @@ namespace Search.Index
                 finalRank = (double)candidate.Value / normalizer;
 
                 int tierValue = id2tier[candidate.Key];
-                Console.WriteLine("Candidate " + candidate + " Rank Score" + finalRank + " ");
+                //Console.WriteLine("Candidate " + candidate + " Rank Score" + finalRank + " ");
                 Tuple<int, int> tempTuple = new Tuple<int, int>(candidate.Key, tierValue);
 
                 //add to list to perform priority queue on 
                 this.TierPriorityQueue.MaxHeapInsert(finalRank, tempTuple);
             }
-            Console.WriteLine("End of Ranking returned by the Accumulator");
+            //Console.WriteLine("End of Ranking returned by the Accumulator");
 
 
             return this.TierPriorityQueue;
@@ -270,7 +270,7 @@ namespace Search.Index
             //Make a new priority queue
             MaxPriorityQueue TierP = new MaxPriorityQueue();
 
-            Console.WriteLine("Rank returned by the Accumulator: ");
+            //Console.WriteLine("Rank returned by the Accumulator: ");
             //for every key value in the Accumulator divide A_{d} by L_{d}
             foreach (KeyValuePair<int, double> candidate in this.accumulator)
             {
@@ -280,13 +280,13 @@ namespace Search.Index
                 // divide Accumulated Value A_{d} by L_{d} 
                 finalRank = (double)candidate.Value / normalizer;
 
-                Console.WriteLine("Candidate " + candidate + " Rank Score" + finalRank + " ");
+                //Console.WriteLine("Candidate " + candidate + " Rank Score" + finalRank + " ");
 
 
                 //add to list to perform priority queue on 
                 TierP.MaxHeapInsert(finalRank, candidate.Key);
             }
-            Console.WriteLine("End of Ranking returned by the Accumulator");
+            //Console.WriteLine("End of Ranking returned by the Accumulator");
 
 
             return TierP;

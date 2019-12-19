@@ -169,13 +169,13 @@ namespace Search.Index
 
 
             List<Posting> result = postingMap.Get(term);
-            Console.WriteLine("results for get postings" + result.Count);
-            if (default(List<Posting>) == result)
+            if (default(List<Posting>) == result || result == null)
             {
                 return new List<Posting>();
             }
             else
             {
+                Console.WriteLine("results for get postings" + result.Count);
                 return result;
             }
         }
@@ -511,7 +511,7 @@ namespace Search.Index
                     //Console.WriteLine("Printing Doc Ids for: " + term);
                     foreach (var index in temp)
                     {
-                        
+
                         int tf = index.GetTermFreq();
                         int id = index.GetDocumentId();
                         //Console.Write(id + " ");
