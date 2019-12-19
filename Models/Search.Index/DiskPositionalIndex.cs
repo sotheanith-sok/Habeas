@@ -175,7 +175,7 @@ namespace Search.Index
             }
             else
             {
-                Console.WriteLine("results for get postings" + result.Count);
+                //Console.WriteLine("results for get postings" + result.Count);
                 return result;
             }
         }
@@ -476,15 +476,15 @@ namespace Search.Index
                 }
 
                 //Create the Tiers using a priority queue
-                List<MaxPriorityQueue.InvertedIndex> temp = tierQueue.RetrieveTier(100);
+                List<MaxPriorityQueue.InvertedIndex> temp = tierQueue.RetrieveTier(80);
                 tempTier1.Add(term, temp);
 
-                // temp = tierQueue.RetrieveTier(10);
-                // tempTier2.Add(term, temp);
+                temp = tierQueue.RetrieveTier(50);
+                tempTier2.Add(term, temp);
 
 
-                // temp = tierQueue.RetrieveTier(100);
-                // tempTier3.Add(term, temp);
+                temp = tierQueue.RetrieveTier(100);
+                tempTier3.Add(term, temp);
 
 
 

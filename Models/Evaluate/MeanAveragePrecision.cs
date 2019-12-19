@@ -10,6 +10,7 @@ namespace Metrics.MeanAveragePrecision
 {
     public class MeanAveragePrecision
     {
+        private static string indexPath = "../../../corpus/Cranfield/jsonDocs";
         private static string corpusPath = "../../../corpus/Cranfield/";
         private static string queryFilePath = corpusPath + "relevance/~queries";
         private static string qrelFilePath = corpusPath + "relevance/qrel";
@@ -57,7 +58,7 @@ namespace Metrics.MeanAveragePrecision
                 totalTime += stopwatch.ElapsedMilliseconds;
                 foreach (MaxPriorityQueue.InvertedIndex item in topDocs)
                 {
-                    if (item.GetDocumentId() != 1)
+                    if (item.GetTuple().Item1 != 1)
                     {
                         goto Unsat;
                     }

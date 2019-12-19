@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Search.Document;
 using System;
+using System.Diagnostics;
 
 
 namespace Search.Index
@@ -96,14 +97,14 @@ namespace Search.Index
 
             //For Tiered Indices
             this.TierPriorityQueue = BuildAccumulatorTierQueue(query);
-            //  if (this.TierPriorityQueue.GetPriorityQueue().Count < 50)
-            // {
-            //     BuildAccumulatorTierQueue(query, 2);
-            // }
-            // if (this.TierPriorityQueue.GetPriorityQueue().Count < 50)
-            // {
-            //     BuildAccumulatorTierQueue(query, 3);
-            // }
+             if (this.TierPriorityQueue.GetPriorityQueue().Count < 50)
+            {
+                BuildAccumulatorTierQueue(query, 2);
+            }
+            if (this.TierPriorityQueue.GetPriorityQueue().Count < 50)
+            {
+                BuildAccumulatorTierQueue(query, 3);
+            }
 
             //WARN: temporary to get the NonZeroAccumulatorCounts
             NonZeroAccumulatorCounts.Add(accumulator.Count);
@@ -117,12 +118,16 @@ namespace Search.Index
 
         private MaxPriorityQueue BuildAccumulatorTierQueue(List<string> query, int tier = 1)
         {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
             this.TierPriorityQueue.ClearHeap();
 
             Dictionary<int, int> id2tier = new Dictionary<int, int>();
             //stores temporary Accumulator value that will be added to the accumulator hashmap
             double docAccumulator;
             List<MaxPriorityQueue.InvertedIndex> docIDS = new List<MaxPriorityQueue.InvertedIndex>();
+
             foreach (string term in query)
             {
                 if (tier == 1) // get postings only from tier
@@ -182,9 +187,7 @@ namespace Search.Index
                 }
             }
 
-
-
-
+            Console.WriteLine("After initial for each: " + stopwatch.ElapsedMilliseconds);
             //temporary variable to hold the doc weight
             double normalizer;
             //temporary variable to hold the final ranking value of that document
@@ -209,7 +212,8 @@ namespace Search.Index
             }
             //Console.WriteLine("End of Ranking returned by the Accumulator");
 
-
+            stopwatch.Stop();
+            Console.WriteLine("Elapsed time for query: " + stopwatch.ElapsedMilliseconds);
             return this.TierPriorityQueue;
 
         } // end of BuildAccumulatorQueue()
@@ -220,6 +224,8 @@ namespace Search.Index
         /// <param name="query"></param>
         private MaxPriorityQueue BuildAccumulatorQueue(List<string> query)
         {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
 
             //stores temporary Accumulator value that will be added to the accumulator hashmap
             double docAccumulator;
@@ -262,6 +268,8 @@ namespace Search.Index
 
             } // end of foreach loop for query
 
+            Console.WriteLine("After initial for each: " + stopwatch.ElapsedMilliseconds);
+
             //temporary variable to hold the doc weight
             double normalizer;
             //temporary variable to hold the final ranking value of that document
@@ -288,6 +296,8 @@ namespace Search.Index
             }
             //Console.WriteLine("End of Ranking returned by the Accumulator");
 
+            stopwatch.Stop();
+            Console.WriteLine("Elapsed time for query: " + stopwatch.ElapsedMilliseconds);
 
             return TierP;
 
