@@ -177,7 +177,7 @@ namespace Search.Index
             }
             else
             {
-                // Console.WriteLine("results for get postings " + result.Count);
+                //Console.WriteLine("results for get postings " + result.Count);
                 return result;
             }
         }
@@ -525,7 +525,7 @@ namespace Search.Index
                     //     Console.WriteLine(i.GetTuple().Item1);
                     // }
 
-                    if (result.Count < 20)
+                    if (result.Count < 50)
                     {
                         goto case 2;
                     }
@@ -540,7 +540,7 @@ namespace Search.Index
                     temp = tier2.Get(term);
                     foreach (var index in temp)
                     {
-                        if (result.Count < 20)
+                        if (result.Count < 50)
                         {
                             int tf = index.GetTermFreq();
                             int id = index.GetDocumentId();
@@ -550,7 +550,7 @@ namespace Search.Index
                         }
                     }
 
-                    if (result.Count < 20)
+                    if (result.Count < 50)
                     {
                         goto case 3;
                     }

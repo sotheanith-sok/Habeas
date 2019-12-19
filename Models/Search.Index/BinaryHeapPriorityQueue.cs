@@ -258,7 +258,7 @@ public class MaxPriorityQueue
 
         List<InvertedIndex> topTen = new List<InvertedIndex>();
 
-        while (topTen.Count < 20)
+        while (topTen.Count < 50)
         {
             if (priorityQueue.Count == 0)
             {

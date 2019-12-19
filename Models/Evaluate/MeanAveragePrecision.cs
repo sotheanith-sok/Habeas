@@ -48,6 +48,7 @@ namespace Metrics.MeanAveragePrecision
                 stopwatch.Stop();
                 totalTime += stopwatch.ElapsedMilliseconds;
 
+                printResults(i,ConvertRankedResult(topDocs));
                 retrievals.Add(ConvertRankedResult(topDocs));
             }
             totalTime /= 1000;    //miliseconds to seconds
@@ -61,8 +62,9 @@ namespace Metrics.MeanAveragePrecision
 
             List<int> accumulatorCounts = BEP.NonZeroAccumulatorCounts;
             float avg;
-            int sum=0;
-            foreach(int count in accumulatorCounts) {
+            int sum = 0;
+            foreach (int count in accumulatorCounts)
+            {
                 sum += count;
             }
             avg = (float)sum / accumulatorCounts.Count;
@@ -142,6 +144,16 @@ namespace Metrics.MeanAveragePrecision
                 }
             }
             return sumpks / actual.Count;
+        }
+
+        public void printResults(int v, List<int> results)
+        {
+            Console.Write("This is a set of results for query "+v+" returned by Habeas: ");
+            foreach (int i in results)
+            {
+                Console.Write(i+" ");
+            }
+            Console.WriteLine();
         }
 
         /// <summary>
