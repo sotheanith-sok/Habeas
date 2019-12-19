@@ -92,10 +92,10 @@ namespace Search.Index
             // //Build Priority Queue using the Accumulator divided by L_{d}  
           
             //For regular index
-            MaxPriorityQueue priorityQueue = BuildAccumulator(query);
+            MaxPriorityQueue priorityQueue = BuildAccumulatorQueue(query);
 
             //For Tiered Indices
-            //MaxPriorityQueue priorityQueue = BuildAccumulatorQueue(query);
+            //MaxPriorityQueue priorityQueue = BuildAccumulatorTierQueue(query);
             //WARN: temporary to get the NonZeroAccumulatorCounts
             NonZeroAccumulatorCounts.Add(accumulator.Count);
 
@@ -106,7 +106,7 @@ namespace Search.Index
 
         }
 
-        private MaxPriorityQueue BuildAccumulatorQueue(List<string> query)
+        private MaxPriorityQueue BuildAccumulatorTierQueue(List<string> query)
         {
             Dictionary<int, int> id2tier = new Dictionary<int, int>();
             //stores temporary Accumulator value that will be added to the accumulator hashmap
@@ -211,7 +211,7 @@ namespace Search.Index
         /// Builds the Accumulator hashmap for the query to retrieve top 10 documents
         /// </summary>
         /// <param name="query"></param>
-        private MaxPriorityQueue BuildAccumulator(List<string> query)
+        private MaxPriorityQueue BuildAccumulatorQueue(List<string> query)
         {
 
             //stores temporary Accumulator value that will be added to the accumulator hashmap
