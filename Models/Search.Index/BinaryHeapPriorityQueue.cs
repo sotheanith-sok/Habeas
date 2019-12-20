@@ -304,7 +304,7 @@ public class MaxPriorityQueue
                 topDocuments.Add(max);
             }
         }
-        if (limit <= 1)
+        else if (limit <= 1)
         {
             while (this.priorityQueue.Count > 0)
             {

@@ -475,23 +475,24 @@ namespace Search.Index
                     tierQueue.MaxHeapInsert(p.Positions.Count, p.DocumentId);
                 }
 
-                //Console.WriteLine("Total documents for term " + term + " is: " + termPostings.Count);
-
+                int Whole = tierQueue.GetPriorityQueue().Count;
                 //Create the Tiers using a priority queue
-                List<MaxPriorityQueue.InvertedIndex> temp = tierQueue.RetrieveTier(80);
+                List<MaxPriorityQueue.InvertedIndex> temp = tierQueue.RetrieveTier(50);
+                int Tier1Amount = temp.Count;
                 tempTier1.Add(term, temp);
-                //Console.WriteLine("Total documents in Tier 1 " + term + " is: " + temp.Count);
-
 
                 temp = tierQueue.RetrieveTier(50);
+                int Tier2Amount = temp.Count;
                 tempTier2.Add(term, temp);
-                //Console.WriteLine("Total documents in Tier 2 " + term + " is: " + temp.Count);
-
 
                 temp = tierQueue.RetrieveTier(100);
+                int Tier3Amount = temp.Count;
                 tempTier3.Add(term, temp);
-                //Console.WriteLine("Total documents in Tier 3 " + term + " is: " + temp.Count);
 
+                if (Whole > 2)
+                {
+                    Console.WriteLine(term + ": " + Whole + ", " + Tier1Amount + ", " + Tier2Amount + ", " + Tier3Amount + ", ");
+                }
 
             }
 
