@@ -475,17 +475,22 @@ namespace Search.Index
                     tierQueue.MaxHeapInsert(p.Positions.Count, p.DocumentId);
                 }
 
+                //Console.WriteLine("Total documents for term " + term + " is: " + termPostings.Count);
+
                 //Create the Tiers using a priority queue
                 List<MaxPriorityQueue.InvertedIndex> temp = tierQueue.RetrieveTier(80);
                 tempTier1.Add(term, temp);
+                //Console.WriteLine("Total documents in Tier 1 " + term + " is: " + temp.Count);
+
 
                 temp = tierQueue.RetrieveTier(50);
                 tempTier2.Add(term, temp);
+                //Console.WriteLine("Total documents in Tier 2 " + term + " is: " + temp.Count);
 
 
                 temp = tierQueue.RetrieveTier(100);
                 tempTier3.Add(term, temp);
-
+                //Console.WriteLine("Total documents in Tier 3 " + term + " is: " + temp.Count);
 
 
             }

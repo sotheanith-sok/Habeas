@@ -296,6 +296,14 @@ public class MaxPriorityQueue
         List<InvertedIndex> topDocuments = new List<InvertedIndex>();
         double limit = Math.Floor((percentOfDocuments * this.priorityQueue.Count) / 100);
 
+        if (this.priorityQueue.Count < 10)
+        {
+            while (this.priorityQueue.Count > 0)
+            {
+                InvertedIndex max = ExtractMax(this.priorityQueue);
+                topDocuments.Add(max);
+            }
+        }
         if (limit <= 1)
         {
             while (this.priorityQueue.Count > 0)
