@@ -21,6 +21,8 @@ namespace Search.Index
         private static Boolean mode = true;
         private static String RankedRetrievalMode = "Default";
 
+        public List<int> NonZeroAccumulatorCounts { get; set; }
+
         /// <summary>
         /// Gets on-disk index or generate a new index out of the selected corpus
         /// </summary>
@@ -45,7 +47,7 @@ namespace Search.Index
                 if (doesOnDiskIndexExist)
                 {
                     Console.WriteLine("Reading the existing on-disk index.");
-                    index = new DiskPositionalIndex(pathToIndex);        
+                    index = new DiskPositionalIndex(pathToIndex);
                 }
                 else
                 {
@@ -142,7 +144,65 @@ namespace Search.Index
         }
 
         /// <summary>
-        /// Returns postings for a query
+        /// Performs Rancked Retrieval for SearchQuery()
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns>MaxPriorityQueue of top ten documents</returns>
+        public IList<MaxPriorityQueue.InvertedIndex> SearchRankedRetrieval(string query)
+        {
+            Console.WriteLine("In Ranked Retrieval");
+            Console.WriteLine("Query:" + query);
+
+            //parser to parse the query 
+            RankedRetrievalParser parser = new RankedRetrievalParser();
+
+            List<string> finalTerms = parser.ParseQuery(query);
+
+
+            
+            //IMPLEMENT TIERED INDEX
+            // DiskTierIndex tierIndices = new DiskTierIndex(Indexer.path, index);
+            // RankedRetrieval rv = new RankedRetrieval(corpus, tierIndices, RankedRetrievalMode);
+            // NonZeroAccumulatorCounts = rv.NonZeroAccumulatorCounts;
+            // IList<MaxPriorityQueue.InvertedIndex> tempFinal = rv.GetTopTenTier(finalTerms);
+
+
+            //retrieves the top ten documents of the normalized tokens
+            RankedRetrieval rv = new RankedRetrieval(corpus, this.index, RankedRetrievalMode);
+
+            //WARN: temporary
+            NonZeroAccumulatorCounts = rv.NonZeroAccumulatorCounts;
+
+            IList<MaxPriorityQueue.InvertedIndex> tempFinal = rv.GetTopTen(finalTerms);
+
+
+            return tempFinal;
+        }
+
+        public IList<Posting> SearchBooleanRetrieval(string query)
+        {
+            Console.WriteLine("In Boolean Retrieval");
+            Console.WriteLine("Query:" + query);
+
+            //the list of postings
+            IList<Posting> postings;
+            IQueryComponent component;
+            //create a stemming token processor
+            ITokenProcessor processor = new StemmingTokenProcesor();
+            //create a boolean query parser
+            BooleanQueryParser parser = new BooleanQueryParser();
+            //parse the query
+            component = parser.ParseQuery(query);
+
+            //get the postings
+            postings = component.GetPostings(index, processor);
+
+            return postings;
+        }
+
+        /// <summary>
+        /// Returns the search result of the query based on mode(Ranked or Boolean Retrieval)
+        /// and converts it to list of string for the front end.
         /// </summary>
         /// <param name="query">the query which the user is making to the search engine</param>
         public List<string> SearchQuery(string query)
@@ -152,25 +212,15 @@ namespace Search.Index
                 //the list of strings to return 
                 List<String> results = new List<string>();
 
-
+                //Ranked Retrieval
                 if (mode == false)
                 {
-                    Console.WriteLine("In Ranked Retrieval");
-                    Console.WriteLine("Query:" + query);
+                    //Performs RanckedRetrieval
+                    IList<MaxPriorityQueue.InvertedIndex> topTenDocs;
+                    topTenDocs = SearchRankedRetrieval(query);
 
-                    //parser to parse the query 
-                    RankedRetrievalParser parser = new RankedRetrievalParser();
 
-                    List<string> finalTerms = parser.ParseQuery(query);
-
-                    //retrieves the top ten documents of the normalized tokens
-                    RankedRetrieval rv = new RankedRetrieval(corpus, index, RankedRetrievalMode);
-
-                    IList<MaxPriorityQueue.InvertedIndex> topTenDocs = rv.GetTopTen(finalTerms);
-
-                    //parse the query
-                    List<string> terms = parser.ParseQuery(query);
-
+                    //Converts the result for the front end
                     if (topTenDocs.Count > 0)
                     {
                         //add the count of the postings to the list of strings to be returned
@@ -181,43 +231,37 @@ namespace Search.Index
                         foreach (MaxPriorityQueue.InvertedIndex p in topTenDocs)
                         {
                             //use the document id to access the document
+                            //IDocument doc = corpus.GetDocument(p.GetTuple().Item1);
                             IDocument doc = corpus.GetDocument(p.GetDocumentId());
 
                             //add the title to the list of strings to be returned
+                            //results.Add("#" + numberRank + ": (" + Math.Round(p.GetRank(), 5).ToString() + ") " + doc.Title + " ----From Tier " + p.GetTuple().Item2);
                             results.Add("#" + numberRank + ": (" + Math.Round(p.GetRank(), 5).ToString() + ") " + doc.Title);
 
                             //add the document id to the list of strings to be returned 
                             results.Add(doc.DocumentId.ToString());
-                            Console.WriteLine(p.GetDocumentId() + "" + doc.Title);
+
+
+                            //Console.WriteLine(p.GetTuple().Item1 + "" + doc.Title + " from tier " + p.GetTuple().Item2);
                             numberRank++;
                         }
                     }
+                    else
+                    {
+                        results.Add("0");
+                    }
 
                     return results;
+
                 }
-                // end of ranked retrieval segment (if statement)
+                //Boolean Retrieval
                 else
                 {
+                    //Performs Boolean Retrieval
+                    IList<Posting> postings = SearchBooleanRetrieval(query);
 
-                    Console.WriteLine(query);
-
-
-                    //the list of postings
-                    IList<Posting> postings;
-                    IQueryComponent component;
-                    //create a stemming token processor
-                    ITokenProcessor processor = new StemmingTokenProcesor();
-                    //create a boolean query parser
-                    BooleanQueryParser parser = new BooleanQueryParser();
-                    //parse the query
-                    component = parser.ParseQuery(query);
-
-                    //get the postings
-                    postings = component.GetPostings(index, processor);
-
-
-                    //if there are any postings...
-                    if (postings.Count > 0)
+                    //Converts the result for the front end
+                    if (postings.Count > 0)     //if there are any postings...
                     {
                         //add the count of the postings to the list of strings to be returned
                         results.Add(postings.Count.ToString());
@@ -233,8 +277,7 @@ namespace Search.Index
                         }
                         Console.WriteLine(results.Count);
                     }
-                    //if there aren't any postings...
-                    else
+                    else    //if there aren't any postings...
                     {
                         //add a zero to the list of strings to be returned
                         results.Add("0");

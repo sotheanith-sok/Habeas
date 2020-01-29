@@ -113,7 +113,7 @@ namespace Search.Index
             DiskPositionalIndex.PostingDocWeight temp = index.GetPostingDocWeight(docID);
             int fileSizeInByte = temp.GetDocByteSize();
             double WackyLd = (double)(Math.Sqrt(fileSizeInByte));
-            Console.WriteLine(WackyLd);
+            //Console.WriteLine(WackyLd);
             return WackyLd;
 
         }

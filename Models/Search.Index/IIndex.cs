@@ -47,9 +47,7 @@ namespace Search.Index
 
         List<MaxPriorityQueue.InvertedIndex> GetPostingsFromTier(string term, int tierNumber = 1);
 
-        //List<int> GetDocWeightsIds();
-
-        //int GetDocumentsCount();
+        
 
     }
 }

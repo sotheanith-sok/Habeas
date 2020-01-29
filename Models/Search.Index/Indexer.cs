@@ -35,6 +35,8 @@ namespace Search.Index
             DiskSoundEx soundEx = new DiskSoundEx(Indexer.path);
             DiskKGram kGram = new DiskKGram(Indexer.path);
 
+
+
             index.Clear();
             soundEx.Clear();
             kGram.Clear();
@@ -92,13 +94,13 @@ namespace Search.Index
                 //Add token count per document
                 index.AddTokensPerDocument(doc.DocumentId, tokenCount);
 
-                //get number of bytes in file 
+                //get number of bytes in file for WACKY
                 string docFilePath = doc.FilePath;
                 int fileSizeInByte = (int)(new FileInfo(docFilePath).Length / 8f);
                 index.AddByteSize(doc.DocumentId, fileSizeInByte);
 
 
-                //calculates Average term Frequency for a specific document
+                //calculates Average term Frequency for a specific document for WACKY
                 index.CalcAveTermFreq(doc.DocumentId);
 
                 //calculate L_{d} for the document and store it index so that we can write it to disk later
@@ -112,10 +114,20 @@ namespace Search.Index
 
             }
 
+            // Code to create a tier index using the regular index (used to access the tempPostingMap)
+
+            // DiskTierIndex tierIndices = new DiskTierIndex(Indexer.path, index);
+            // tierIndices.Clear();
+            // tierIndices.CreateTiers(index.GetPostingMap());
 
             kGram.buildKGram(unstemmedVocabulary);
             index.Save();
             soundEx.Save();
+
+
+
+
+            Console.WriteLine("Vocab Size " + index.GetVocabulary().Count);
 
             elapsedTime.Stop();
             Console.WriteLine("[Indexer] Done Indexing! Time Elapsed " + elapsedTime.Elapsed.ToString("mm':'ss':'fff"));
