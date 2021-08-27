@@ -1,41 +1,37 @@
-# Habeas v1.3
-CECS-529-Search-Engine-Project  
-A semester long project implementing search engine
+<h1 align="center" style="border: none">Habeas</h1>
 
-# Milestone 1
 ![v1.3_search](docs/screenshots/v1.3_shot6_search.png)
 
-[Milestone 1 Requirements](docs/milestone1-summary.md)
+## Overview
+A complete implementation of large scale search engine including on-disk indexing, multiple queries options, and user interfaces.
 
-## Supported features
-### Search Queries
-- Single query `ants`
-- Phrase query `"dancing ants"`
-- Or query `dance + ants`
-- And query `dance ants`
-- Near query `[dance near/2 ants]`
-- Wildcard query `danc*`
-- Author query `:author name`
-### Special Queries
-- **Index** another corpus
-- **Stem** a term
-- Print **vocabulary** of the index
+## Prerequisites
+ - [C#](https://docs.microsoft.com/en-us/dotnet/csharp/)
+ - [Electron.NET](https://github.com/ElectronNET/Electron.NET)
+ 
+## Authors
+ - [Sotheanith Sok](https://github.com/sotheanith)
+ - [Yashua Ovando](https://github.com/ydovando)
+ - [Jesse Blacklock](https://github.com/jblacklock)
+ - [Sella Bae](https://github.com/sellabae)
+ 
+## Features
+### Core Features  
+1. Corpus to handle Json
+2. Building positional index
+3. Indexing and Tokenization
+4. Query Language
+5. Main Application
+6. JsonFileDocument
 
-## Design
-### Index
-**Positional-Inverted-Index**  
-`term -> (docId, [pos1, pos2, ...]), (docId, [...]), ...`  
-A posting stores document id and positions of a term within a document
-### Token Processor
-- lowercase
-- removes `-`, `'`, `"`, non-alphanumerics
-- stem (e.g. dancing, dances -> dance)
+### Additional Features  
+1. Unit Testing 
+2. GUI 
+3. Wildcard Queries 
+4. SoundEx 
+5. Near Operator
 
-## GUI
-- using Electron.Net
-- more screenshots  
-![v1.3_start](docs/screenshots/v1.3_shot1_start.png)
-![v1.3_content](docs/screenshots/v1.3_shot7_content.png)
+[Click here for more detail!](https://github.com/sotheanith/Habeas/blob/master/docs/milestone1-summary.md#additional-features)
 
-
-
+## Course
+ - [CECS 529 - Search Engine Technology](http://catalog.csulb.edu/preview_course_nopop.php?catoid=5&coid=40030)
