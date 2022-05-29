@@ -10,7 +10,7 @@ A complete implementation of large scale search engine including on-disk indexin
  - [Electron.NET](https://github.com/ElectronNET/Electron.NET)
  
 ## Authors
- - [Sotheanith Sok](https://github.com/sotheanith)
+ - [Sotheanith Sok](https://github.com/sotheanith-sok)
  - [Yashua Ovando](https://github.com/ydovando)
  - [Jesse Blacklock](https://github.com/jblacklock)
  - [Sella Bae](https://github.com/sellabae)
