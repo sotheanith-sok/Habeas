@@ -42,7 +42,6 @@ A complete implementation of large scale search engine including on-disk indexin
   - Wildcard Queries
   - SoundEx
   - Near Operator
-- [Features Details]
 
 
 <!-- Include your major tools and frameworks -->
